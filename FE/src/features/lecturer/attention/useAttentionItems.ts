@@ -66,7 +66,7 @@ export function useAttentionItems() {
         priority: "high",
         message: `${draftExams.count} bài thi ở dạng bản nháp chưa được công bố`,
         count: draftExams.count,
-        actionLabel: "Tiếp tục chỉnh sửa",
+        actionLabel: draftExams.count > 1 ? "Xem danh sách bản nháp" : "Tiếp tục chỉnh sửa",
         href: draftExams.href,
       });
     }

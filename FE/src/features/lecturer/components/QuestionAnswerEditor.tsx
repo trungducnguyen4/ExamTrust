@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { QuestionOption } from "../question-editor-types";
 import { QUESTION_LIMITS, WARNING_THRESHOLD } from "../question-validation.constants";
@@ -144,7 +145,12 @@ export function QuestionAnswerEditor({
           <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
               <Label className="text-sm">Rubric / tiêu chí chấm điểm</Label>
-              <Textarea placeholder="Mô tả tiêu chí, ý chính cần có..." value={essayRubric} onChange={(event) => onEssayRubricChange(event.target.value)} rows={3} className="resize-none text-sm" />
+              <RichTextEditor
+                placeholder="Mô tả tiêu chí, ý chính cần có..."
+                value={essayRubric}
+                onChange={(val) => onEssayRubricChange(val)}
+                rows={4}
+              />
             </div>
           </div>
         ) : null}
@@ -249,18 +255,71 @@ type OptionRowProps = {
 };
 
 function OptionRow({ questionType, option, index, optionCount, pinned, onRemove, onUpdate, onUpdateMatch, onMove, onToggleCorrect, onTogglePinned }: OptionRowProps) {
-  const isChoice = questionType === "multiple_choice" || questionType === "find_error";
+  if (questionType === "multiple_choice") {
+    return (
+      <div className="rounded-lg border border-border/80 bg-muted/10 p-2.5 sm:p-3 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <CorrectToggle questionType={questionType} option={option} onToggle={onToggleCorrect} />
+            <span className="text-xs font-semibold text-foreground">
+              Phương án {option.id}
+              {option.isCorrect ? (
+                <span className="ml-2 text-xs font-medium text-green-600 dark:text-green-400">
+                  (Đáp án đúng)
+                </span>
+              ) : null}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={pinned ? "h-7 w-7 p-0 text-amber-600" : "h-7 w-7 p-0 text-muted-foreground"}
+                    onClick={() => onTogglePinned(option.id)}
+                  >
+                    {pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{pinned ? "Đáp án được ghim, không xáo trộn" : "Ghim để không xáo trộn"}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+              onClick={() => onRemove(option.id)}
+              disabled={optionCount <= 2}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+        <RichTextEditor
+          compact
+          rows={2}
+          placeholder={`Nhập nội dung phương án ${option.id}...`}
+          value={option.text}
+          onChange={(val) => onUpdate(option.id, val)}
+        />
+      </div>
+    );
+  }
+
   const isMatching = questionType === "matching";
   const isOrdering = questionType === "ordering";
   return (
     <div className="flex items-center gap-2 sm:gap-3">
       {isMatching ? <GripVertical className="h-4 w-4 shrink-0 cursor-move text-muted-foreground" /> : null}
       {isOrdering ? <div className="flex shrink-0 flex-col gap-0.5"><Button type="button" variant="ghost" size="sm" className="h-4 w-6 p-0" disabled={index === 0} onClick={() => onMove(option.id, "up")}><ChevronUp className="h-3.5 w-3.5" /></Button><Button type="button" variant="ghost" size="sm" className="h-4 w-6 p-0" disabled={index === optionCount - 1} onClick={() => onMove(option.id, "down")}><ChevronDown className="h-3.5 w-3.5" /></Button></div> : null}
-      {isChoice ? <CorrectToggle questionType={questionType} option={option} onToggle={onToggleCorrect} /> : null}
+      {questionType === "find_error" ? <CorrectToggle questionType={questionType} option={option} onToggle={onToggleCorrect} /> : null}
       {isOrdering ? <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">{index + 1}</div> : null}
       <Input placeholder={isMatching ? "Khái niệm..." : questionType === "find_error" ? "Dòng mã nguồn..." : `Phương án ${option.id}`} value={option.text} onChange={(event) => onUpdate(option.id, event.target.value)} className={`min-w-0 flex-1 text-sm ${questionType === "find_error" ? "font-mono" : ""}`} />
       {isMatching ? <><span className="shrink-0 text-sm text-muted-foreground">→</span><Input placeholder="Ghép với..." value={option.match || ""} onChange={(event) => onUpdateMatch(option.id, event.target.value)} className="min-w-0 flex-1 text-sm" /></> : null}
-      {questionType === "multiple_choice" ? <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="sm" className={pinned ? "text-amber-600" : "text-muted-foreground"} onClick={() => onTogglePinned(option.id)}>{pinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}</Button></TooltipTrigger><TooltipContent>{pinned ? "Đáp án được ghim, không xáo trộn" : "Ghim để không xáo trộn"}</TooltipContent></Tooltip></TooltipProvider> : null}
       <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onRemove(option.id)} disabled={optionCount <= 2}><Trash2 className="h-4 w-4" /></Button>
     </div>
   );

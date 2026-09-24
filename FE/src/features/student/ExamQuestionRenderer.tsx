@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { FormattedText } from "@/components/ui/formatted-text";
 import type { AnswerMap, FindErrorQ, FillBlankQ, MatchingQ, MultiChoiceQ, OrderingQ, Question, ShortAnswerQ, SingleChoiceQ, TrueFalseQ } from "./exam-taking-model";
 
 // ─── Question sub-renderers ────────────────────────────────────────
@@ -23,9 +24,10 @@ function SingleChoiceRenderer({
   const selected = answers[q.id] as number | undefined;
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground leading-relaxed break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed break-words"
+      />
       {q.options.map((opt, idx) => {
         const isSel = selected === idx;
         return (
@@ -48,7 +50,7 @@ function SingleChoiceRenderer({
             >
               {String.fromCharCode(65 + idx)}
             </span>
-            <span className="min-w-0 break-words text-sm">{opt}</span>
+            <FormattedText text={opt} className="min-w-0 break-words text-sm" />
           </button>
         );
       })}
@@ -75,9 +77,10 @@ function MultiChoiceRenderer({
   };
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground leading-relaxed break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed break-words"
+      />
       <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-violet-800">
         <CheckCircle2 className="h-3.5 w-3.5" />
         Select all that apply
@@ -100,7 +103,7 @@ function MultiChoiceRenderer({
               onCheckedChange={() => {}} // Controlled by div onClick
               className="pointer-events-none"
             />
-            <span className="min-w-0 break-words text-sm">{opt}</span>
+            <FormattedText text={opt} className="min-w-0 break-words text-sm" />
           </div>
         );
       })}
@@ -121,9 +124,10 @@ function TrueFalseRenderer({
   const selected = answers[q.id] as boolean | undefined;
   return (
     <div>
-      <p className="text-sm text-muted-foreground leading-relaxed mb-6 break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed mb-6 break-words"
+      />
       <div className="flex gap-4">
         {([true, false] as const).map((val) => {
           const isSel = selected === val;
@@ -184,8 +188,8 @@ function FillBlankRenderer({
       );
     }
     return (
-      <span key={i} className="text-sm leading-relaxed text-foreground break-words">
-        {part}
+      <span key={i} className="inline-block text-sm leading-relaxed text-foreground break-words align-baseline">
+        <FormattedText text={part} />
       </span>
     );
   });
@@ -237,9 +241,10 @@ function MatchingRenderer({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground leading-relaxed break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed break-words"
+      />
       <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
@@ -307,9 +312,10 @@ function FindErrorRenderer({
   const toggle = (label: string) => setAnswer(q.id, selected.includes(label) ? selected.filter((item) => item !== label) : [...selected, label]);
   return (
     <div>
-      <p className="text-sm text-muted-foreground leading-relaxed mb-3 break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed mb-3 break-words"
+      />
       <p className="text-xs font-medium text-primary mb-3">
         Nhấp vào dòng bạn cho là có chứa lỗi:
       </p>
@@ -383,9 +389,10 @@ function OrderingRenderer({
   };
   return (
     <div>
-      <p className="text-sm text-muted-foreground leading-relaxed mb-3 break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed mb-3 break-words"
+      />
       <p className="text-xs font-medium text-primary mb-3">
         Dùng các nút mũi tên để sắp xếp các mục theo đúng thứ tự:
       </p>
@@ -396,7 +403,7 @@ function OrderingRenderer({
             className="flex items-center gap-3 border rounded-lg px-4 py-3 bg-card hover:bg-secondary/20 transition-colors"
           >
             <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="min-w-0 flex-1 break-words text-sm">{item}</span>
+            <FormattedText text={item} className="min-w-0 flex-1 break-words text-sm" />
             <div className="flex flex-col gap-0.5 shrink-0">
               <button
                 onClick={() => move(idx, "up")}
@@ -439,9 +446,10 @@ function ShortAnswerRenderer({
   const isOver = wordCount > limit;
   return (
     <div>
-      <p className="text-sm text-muted-foreground leading-relaxed mb-4 break-words">
-        {q.content}
-      </p>
+      <FormattedText
+        text={q.content}
+        className="text-sm text-muted-foreground leading-relaxed mb-4 break-words"
+      />
       <Textarea
         placeholder="Nhập câu trả lời của bạn tại đây…"
         value={val}

@@ -55,6 +55,7 @@ describe('AIGenerationProcessor - exam-quality-review task', () => {
     };
 
     const aiService = {
+      syncProviderFromRedis: jest.fn().mockResolvedValue(undefined),
       generateExamQualityReview: jest.fn(),
       ...aiServiceOverrides,
     };

@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SharedRedisModule } from './redis/redis.module';
 import { AiService } from './ai/ai.service';
+import { EmbeddingService } from './ai/embedding.service';
+import { AiTelemetryService } from './ai/telemetry.service';
 import { AIGenerationProcessor } from './queue/processors/ai-generation.processor';
 
 @Module({
@@ -23,6 +25,6 @@ import { AIGenerationProcessor } from './queue/processors/ai-generation.processo
     }),
     BullModule.registerQueue({ name: 'ai-generation' }),
   ],
-  providers: [AiService, AIGenerationProcessor],
+  providers: [AiService, EmbeddingService, AiTelemetryService, AIGenerationProcessor],
 })
 export class AiWorkerModule {}

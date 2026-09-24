@@ -554,7 +554,7 @@ export default function LecturerDashboard() {
                         </span>
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {bank.questionTypes.slice(0, 2).map((type) => (
+                        {bank.questionTypes.map((type) => (
                           <span
                             key={type}
                             className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[11px] text-muted-foreground"
@@ -563,11 +563,6 @@ export default function LecturerDashboard() {
                             {questionTypeLabels[type] || type}
                           </span>
                         ))}
-                        {bank.questionTypes.length > 2 ? (
-                          <span className="rounded-md bg-muted px-2 py-1 text-[11px] text-muted-foreground">
-                            +{bank.questionTypes.length - 2} loại
-                          </span>
-                        ) : null}
                       </div>
                     </Link>
                   ))

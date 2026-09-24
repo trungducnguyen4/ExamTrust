@@ -36,7 +36,25 @@ import {
   Copy,
   Loader2,
   RefreshCw,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 import { IntegrityCaseDetail } from "@/components/admin/IntegrityCaseDetail";
 import { ListPageHeader } from "@/components/common/list/ListPageHeader";
 import { SearchBar } from "@/components/common/list/SearchBar";
@@ -126,6 +144,7 @@ type IntegrityCasesResponse = {
   };
   stats?: IntegrityStats;
   patterns?: IntegrityPatterns;
+  timeline?: Array<{ date: string; count: number; highConfidence: number }>;
 };
 
 const EMPTY_STATS: IntegrityStats = {
@@ -173,6 +192,7 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
   const [submissions, setSubmissions] = useState<FlaggedSubmission[]>([]);
   const [stats, setStats] = useState<IntegrityStats>(EMPTY_STATS);
   const [patterns, setPatterns] = useState<IntegrityPatterns>(EMPTY_PATTERNS);
+  const [timeline, setTimeline] = useState<Array<{ date: string; count: number; highConfidence: number }>>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -357,6 +377,7 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
       setSubmissions(Array.isArray(response.data) ? response.data : []);
       setStats(response.stats || EMPTY_STATS);
       setPatterns(response.patterns || EMPTY_PATTERNS);
+      setTimeline(Array.isArray(response.timeline) ? response.timeline : []);
       setTotalItems(response.pagination?.total || 0);
       setTotalPages(response.pagination?.totalPages || 1);
     } catch (err) {
@@ -364,6 +385,7 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
       setSubmissions([]);
       setStats(EMPTY_STATS);
       setPatterns(EMPTY_PATTERNS);
+      setTimeline([]);
       setTotalItems(0);
       setTotalPages(1);
       setError(
@@ -503,7 +525,6 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
   return (
     <DashboardLayout>
       <AdminPageShell>
-        {lecturerScope ? <p className="mb-2 text-sm text-muted-foreground">Chỉ hiển thị tín hiệu của bài thi và khóa học do bạn phụ trách.</p> : null}
         <ListPageHeader
           title="Giám sát rủi ro"
           className="mb-4"
@@ -524,37 +545,6 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
             </Button>
           }
         />
-
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <AdminStatCard
-            icon={Shield}
-            value={stats.totalFlagged}
-            label="Tổng tín hiệu"
-            iconWrapClassName="bg-warning/10"
-            iconClassName="text-warning"
-          />
-          <AdminStatCard
-            icon={Clock}
-            value={stats.pendingReview}
-            label="Chờ xem xét"
-            iconWrapClassName="bg-info/10"
-            iconClassName="text-info"
-          />
-          <AdminStatCard
-            icon={AlertTriangle}
-            value={stats.highConfidence}
-            label="Mức tín hiệu cao"
-            iconWrapClassName="bg-destructive/10"
-            iconClassName="text-destructive"
-          />
-          <AdminStatCard
-            icon={XCircle}
-            value={stats.confirmedCases}
-            label="Đã xác nhận"
-            iconWrapClassName="bg-destructive/10"
-            iconClassName="text-destructive"
-          />
-        </div>
 
         <div className="mb-6 space-y-3">
           <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center">
@@ -583,6 +573,367 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
             onRemove={removeFilter}
             onClearAll={clearFilters}
           />
+        </div>
+
+        {/* Visual Analytics Charts Panel */}
+        <div className="mb-6 space-y-6">
+          <div className="grid gap-6 lg:grid-cols-12">
+            {/* Chart 1: Donut Chart - Phân bố trạng thái xử lý */}
+            <Card className="lg:col-span-5">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                      <BarChart3 className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold">
+                        <HelpedTitle
+                          help={{
+                            description: "Tỷ lệ phân bổ các trường hợp vi phạm theo trạng thái xử lý hiện tại.",
+                            usedBy: "Giảng viên và giám thị theo dõi tiến độ xử lý và rà soát các bài thi có rủi ro.",
+                            note: "Dữ liệu được cập nhật theo bộ lọc bài thi và thời gian bạn đang chọn.",
+                          }}
+                        >
+                          Trạng thái xử lý
+                        </HelpedTitle>
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Tỷ lệ bài nộp theo tiến độ rà soát
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Tổng: {stats.totalFlagged}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                {stats.totalFlagged === 0 ? (
+                  <div className="flex h-52 flex-col items-center justify-center text-center text-sm text-muted-foreground">
+                    <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
+                    <span>Không có tín hiệu nghi vấn nào trong phạm vi lọc</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <div className="h-52 w-52 shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Tooltip
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const data = payload[0];
+                              const pct = stats.totalFlagged
+                                ? Math.round(((Number(data.value) || 0) / stats.totalFlagged) * 100)
+                                : 0;
+                              return (
+                                <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+                                  <p className="font-semibold text-popover-foreground">{data.name}</p>
+                                  <p className="mt-0.5 text-muted-foreground">
+                                    Số lượng: <span className="font-bold text-foreground">{data.value}</span> ({pct}%)
+                                  </p>
+                                </div>
+                              );
+                            }}
+                          />
+                          <Pie
+                            data={[
+                              { name: "Chờ xem xét", value: stats.pendingReview, color: "#f59e0b" },
+                              {
+                                name: "Đã xem xét",
+                                value: Math.max(0, stats.totalFlagged - stats.pendingReview - stats.confirmedCases),
+                                color: "#0284c7",
+                              },
+                              { name: "Đã xác nhận", value: stats.confirmedCases, color: "#ef4444" },
+                            ].filter((d) => d.value > 0)}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={50}
+                            outerRadius={75}
+                            paddingAngle={4}
+                            stroke="none"
+                          >
+                            {[
+                              { name: "Chờ xem xét", value: stats.pendingReview, color: "#f59e0b" },
+                              {
+                                name: "Đã xem xét",
+                                value: Math.max(0, stats.totalFlagged - stats.pendingReview - stats.confirmedCases),
+                                color: "#0284c7",
+                              },
+                              { name: "Đã xác nhận", value: stats.confirmedCases, color: "#ef4444" },
+                            ]
+                              .filter((d) => d.value > 0)
+                              .map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} />
+                              ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="w-full flex-1 space-y-2.5">
+                      {[
+                        {
+                          label: "Chờ xem xét",
+                          value: stats.pendingReview,
+                          color: "bg-amber-500",
+                          textColor: "text-amber-600 dark:text-amber-400",
+                        },
+                        {
+                          label: "Đã xem xét / Khác",
+                          value: Math.max(0, stats.totalFlagged - stats.pendingReview - stats.confirmedCases),
+                          color: "bg-sky-600",
+                          textColor: "text-sky-600 dark:text-sky-400",
+                        },
+                        {
+                          label: "Đã xác nhận vi phạm",
+                          value: stats.confirmedCases,
+                          color: "bg-red-500",
+                          textColor: "text-red-600 dark:text-red-400",
+                        },
+                      ].map((item) => {
+                        const pct = stats.totalFlagged
+                          ? Math.round((item.value / stats.totalFlagged) * 100)
+                          : 0;
+                        return (
+                          <div key={item.label} className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
+                              <span className="font-medium text-foreground">{item.label}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 font-medium">
+                              <span className={item.textColor}>{item.value}</span>
+                              <span className="text-muted-foreground">({pct}%)</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Chart 2: Horizontal Bar Chart - Nhóm vi phạm */}
+            <Card className="lg:col-span-7">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <Shield className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold">
+                        <HelpedTitle
+                          help={{
+                            description: "Tổng hợp tần suất các hành vi vi phạm toàn vẹn học thuật được ghi nhận trong phiên thi.",
+                            usedBy: "Giảng viên nhận biết các loại gian lận phổ biến như chuyển tab, bất thường chuột hoặc copy/paste.",
+                            note: "Các tín hiệu là cơ sở cảnh báo tự động từ hệ thống giám sát để hỗ trợ rà soát.",
+                          }}
+                        >
+                          Tần suất nhóm tín hiệu
+                        </HelpedTitle>
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Số lượng và tỷ lệ các nhóm hành vi vi phạm
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Tổng sự kiện: {patterns.tabSwitch + patterns.mouseAnomaly + patterns.copyPaste + patterns.otherBehavior}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                {patterns.tabSwitch + patterns.mouseAnomaly + patterns.copyPaste + patterns.otherBehavior === 0 ? (
+                  <div className="flex h-52 flex-col items-center justify-center text-center text-sm text-muted-foreground">
+                    <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
+                    <span>Không có sự kiện bất thường nào</span>
+                  </div>
+                ) : (
+                  <div className="h-52 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        layout="vertical"
+                        data={[
+                          {
+                            name: "Chuyển tab",
+                            count: patterns.tabSwitch,
+                            fill: "#f59e0b",
+                            pct: Math.round((patterns.tabSwitch / patternTotal) * 100),
+                          },
+                          {
+                            name: "Tín hiệu con trỏ",
+                            count: patterns.mouseAnomaly,
+                            fill: "#ef4444",
+                            pct: Math.round((patterns.mouseAnomaly / patternTotal) * 100),
+                          },
+                          {
+                            name: "Sao chép/Dán",
+                            count: patterns.copyPaste,
+                            fill: "#0284c7",
+                            pct: Math.round((patterns.copyPaste / patternTotal) * 100),
+                          },
+                          {
+                            name: "Hành vi khác",
+                            count: patterns.otherBehavior,
+                            fill: "#8b5cf6",
+                            pct: Math.round((patterns.otherBehavior / patternTotal) * 100),
+                          },
+                        ]}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-border/40" />
+                        <XAxis type="number" tick={{ fontSize: 11 }} />
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          tick={{ fontSize: 12, fill: "currentColor" }}
+                          width={110}
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+                                <p className="font-semibold text-popover-foreground">{d.name}</p>
+                                <p className="mt-0.5 text-muted-foreground">
+                                  Số lần: <span className="font-bold text-foreground">{d.count}</span> ({d.pct}%)
+                                </p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                          {[
+                            { fill: "#f59e0b" },
+                            { fill: "#ef4444" },
+                            { fill: "#0284c7" },
+                            { fill: "#8b5cf6" },
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Chart 3: Area Chart - Xu hướng tín hiệu theo thời gian */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      <HelpedTitle
+                        help={{
+                          description: "Biểu đồ đường/miền thể hiện số ca nộp bài phát hiện tín hiệu nghi vấn theo từng ngày.",
+                          usedBy: "Giúp giảng viên và quản trị viên nhận diện các ngày thi có tỷ lệ rủi ro cao hoặc đột biến vi phạm.",
+                          note: "Đường màu tím thể hiện tổng ca ghi nhận, đường màu đỏ thể hiện các ca có mức tín hiệu cao (High).",
+                        }}
+                      >
+                        Xu hướng phát hiện tín hiệu theo thời gian
+                      </HelpedTitle>
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Phân bổ số lượt nộp bài có cảnh báo theo ngày nộp bài
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-violet-600" />
+                    <span className="text-muted-foreground">Tổng tín hiệu</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                    <span className="text-muted-foreground">Mức tín hiệu cao</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-2">
+              {timeline.length === 0 ? (
+                <div className="flex h-44 flex-col items-center justify-center text-center text-sm text-muted-foreground">
+                  <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
+                  <span>Chưa có dữ liệu theo mốc thời gian để vẽ biểu đồ</span>
+                </div>
+              ) : (
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={timeline.map((item) => {
+                        const parts = item.date.split("-");
+                        const formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}` : item.date;
+                        return {
+                          ...item,
+                          formattedDate,
+                        };
+                      })}
+                      margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.0} />
+                        </linearGradient>
+                        <linearGradient id="colorHigh" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
+                      <XAxis dataKey="formattedDate" tick={{ fontSize: 11 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+                              <p className="font-semibold text-popover-foreground">Ngày: {d.date}</p>
+                              <p className="mt-1 text-violet-600 dark:text-violet-400">
+                                Tổng bài nộp có tín hiệu: <span className="font-bold">{d.count}</span>
+                              </p>
+                              <p className="text-rose-600 dark:text-rose-400">
+                                Mức tín hiệu cao: <span className="font-bold">{d.highConfidence}</span>
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="count"
+                        stroke="#8b5cf6"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorCount)"
+                        name="Tổng tín hiệu"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="highConfidence"
+                        stroke="#f43f5e"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorHigh)"
+                        name="Mức tín hiệu cao"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <Card>

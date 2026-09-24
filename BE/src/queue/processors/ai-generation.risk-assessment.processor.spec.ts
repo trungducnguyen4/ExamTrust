@@ -56,6 +56,7 @@ describe('AIGenerationProcessor - exam-risk-assessment task', () => {
     };
 
     const aiService = {
+      syncProviderFromRedis: jest.fn().mockResolvedValue(undefined),
       assessExamIntegrityRisk: jest.fn(),
       ...aiServiceOverrides,
     };

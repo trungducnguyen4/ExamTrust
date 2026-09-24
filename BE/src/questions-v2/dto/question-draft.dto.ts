@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -105,6 +106,7 @@ export class AIGenerateSectionDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   instruction?: string;
 
   @IsOptional()

@@ -575,6 +575,8 @@
       "FE/stack.txt",
       "README.md",
       "docs/architecture-audit-2026-08-01.md",
+      "docs/grading-publish-flow-trace.md",
+      "docs/integrity-penalty-flow-trace.md",
       "docs/powerpoint-prompt.md",
       "docs/refactor-backlog.md",
       "docs/webcam-proctoring-upgrade-plan.md",
@@ -596,6 +598,7 @@
       "FE/public/favicon.png",
       "FE/public/placeholder.svg",
       "FE/public/zalo-bot-qr.jpg",
+      "FE/src/components/admin/image.png",
       "artifacts/score-dialog.png",
       "examtrust-3a-crest-flat (1).svg",
       "examtrust-3a-crest-flat.svg"
@@ -604,19 +607,18 @@
       "1mb.mp3"
     ]
   },
-  "total_files": 594,
-  "total_words": 573361,
+  "total_files": 597,
+  "total_words": 589233,
   "needs_graph": true,
-  "warning": "Large corpus: 594 files · ~573,361 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
+  "warning": "Large corpus: 597 files · ~589,233 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
   "skipped_sensitive": [
     "FE/src/features/ResetPassword.tsx"
   ],
   "graphifyignore_patterns": 67,
   "git": {
     "source_owner": "git",
-    "source_hash": "649b41d566dd1bf923b72f89314e5b20a0b6e3c3",
+    "source_hash": "7ff6d1ca220493548613b59f9be37389aebc27ad",
     "branches": [
-      "duc",
       "main"
     ],
     "max_commits": 200,
@@ -628,11 +630,11 @@
     "source": "default-auto",
     "root": ".",
     "git_root": ".",
-    "head": "649b41d566dd1bf923b72f89314e5b20a0b6e3c3",
-    "candidate_count": 658,
-    "included_count": 594,
-    "excluded_untracked_count": 0,
-    "excluded_ignored_count": 105332,
+    "head": "7ff6d1ca220493548613b59f9be37389aebc27ad",
+    "candidate_count": 661,
+    "included_count": 597,
+    "excluded_untracked_count": 12,
+    "excluded_ignored_count": 105509,
     "excluded_sensitive_count": 1,
     "missing_committed_count": 0,
     "warnings": [],

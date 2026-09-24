@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'crypto';
 import { AiService } from './ai.service';
+import { AiTelemetryService } from './telemetry.service';
 
 function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a ?? '', 'utf8');
@@ -14,7 +15,11 @@ function safeEqual(a: string, b: string): boolean {
 @ApiTags('AI')
 @Controller('ai-status')
 export class AiStatusController {
-  constructor(private readonly aiService: AiService, private readonly configService: ConfigService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly configService: ConfigService,
+    private readonly telemetryService: AiTelemetryService,
+  ) {}
 
   // Unauthenticated on purpose: only exposes which AI provider/model is
   // active (no keys, no user data) so ops tooling (e.g. the Zalo bot) can
@@ -22,6 +27,11 @@ export class AiStatusController {
   @Get()
   getStatus() {
     return this.aiService.getProviderStatus();
+  }
+
+  @Get('telemetry')
+  getTelemetry() {
+    return this.telemetryService.getSummary();
   }
 
   // Authenticated by a shared-secret header (AI_SWITCH_SECRET), not JWT —

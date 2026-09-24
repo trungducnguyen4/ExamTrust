@@ -35,6 +35,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import api from "@/lib/api";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 type ExamQuestion = {
   id: string;
@@ -439,9 +440,10 @@ export default function ExamPreview() {
                         ) : eq.question?.mediaType === "audio" && eq.question?.mediaUrl ? (
                           <audio src={eq.question.mediaUrl} controls className="w-full" />
                         ) : null}
-                        <p className="rounded-md border border-border/70 bg-background px-4 py-3 text-sm font-medium leading-6 whitespace-pre-wrap">
-                          {eq.question?.content || "Chưa có nội dung"}
-                        </p>
+                        <FormattedText
+                          text={eq.question?.content || "Chưa có nội dung"}
+                          className="rounded-md border border-border/70 bg-background px-4 py-3 text-sm font-medium leading-6"
+                        />
 
                         {rawType === "MATCHING" ? (
                           /* MATCHING: show pairs */
@@ -472,7 +474,7 @@ export default function ExamPreview() {
                                 return (
                                   <div key={i} className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm ${isCorrect ? "border-success/35 bg-success/10 text-success" : "border-border bg-muted/20 text-foreground"}`}>
                                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-background text-xs font-semibold text-muted-foreground">{i + 1}</span>
-                                    <span className="min-w-0 break-words">{item}</span>
+                                    <FormattedText text={item} className="min-w-0 break-words" />
                                     {isCorrect ? <CheckCircle2 className="ml-auto h-4 w-4 shrink-0" /> : null}
                                   </div>
                                 );
@@ -518,7 +520,7 @@ export default function ExamPreview() {
                                   >
                                     {option.key}
                                   </span>
-                                  <span className="min-w-0 break-words leading-6">{option.value}</span>
+                                  <FormattedText text={option.value} className="min-w-0 break-words leading-6" />
                                   {isCorrect ? (
                                     <CheckCircle2 className="ml-auto h-4 w-4 shrink-0" />
                                   ) : null}

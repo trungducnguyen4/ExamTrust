@@ -1,7 +1,8 @@
-import { IsNumber, IsObject, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsNumber, IsObject, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 export class GenerateQuestionDto {
   @IsString()
+  @MaxLength(2000)
   prompt: string;
 
   @IsOptional()
@@ -33,6 +34,7 @@ export class GenerateQuestionDto {
 
 export class GenerateExamQuestionsDto {
   @IsString()
+  @MaxLength(2000)
   prompt: string;
 
   @IsNumber()

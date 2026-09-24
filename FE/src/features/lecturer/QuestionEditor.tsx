@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor, type RichTextEditorRef } from "@/components/ui/rich-text-editor";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -144,10 +145,12 @@ export default function QuestionEditor() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Autosave draft
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
+  const contentRef = useRef<RichTextEditorRef | null>(null);
 
   const insertBlankAtCursor = () => {
-    const textarea = contentRef.current;
+    const editor = contentRef.current;
+    if (!editor) return;
+    const textarea = editor.getTextarea();
     if (!textarea) return;
     const start = textarea.selectionStart ?? textarea.value.length;
     const end = textarea.selectionEnd ?? textarea.value.length;
@@ -815,30 +818,30 @@ export default function QuestionEditor() {
 
                         {/* Insert fill-in-the-blank helper into Question Content for better discoverability */}
                         {questionType === "fill_blank" ? <FillBlankGuide /> : null}
-                        <Textarea
+                        <RichTextEditor
+                          ref={contentRef}
                           id="content"
                           placeholder="Nhập nội dung câu hỏi tại đây..."
                           value={content}
-                          onChange={(e) => setContent(e.target.value)}
-                          rows={3}
-                          className="text-sm sm:text-base resize-none"
-                          ref={contentRef}
+                          onChange={(val) => setContent(val)}
+                          rows={4}
+                          extraActions={
+                            questionType === "fill_blank" ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={insertBlankAtCursor}
+                                className="h-7 gap-1 px-2.5 text-xs font-medium text-primary hover:bg-primary/10 border-primary/30"
+                              >
+                                <Plus className="h-3.5 w-3.5" /> Thêm chỗ trống
+                              </Button>
+                            ) : null
+                          }
                         />
                         <p className={`mt-1 text-xs ${content.length >= QUESTION_LIMITS.content * WARNING_THRESHOLD ? (content.length > QUESTION_LIMITS.content ? "text-destructive" : "text-amber-600") : "text-muted-foreground"}`}>
                           {content.length.toLocaleString()} / {QUESTION_LIMITS.content.toLocaleString()} ký tự
                         </p>
-                        {questionType === "fill_blank" && (
-                          <div className="mt-2 flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={insertBlankAtCursor}
-                              className="gap-1"
-                            >
-                              <Plus className="h-3.5 w-3.5" /> Thêm chỗ trống
-                            </Button>
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex items-center gap-4">

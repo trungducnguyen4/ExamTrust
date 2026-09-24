@@ -2485,6 +2485,16 @@ export class SubmissionsService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    const timelineMap = new Map<string, { date: string; count: number; highConfidence: number }>();
+    for (const item of filteredCases) {
+      const d = item.submittedAt ? item.submittedAt.slice(0, 10) : new Date().toISOString().slice(0, 10);
+      const entry = timelineMap.get(d) || { date: d, count: 0, highConfidence: 0 };
+      entry.count += 1;
+      if (item.confidence === 'High') entry.highConfidence += 1;
+      timelineMap.set(d, entry);
+    }
+    const timeline = Array.from(timelineMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+
     const total = filteredCases.length;
     const start = (page - 1) * limit;
 
@@ -2503,6 +2513,7 @@ export class SubmissionsService implements OnModuleInit, OnModuleDestroy {
         confirmedCases: filteredCases.filter((item) => item.status === 'confirmed').length,
       },
       patterns,
+      timeline,
     };
   }
 

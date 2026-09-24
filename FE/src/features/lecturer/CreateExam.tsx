@@ -23,6 +23,7 @@ import { DurationInput } from "@/components/common/DurationInput";
 import { TimePickerVi } from "@/components/common/TimePickerVi";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -2116,11 +2117,11 @@ export default function CreateExam() {
                             </CardHeader>
                             <CardContent className="space-y-3">
                               {manualQuestionType === "fill_blank" && <FillBlankGuide />}
-                              <Textarea
-                                className="min-h-32 text-base"
+                              <RichTextEditor
                                 value={manualQuestionContent}
-                                onChange={(event) => setManualQuestionContent(event.target.value)}
+                                onChange={(val) => setManualQuestionContent(val)}
                                 placeholder="Nhập nội dung câu hỏi tại đây..."
+                                rows={4}
                               />
 
                               <div className="flex items-center gap-4">

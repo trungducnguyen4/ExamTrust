@@ -47,15 +47,36 @@ export class QueueService {
     });
   }
 
-  async enqueueAiGeneration(data: any): Promise<void> {
+  getTaskPriority(task?: string): number {
+    switch (task) {
+      case 'single-question':
+      case 'draft-section':
+      case 'question-improvement':
+      case 'proctoring-evidence':
+      case 'exam-risk-assessment':
+        return 1; // High priority: interactive user requests
+      case 'exam-questions':
+      case 'exam-quality-review':
+        return 5; // Normal priority
+      case 'question-duplicate-analysis':
+        return 10; // Low priority: batch background comparison
+      default:
+        return 5;
+    }
+  }
+
+  async enqueueAiGeneration(data: any, customOpts?: any): Promise<void> {
+    const priority = this.getTaskPriority(data?.task);
     await this.aiGenerationQueue.add(data, {
       removeOnComplete: false,
       removeOnFail: false,
       attempts: 3,
+      priority,
       backoff: {
         type: 'exponential',
         delay: 2000,
       },
+      ...customOpts,
     });
   }
 

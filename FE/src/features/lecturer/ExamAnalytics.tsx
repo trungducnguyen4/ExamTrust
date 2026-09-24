@@ -24,6 +24,24 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Loader2, ExternalLink, Sparkles, TrendingUp, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  Line,
+  ComposedChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  ReferenceLine,
+} from "recharts";
 import api from "@/lib/api";
 import { unwrapPaginatedData } from "@/lib/api";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
@@ -269,15 +287,50 @@ export default function ExamAnalytics() {
   }, [aiImprovements]);
 
   const distribution = useMemo(() => {
-    const total = (data?.visualizations.correctVsIncorrect.correct || 0)
-      + (data?.visualizations.correctVsIncorrect.incorrect || 0)
-      + (data?.visualizations.correctVsIncorrect.skipped || 0);
+    const correct = data?.visualizations.correctVsIncorrect.correct || 0;
+    const incorrect = data?.visualizations.correctVsIncorrect.incorrect || 0;
+    const skipped = data?.visualizations.correctVsIncorrect.skipped || 0;
+    const total = correct + incorrect + skipped;
     return {
       total,
-      correctPct: total ? ((data?.visualizations.correctVsIncorrect.correct || 0) / total) * 100 : 0,
-      incorrectPct: total ? ((data?.visualizations.correctVsIncorrect.incorrect || 0) / total) * 100 : 0,
-      skippedPct: total ? ((data?.visualizations.correctVsIncorrect.skipped || 0) / total) * 100 : 0,
+      correct,
+      incorrect,
+      skipped,
+      correctPct: total ? (correct / total) * 100 : 0,
+      incorrectPct: total ? (incorrect / total) * 100 : 0,
+      skippedPct: total ? (skipped / total) * 100 : 0,
     };
+  }, [data]);
+
+  const distributionPieData = useMemo(() => [
+    { name: "Đúng", value: distribution.correct, pct: distribution.correctPct, color: "#10b981" },
+    { name: "Sai", value: distribution.incorrect, pct: distribution.incorrectPct, color: "#f43f5e" },
+    { name: "Bỏ qua", value: distribution.skipped, pct: distribution.skippedPct, color: "#f59e0b" },
+  ], [distribution]);
+
+  const trendChartData = useMemo(() => {
+    return (data?.visualizations.trendSeries || []).map((row) => ({
+      date: row.date,
+      score: Number((row.avgScorePct / 10).toFixed(2)),
+      pct: row.avgScorePct,
+    }));
+  }, [data]);
+
+  const weakestTopicsChartData = useMemo(() => {
+    return (data?.weakestTopics || []).map((t) => ({
+      name: t.topicName,
+      incorrectRate: Math.round(t.incorrectRate),
+      skipRate: Math.round(t.skipRate),
+    }));
+  }, [data]);
+
+  const attemptBreakdownChartData = useMemo(() => {
+    return (data?.attemptStats?.attemptBreakdown || []).map((item) => ({
+      attemptName: `Lần ${item.attemptNo}`,
+      avgScore: Number((item.avgScorePct / 10).toFixed(2)),
+      passRate: Number(item.passRate.toFixed(1)),
+      submissions: item.submissionCount,
+    }));
   }, [data]);
 
   const openAction = (action?: { path: string; params?: Record<string, string> }) => {
@@ -580,14 +633,6 @@ export default function ExamAnalytics() {
         iconClassName: "text-amber-600",
         className: "border-border/70 bg-amber-50/35",
       },
-      {
-        icon: AlertTriangle,
-        value: payload.creatorQualityAlerts?.length ?? 0,
-        label: "Cảnh báo chất lượng",
-        iconWrapClassName: "bg-rose-500/10",
-        iconClassName: "text-rose-600",
-        className: "border-border/70 bg-rose-50/35",
-      },
     ];
   };
 
@@ -662,9 +707,6 @@ export default function ExamAnalytics() {
               </Badge>
             ) : null}
             <h1 className="text-xl font-bold sm:text-2xl">Phân tích hiệu suất</h1>
-            <p className="text-sm text-muted-foreground">
-              Phân tích - Luyện tập - Cải thiện theo từng bài thi.
-            </p>
           </div>
           <Button
             variant="outline"
@@ -693,7 +735,6 @@ export default function ExamAnalytics() {
               </span>
               <div>
                 <h3 className="text-sm font-semibold leading-5 text-foreground">Bộ lọc phân tích bài thi</h3>
-                <p className="text-xs text-muted-foreground">Chọn hoặc tìm kiếm bài thi để xem phân tích hiệu suất</p>
               </div>
             </div>
             <div className="relative w-full sm:w-72 md:w-80">
@@ -1021,7 +1062,42 @@ export default function ExamAnalytics() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* AI Summary Highlight Box */}
+              {data.aiSummary && (
+                <Card className="border-border/70 border-l-4 border-l-violet-600 bg-card shadow-sm transition-all hover:shadow-md dark:border-l-violet-400">
+                  <CardContent className="p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-300 shadow-xs">
+                        <Sparkles className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-base font-semibold text-foreground">
+                            <HelpedTitle help={{
+                              description: "Tóm tắt ngắn do AI tạo từ dữ liệu kết quả bài thi, tỷ lệ sai, chủ đề yếu và áp lực thời gian.",
+                              usedBy: "Giảng viên dùng để nhìn nhanh xu hướng trước khi đi vào từng câu hỏi hoặc từng chủ đề.",
+                              note: "Đây là gợi ý hỗ trợ phân tích, nên đối chiếu với dữ liệu chi tiết trước khi quyết định chỉnh đề.",
+                            }}>
+                              Tóm tắt nhận định AI
+                            </HelpedTitle>
+                          </h2>
+                          <Badge
+                            variant="secondary"
+                            className="border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300 text-xs font-semibold px-2 py-0.5"
+                          >
+                            AI Insights
+                          </Badge>
+                        </div>
+                        <p className="text-sm leading-relaxed text-foreground/90 font-normal">
+                          {translateMetricText(data.aiSummary)}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {getKpiCards(data).map((card) => (
                   <AdminStatCard
                     key={card.label}
@@ -1096,13 +1172,85 @@ export default function ExamAnalytics() {
                       </div>
                     </div>
 
-                    {/* Progression Breakdown by Attempt Number */}
+                    {/* Progression Breakdown by Attempt Number with Chart */}
                     {data.attemptStats.attemptBreakdown && data.attemptStats.attemptBreakdown.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-border/70">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Chi tiết kết quả theo từng lượt làm bài
-                        </p>
+                      <div className="space-y-4 pt-2 border-t border-border/70">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Biểu đồ tiến độ & tỷ lệ đạt qua các lần thi
+                          </p>
+                          <span className="text-[11px] text-muted-foreground">
+                            Cột: Điểm TB (/10) · Đường: Tỷ lệ đạt (%)
+                          </span>
+                        </div>
+
+                        <div className="h-[230px] w-full rounded-xl border border-border/60 bg-muted/10 p-2">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={attemptBreakdownChartData} margin={{ top: 12, right: 20, bottom: 5, left: -10 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.6} />
+                              <XAxis dataKey="attemptName" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+                              <YAxis
+                                yAxisId="scoreAxis"
+                                domain={[0, 10]}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fontSize: 11 }}
+                                tickFormatter={(v) => `${v}`}
+                              />
+                              <YAxis
+                                yAxisId="rateAxis"
+                                orientation="right"
+                                domain={[0, 100]}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fontSize: 11 }}
+                                tickFormatter={(v) => `${v}%`}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  borderRadius: 10,
+                                  border: "1px solid hsl(var(--border))",
+                                  backgroundColor: "hsl(var(--card))",
+                                  color: "hsl(var(--card-foreground))",
+                                  fontSize: "12px",
+                                  boxShadow: "0 10px 25px -10px rgba(0,0,0,0.15)",
+                                }}
+                                formatter={(val: any, name: string) => {
+                                  if (name === "Điểm TB") return [`${Number(val).toFixed(2)}/10 điểm`, name];
+                                  if (name === "Tỷ lệ đạt") return [`${val}%`, name];
+                                  return [val, name];
+                                }}
+                              />
+                              <Legend
+                                wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }}
+                                iconType="circle"
+                              />
+                              <Bar
+                                yAxisId="scoreAxis"
+                                dataKey="avgScore"
+                                name="Điểm TB"
+                                fill="#0ea5e9"
+                                radius={[6, 6, 0, 0]}
+                                maxBarSize={48}
+                              />
+                              <Line
+                                yAxisId="rateAxis"
+                                type="monotone"
+                                dataKey="passRate"
+                                name="Tỷ lệ đạt"
+                                stroke="#10b981"
+                                strokeWidth={2.5}
+                                dot={{ r: 4, fill: "#10b981", strokeWidth: 1.5, stroke: "#fff" }}
+                                activeDot={{ r: 6 }}
+                              />
+                            </ComposedChart>
+                          </ResponsiveContainer>
+                        </div>
+
                         <div className="space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Chi tiết bảng số liệu:
+                          </p>
                           {data.attemptStats.attemptBreakdown.map((item) => (
                             <div
                               key={item.attemptNo}
@@ -1144,136 +1292,184 @@ export default function ExamAnalytics() {
                 </Card>
               )}
 
-            <Card className="border-border/70 bg-card shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
-                      <AlertTriangle className="h-4 w-4 text-amber-600" /> Tín hiệu toàn vẹn
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      Hoàn thành nhanh bất thường là tín hiệu để giảng viên rà soát, không phải kết luận gian lận.
-                    </CardDescription>
-                  </div>
-                  <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
-                    {(data.integritySignals?.fastCompletions?.length || 0) + (data.integritySignals?.similarAnswerPairs?.length || 0)} cần xem xét
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground">Làm bài nhanh bất thường</h3>
-                  {(data.integritySignals?.fastCompletions || []).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Chưa có bài hoàn tất nhanh bất thường đủ điều kiện cảnh báo.</p>
-                  ) : (
-                    <div className="divide-y divide-border/70 rounded-md border border-border/70">
-                      {data.integritySignals!.fastCompletions.map((item) => (
-                        <div key={item.submissionId} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-sm font-semibold text-foreground">{item.studentName}</p>
-                              {item.studentCode ? <span className="text-xs text-muted-foreground">{item.studentCode}</span> : null}
-                              <Badge variant="outline" className={item.severity === "HIGH" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700"}>{item.severity === "HIGH" ? "Rủi ro cao" : "Cần xem xét"}</Badge>
-                            </div>
-                            <p className="mt-1 text-sm text-muted-foreground">{item.elapsedMinutes} phút / {item.allowedMinutes} phút · {(item.scorePct / 10).toFixed(2)}/10 điểm · nhanh hơn {((1 - item.completionRatio) * 100).toFixed(1)}% thời lượng cho phép</p>
-                            {item.cohortMedianMinutes !== null ? <p className="mt-1 text-xs text-muted-foreground">Trung vị lớp: {item.cohortMedianMinutes} phút</p> : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-                <section className="space-y-2 border-t border-border/70 pt-5">
-                  <h3 className="text-sm font-semibold text-foreground">Mẫu trả lời giống nhau bất thường</h3>
-                  {(data.integritySignals?.similarAnswerPairs || []).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Chưa có cặp bài làm đủ bằng chứng đáp án sai hiếm trùng nhau.</p>
-                  ) : (
-                    <div className="divide-y divide-border/70 rounded-md border border-border/70">
-                      {data.integritySignals!.similarAnswerPairs.map((pair) => (
-                        <div key={`${pair.studentA.submissionId}-${pair.studentB.submissionId}`} className="p-4">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-foreground">{pair.studentA.studentName} ↔ {pair.studentB.studentName}</p>
-                            <Badge variant="outline" className={pair.severity === "HIGH" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700"}>{pair.severity === "HIGH" ? "Rủi ro cao" : "Cần xem xét"}</Badge>
-                          </div>
-                          <p className="mt-1 text-sm text-muted-foreground">{pair.rareWrongMatches} đáp án sai hiếm trùng nhau · {pair.comparableQuestions} câu so sánh · tương đồng {pair.similarityScore.toFixed(1)}%</p>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {pair.evidence.slice(0, 4).map((evidence) => <Badge key={`${evidence.questionIdentity}-${evidence.answer}`} variant="secondary">{evidence.orderIndex !== null ? `Câu ${evidence.orderIndex + 1}` : "Câu snapshot"}: {evidence.answer} · {(evidence.answerFrequency * 100).toFixed(1)}%</Badge>)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              </CardContent>
-            </Card>
-
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-              <Card className="min-h-[240px] border-border/70 bg-card shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold text-foreground">Đúng / Sai / Bỏ qua</CardTitle>
-                  <CardDescription>Tổng quan nhanh kết quả trả lời.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
+              <Card className="min-h-[300px] border-border/70 bg-card shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="mb-1 flex justify-between text-sm"><span>Đúng</span><span className="font-medium">{distribution.correctPct.toFixed(1)}%</span></div>
-                      <Progress value={distribution.correctPct} className="h-1.5 [&>div]:bg-emerald-500" />
+                      <CardTitle className="text-base font-semibold text-foreground">Đúng / Sai / Bỏ qua</CardTitle>
+                      <CardDescription>Tỷ lệ phân bố câu trả lời toàn bài thi.</CardDescription>
                     </div>
-                    <div>
-                      <div className="mb-1 flex justify-between text-sm"><span>Sai</span><span className="font-medium">{distribution.incorrectPct.toFixed(1)}%</span></div>
-                      <Progress value={distribution.incorrectPct} className="h-1.5 [&>div]:bg-rose-500" />
-                    </div>
-                    <div>
-                      <div className="mb-1 flex justify-between text-sm"><span>Bỏ qua</span><span className="font-medium">{distribution.skippedPct.toFixed(1)}%</span></div>
-                      <Progress value={distribution.skippedPct} className="h-1.5 [&>div]:bg-amber-500" />
-                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {distribution.total} lượt trả lời
+                    </Badge>
                   </div>
+                </CardHeader>
+                <CardContent>
+                  {distribution.total === 0 ? (
+                    <div className="flex h-[210px] items-center justify-center text-sm text-muted-foreground">
+                      Chưa có dữ liệu câu trả lời.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center sm:flex-row sm:justify-around gap-2 pt-1">
+                      <div className="relative h-[210px] w-[210px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Tooltip
+                              contentStyle={{
+                                borderRadius: 10,
+                                border: "1px solid hsl(var(--border))",
+                                backgroundColor: "hsl(var(--card))",
+                                color: "hsl(var(--card-foreground))",
+                                fontSize: "12px",
+                                boxShadow: "0 10px 25px -10px rgba(0,0,0,0.15)",
+                              }}
+                              formatter={(value: any, name: string) => [
+                                `${value} câu (${distribution.total ? ((Number(value) / distribution.total) * 100).toFixed(1) : 0}%)`,
+                                name,
+                              ]}
+                            />
+                            <Pie
+                              data={distributionPieData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={58}
+                              outerRadius={88}
+                              paddingAngle={3}
+                              dataKey="value"
+                            >
+                              {distributionPieData.map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} stroke="transparent" />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <span className="text-2xl font-bold tracking-tight text-foreground">
+                            {distribution.correctPct.toFixed(0)}%
+                          </span>
+                          <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                            Chính xác
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex w-full max-w-[200px] flex-col justify-center gap-3">
+                        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-emerald-500/5 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                            <span className="text-xs font-medium">Đúng</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-foreground">{distribution.correct}</p>
+                            <p className="text-[10px] text-muted-foreground">{distribution.correctPct.toFixed(1)}%</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-rose-500/5 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-rose-500" />
+                            <span className="text-xs font-medium">Sai</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-foreground">{distribution.incorrect}</p>
+                            <p className="text-[10px] text-muted-foreground">{distribution.incorrectPct.toFixed(1)}%</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-amber-500/5 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-amber-500" />
+                            <span className="text-xs font-medium">Bỏ qua</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-foreground">{distribution.skipped}</p>
+                            <p className="text-[10px] text-muted-foreground">{distribution.skippedPct.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
-              <Card className="min-h-[240px] border-border/70 bg-card shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold text-foreground">Tiến độ theo thời gian</CardTitle>
-                  <CardDescription>Điểm trung bình theo ngày nộp bài.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {(data.visualizations.trendSeries || []).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Chưa có dữ liệu tiến độ.</p>
-                  ) : (data.visualizations.trendSeries || []).map((row) => (
-                    <div key={row.date} className="flex items-center gap-3">
-                      <span className="w-24 shrink-0 text-xs text-muted-foreground">{row.date}</span>
-                      <Progress value={row.avgScorePct} className="h-1.5 flex-1 [&>div]:bg-primary" />
-                      <span className="w-14 text-right text-xs font-medium">{(row.avgScorePct / 10).toFixed(2)}/10</span>
+              <Card className="min-h-[300px] border-border/70 bg-card shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base font-semibold text-foreground">Tiến độ theo thời gian</CardTitle>
+                      <CardDescription>Biến thiên điểm trung bình theo ngày nộp bài.</CardDescription>
                     </div>
-                  ))}
+                    {trendChartData.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        Thang điểm 0 - 10
+                      </span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {trendChartData.length === 0 ? (
+                    <div className="flex h-[210px] items-center justify-center text-sm text-muted-foreground">
+                      Chưa có dữ liệu tiến độ theo thời gian.
+                    </div>
+                  ) : (
+                    <div className="h-[210px] w-full pt-2">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={trendChartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.6} />
+                          <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                          <YAxis domain={[0, 10]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                          <Tooltip
+                            contentStyle={{
+                              borderRadius: 10,
+                              border: "1px solid hsl(var(--border))",
+                              backgroundColor: "hsl(var(--card))",
+                              color: "hsl(var(--card-foreground))",
+                              fontSize: "12px",
+                              boxShadow: "0 10px 25px -10px rgba(0,0,0,0.15)",
+                            }}
+                            formatter={(value: any) => [`${Number(value).toFixed(2)}/10 điểm`, "Điểm trung bình"]}
+                            labelFormatter={(label) => `Ngày: ${label}`}
+                          />
+                          {(() => {
+                            const rawPassing = data?.exam?.passingScore ?? data?.passingScorePct ?? 50;
+                            const passingPoint = Number(((rawPassing > 10 ? rawPassing : rawPassing * 10) / 10).toFixed(2));
+                            return (
+                              <ReferenceLine
+                                y={passingPoint}
+                                stroke="#10b981"
+                                strokeDasharray="4 4"
+                                label={{
+                                  value: `Đạt (${passingPoint})`,
+                                  position: "insideTopRight",
+                                  fill: "#10b981",
+                                  fontSize: 10,
+                                }}
+                              />
+                            );
+                          })()}
+                          <Area
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#0ea5e9"
+                            strokeWidth={2.5}
+                            fillOpacity={1}
+                            fill="url(#scoreGradient)"
+                            activeDot={{ r: 5, stroke: "#0ea5e9", strokeWidth: 2, fill: "#fff" }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="border-border/70 bg-card shadow-sm">
-              <CardContent className="p-5">
-                <div className="flex gap-4">
-                  <div className="mt-1 h-12 w-1 shrink-0 rounded-full bg-primary/70" />
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <h2 className="text-base font-semibold text-foreground">
-                        <HelpedTitle help={{
-                          description: "Tóm tắt ngắn do AI tạo từ dữ liệu kết quả bài thi, tỷ lệ sai, chủ đề yếu và áp lực thời gian.",
-                          usedBy: "Giảng viên dùng để nhìn nhanh xu hướng trước khi đi vào từng câu hỏi hoặc từng chủ đề.",
-                          note: "Đây là gợi ý hỗ trợ phân tích, nên đối chiếu với dữ liệu chi tiết trước khi quyết định chỉnh đề.",
-                        }}>
-                          Tóm tắt AI
-                        </HelpedTitle>
-                      </h2>
-                    </div>
-                    <p className="max-w-4xl text-sm leading-6 text-foreground/85">
-                      {translateMetricText(data.aiSummary)}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             <Card className="border-border/70 bg-card shadow-sm">
               <CardHeader className="pb-3">
@@ -1292,29 +1488,102 @@ export default function ExamAnalytics() {
                 <div className="space-y-6">
                   <section className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-sm font-semibold text-foreground">Chủ đề yếu nhất</h3>
-                      <Badge variant="outline" className="border-border bg-muted/40 text-xs">{data.weakestTopics.length}</Badge>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        <HelpedTitle help={{
+                          description: "Chủ đề yếu được tính bằng tổng số lượt trả lời sai của sinh viên chia cho tổng số lượt làm của toàn bộ câu hỏi thuộc chủ đề đó (% Sai = [Số câu sai / Tổng lượt làm] × 100).",
+                          usedBy: "Hệ thống xếp hạng tất cả các chủ đề xuất hiện trong bài thi từ tỷ lệ sai cao nhất xuống thấp nhất, lấy tối đa top 8 chủ đề có tỷ lệ sai cao để cảnh báo.",
+                          note: "Giảng viên có thể dựa vào danh sách này để mở đề luyện tập bổ trợ hoặc củng cố kiến thức tương ứng cho sinh viên.",
+                        }}>
+                          Chủ đề yếu nhất
+                        </HelpedTitle>
+                      </h3>
+                      <Badge variant="outline" className="border-border bg-muted/40 text-xs">{data.weakestTopics.length} chủ đề</Badge>
                     </div>
-                    <div className="divide-y divide-border/70 rounded-md border border-border/70">
-                      {data.weakestTopics.length === 0 ? (
-                        <p className="p-4 text-sm text-muted-foreground">Chưa có chủ đề yếu nổi bật.</p>
-                      ) : data.weakestTopics.slice(0, 3).map((item) => (
-                        <div key={`${item.topicId}-${item.topicName}`} className="p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-foreground">{item.topicName}</p>
-                              <p className="mt-1 text-xs text-muted-foreground">Bỏ qua {item.skipRate.toFixed(0)}%</p>
-                            </div>
-                            <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-rose-700">
-                              {item.incorrectRate.toFixed(0)}% sai
-                            </Badge>
+                    <p className="text-xs text-muted-foreground">
+                      Xếp hạng tối đa 8 chủ đề có tỷ lệ sai cao nhất (tính bằng: tổng số câu trả lời sai / tổng lượt làm của các câu hỏi thuộc chủ đề đó).
+                    </p>
+
+                    {data.weakestTopics.length === 0 ? (
+                      <p className="rounded-md border border-border/70 p-4 text-sm text-muted-foreground">Chưa có chủ đề yếu nổi bật.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                        {/* Bar chart comparison */}
+                        <div className="rounded-xl border border-border/70 bg-card p-3 lg:col-span-6 flex flex-col justify-between">
+                          <div>
+                            <p className="text-xs font-semibold text-foreground mb-1">
+                              So sánh tỷ lệ sai theo chủ đề
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mb-2">
+                              Tỷ lệ trả lời sai (%) của sinh viên đối với các câu hỏi thuộc từng chủ đề.
+                            </p>
                           </div>
-                          <Button variant="ghost" size="sm" className="mt-2 h-8 px-0 text-primary hover:bg-transparent hover:text-primary/80" onClick={() => { trackAction("weakest_topic_open_practice"); openAction(item.action); }}>
-                            Mở luyện tập <ExternalLink className="ml-1 h-3.5 w-3.5" />
-                          </Button>
+                          <div className="h-[210px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={weakestTopicsChartData}
+                                layout="vertical"
+                                margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" opacity={0.6} />
+                                <XAxis type="number" domain={[0, 100]} tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+                                <YAxis
+                                  type="category"
+                                  dataKey="name"
+                                  tickLine={false}
+                                  axisLine={false}
+                                  tick={{ fontSize: 11 }}
+                                  width={100}
+                                  tickFormatter={(v) => v.length > 13 ? `${v.slice(0, 12)}…` : v}
+                                />
+                                <Tooltip
+                                  contentStyle={{
+                                    borderRadius: 10,
+                                    border: "1px solid hsl(var(--border))",
+                                    backgroundColor: "hsl(var(--card))",
+                                    color: "hsl(var(--card-foreground))",
+                                    fontSize: "12px",
+                                    boxShadow: "0 10px 25px -10px rgba(0,0,0,0.15)",
+                                  }}
+                                  formatter={(val: any) => [`${val}%`, "Tỷ lệ sai"]}
+                                />
+                                <Bar
+                                  dataKey="incorrectRate"
+                                  name="Tỷ lệ sai"
+                                  fill="#f43f5e"
+                                  radius={[0, 6, 6, 0]}
+                                  maxBarSize={24}
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
                         </div>
-                      ))}
-                    </div>
+
+                        {/* Detailed action list */}
+                        <div className="divide-y divide-border/70 rounded-xl border border-border/70 bg-card lg:col-span-6">
+                          {data.weakestTopics.slice(0, 4).map((item) => (
+                            <div key={`${item.topicId}-${item.topicName}`} className="p-3.5">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold text-foreground">{item.topicName}</p>
+                                  <p className="mt-0.5 text-xs text-muted-foreground">Bỏ qua {item.skipRate.toFixed(0)}%</p>
+                                </div>
+                                <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-rose-700">
+                                  {item.incorrectRate.toFixed(0)}% sai
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="mt-1.5 h-7 px-0 text-xs text-primary hover:bg-transparent hover:text-primary/80"
+                                onClick={() => { trackAction("weakest_topic_open_practice"); openAction(item.action); }}
+                              >
+                                Mở luyện tập <ExternalLink className="ml-1 h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </section>
 
                   <section className="space-y-3">
@@ -1473,60 +1742,6 @@ export default function ExamAnalytics() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-              <Card className="border-border/70 bg-card shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold text-foreground">Khuyến nghị AI</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="divide-y divide-border/70">
-                    {data.aiRecommendations.slice(0, 3).map((item, idx) => (
-                      <div key={`${item.title}-${idx}`} className="py-3 first:pt-0 last:pb-0">
-                        <p className="text-sm font-semibold text-foreground">{translateMetricText(item.title)}</p>
-                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{translateMetricText(item.detail)}</p>
-                        <Button variant="ghost" size="sm" className="mt-2 h-8 px-0 text-primary hover:bg-transparent hover:text-primary/80" onClick={() => { trackAction("ai_recommendation_action"); openAction(item.action); }}>
-                          Thực hiện <ExternalLink className="ml-1 h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/70 bg-card shadow-sm">
-                <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <CardTitle className="text-base font-semibold text-foreground">Cảnh báo chất lượng câu hỏi</CardTitle>
-                    <CardDescription>
-                      Cảnh báo lỗi kỹ thuật & thiết kế đề thi (Phát hiện các câu hỏi bị lỗi, quá tối nghĩa hoặc bị sinh viên khiếu nại/bỏ qua hàng loạt). Nếu bài thi chất lượng tốt, phần này sẽ hiển thị 0 cảnh báo.
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {(data.creatorQualityAlerts?.length ?? 0) === 0 ? (
-                    <p className="text-sm text-muted-foreground">Không phát hiện cảnh báo chất lượng câu hỏi mức rủi ro cao.</p>
-                  ) : (
-                    <div className="divide-y divide-border/70">
-                      {data.creatorQualityAlerts.slice(0, 3).map((item) => (
-                        <div key={item.questionId} className="py-3 first:pt-0 last:pb-0">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold text-foreground">{translateMetricText(item.questionLabel)}</p>
-                              <p className="mt-1 text-xs text-muted-foreground">{translateMetricText(item.signal)}</p>
-                            </div>
-                            <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-rose-700">Cảnh báo</Badge>
-                          </div>
-                          <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{translateMetricText(item.suggestion)}</p>
-                          <Button variant="ghost" size="sm" className="mt-2 h-8 px-0 text-primary hover:bg-transparent hover:text-primary/80" onClick={() => { trackAction("quality_alert_open_question_preview"); openQuestionPreview(item); }}>
-                            Xem câu hỏi <ExternalLink className="ml-1 h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
           </div>
             );
           })()}
