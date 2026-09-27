@@ -36,8 +36,9 @@ Sau khi hoàn thành bất kỳ thay đổi nào, AI agent phải xuất báo c�
 
 ---
 
-## Kênh báo cáo
-Quy trình này phải được báo cáo tại:
-1. Tin nhắn phản hồi cuối cùng của AI cho người dùng.
-2. File báo cáo tổng kết / walkthrough.
-3. Nội dung Pull Request trên GitHub (theo mẫu `.github/PULL_REQUEST_TEMPLATE.md`).
+## Delivery Channels & Workflow
+Quy trình này phải được thực thi khép kín:
+1. Xuất báo cáo 4 Trụ Cột trong tin nhắn phản hồi cuối cùng cho người dùng.
+2. Cập nhật artifact `walkthrough.md` (đính kèm Screenshots/Video).
+3. **TỰ ĐỘNG COMMIT & PUSH**: Sau khi toàn bộ các bước kiểm tra (Tests, Runtime, Visual, Confidence) đạt tiêu chuẩn, AI BẮT BUỘC phải thực hiện commit với conventional message và push trực tiếp lên repository (`origin main`), không được để dở dang trên local tree trừ khi người dùng yêu cầu giữ lại.
+4. Điền nội dung báo cáo vào GitHub Pull Request description nếu tạo PR (theo mẫu `.github/PULL_REQUEST_TEMPLATE.md`).
