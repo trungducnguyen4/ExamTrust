@@ -37,6 +37,7 @@ STEP 5: Edit + test
 - If `graphify query` returns sufficient scope, do NOT continue with broad searches
 - Target: 3–10 relevant files per task after graph query
 
+
 ## Graph Update
 
 When source code changes significantly:
@@ -45,3 +46,15 @@ graphify update
 ```
 
 This updates the SAME graph at `.graphify/graph.json` — shared with Codex. Do NOT rebuild independently.
+
+---
+
+# Verification Protocol — Proof of Change & Confidence Report
+
+Mọi thay đổi code hoặc bugfix bắt buộc phải xuất báo cáo theo **4 Trụ Cột**:
+1. **🧪 Tests**: Syntax check / unit tests có bằng chứng cụ thể.
+2. **⚡ Runtime**: Kiểm tra API thực tế + xác minh DB (Prisma/DB).
+3. **👁️ Visual**:
+   - **Chỉnh sửa UI/Component**: BẮT BUỘC chụp **Screenshot** đính kèm.
+   - **Chỉnh sửa User Flow / Quy trình**: BẮT BUỘC quay **Video màn hình / GIF**.
+4. **🎯 Confidence**: Đánh giá High/Medium/Low, nêu rõ những gì ĐÃ kiểm và CHƯA kiểm.

@@ -16,3 +16,10 @@ Rules:
 - For review impact on changed files, use `graphify review-delta --graph .graphify/graph.json` instead of generic traversal
 - Read `.graphify/GRAPH_REPORT.md` only for broad architecture review or when `query` / `path` / `explain` do not surface enough context
 - After modifying code files in this session, run `npx graphify hook-rebuild` to keep the graph current
+
+## Verification Protocol — Proof of Change & Confidence Report
+Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
+1. **Tests**: Kiểm tra cú pháp, lint, test case thực tế.
+2. **Runtime**: Chạy API / hàm thực tế, xác minh DB data.
+3. **Visual**: BẮT BUỘC chụp ảnh (Screenshot) nếu sửa UI, quay video màn hình (Video/GIF) nếu sửa luồng người dùng (User Flow).
+4. **Confidence**: Đánh giá độ tin cậy kèm những gì đã kiểm và chưa kiểm.

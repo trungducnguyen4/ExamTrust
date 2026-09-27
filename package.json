@@ -1,0 +1,9 @@
+{
+  "name": "examtrust-monorepo",
+  "private": true,
+  "scripts": {
+    "attack": "node scripts/attack/run-all.mjs",
+    "test:fe": "cd FE && npm test",
+    "test:be": "cd BE && npm test"
+  }
+}
