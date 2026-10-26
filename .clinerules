@@ -58,3 +58,28 @@ Mọi thay đổi code hoặc bugfix bắt buộc phải xuất báo cáo theo *
    - **Chỉnh sửa UI/Component**: BẮT BUỘC chụp **Screenshot** đính kèm.
    - **Chỉnh sửa User Flow / Quy trình**: BẮT BUỘC quay **Video màn hình / GIF**.
 4. **🎯 Confidence**: Đánh giá High/Medium/Low, nêu rõ những gì ĐÃ kiểm và CHƯA kiểm.
+
+---
+
+# Git Flow, Bugfix & Pull Request (PR) Protocol
+
+Mọi quy trình phát triển tính năng, sửa lỗi (bugfix/hotfix) và mở Pull Request (PR) bắt buộc tuân thủ quy trình Git Flow:
+
+1. **Phân nhánh (Branching):**
+   - Feature/Bugfix Branches: Đặt tên theo Jira issue `EX-xxx` (ví dụ: `feature/EX-001`, `bugfix/EX-002`). Tách từ `develop`.
+   - `develop`: Tự động deploy môi trường DEV. Mọi PR vào `develop` phải pass tests, code review và QA.
+   - `Release Branches`: Đặt tên theo SemVer `release/vX.Y.Z` (ví dụ `v1.0.0`, `v1.0.1`).
+   - `UAT / release`: Tự động deploy môi trường UAT.
+   - `Production / master`: Tự động deploy môi trường Production. Bắt buộc gắn tag định dạng `release/v1.x.x`.
+
+2. **Sửa lỗi Khẩn cấp (Critical Hotfix - Nhánh F):**
+   - Lỗi khẩn cấp (như syntax error làm sập trang) được tách nhánh fix trực tiếp để release patch mà không cần chờ toàn bộ `develop`.
+   - **Bắt buộc Back-merge về `develop`** ngay sau khi release để tránh mất bản vá.
+
+3. **Mẫu Soạn thảo PR Template:**
+   - Tiêu đề: `[EX-xxx] <type>(<scope>): <Mô tả ngắn>`
+   - Thân PR: Nêu rõ Problem, Root Cause, Solution/Files changed, Bằng chứng kiểm thử theo 4 Trụ Cột, Target Branch & Back-merge plan.
+
+4. **Quyền hạn Tự động hóa Git (Git Automation Permission):**
+   - AI Agent ĐƯỢC PHÉP chủ động tạo nhánh, commit và push lên GitHub remote theo đúng quy chuẩn mà KHÔNG CẦN hỏi lại người dùng để đảm bảo tính tự động hóa và tốc độ xử lý.
+

@@ -191,66 +191,53 @@ export function FilterPanel({
   const content = (
     <div
       className={cn(
-        "flex min-h-0 flex-col gap-3.5",
         inline
-          ? "rounded-xl border border-border bg-card p-4 shadow-sm"
-          : "max-h-[min(50vh,20rem)]",
+          ? "flex flex-wrap items-center gap-3.5 rounded-xl border border-border bg-card p-3 shadow-sm"
+          : "flex min-h-0 flex-col gap-3.5 max-h-[min(50vh,20rem)]",
       )}
     >
-      <div className={cn("flex flex-wrap items-start gap-3", title ? "justify-between" : "justify-end")}>
-        {title && !isMobile ? (
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Filter className="h-4 w-4" />
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold leading-5 text-foreground">{title}</h3>
-              {description ? (
-                <p className="text-xs text-muted-foreground">{description}</p>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
-        {inline ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleClearWithReset}
-            className="h-8 gap-1.5 rounded-lg px-2 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-3.5 w-3.5" />
-            Xóa bộ lọc
-          </Button>
+      {/* Tiêu đề ngắn gọn: chỉ giữ lại 2 chữ 'Bộ lọc' */}
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Filter className="h-4 w-4" />
+        </span>
+        <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+          Bộ lọc
+        </span>
+        {activeCount > 0 ? (
+          <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+            {activeCount}
+          </span>
         ) : null}
       </div>
 
+      {inline ? <div className="hidden sm:block h-6 w-px bg-border/70 shrink-0" /> : null}
       {!inline ? <Separator /> : null}
-      {inline && title && !isMobile ? <Separator className="bg-border/60" /> : null}
 
-      <div className={cn(inline ? "" : "max-h-[16rem] min-h-[6rem] overflow-y-auto pr-2")}>
-        <div
-          className={cn(
-            inline
-              ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              : "space-y-3",
-          )}
-        >
-          {filters.map((filter) => {
-            const current = value[filter.key];
+      <div
+        className={cn(
+          inline
+            ? "flex flex-1 flex-wrap items-center gap-3.5 min-w-0"
+            : "max-h-[16rem] min-h-[6rem] overflow-y-auto pr-2 space-y-3",
+        )}
+      >
+        {filters.map((filter) => {
+          const current = value[filter.key];
 
-            if (filter.type === "text") return null;
+          if (filter.type === "text") return null;
 
-            if (filter.type === "select") {
-              return (
-                <div
-                  key={filter.key}
-                  className={cn(
-                    "space-y-1.5",
-                    inline ? "" : "mx-auto w-full max-w-[26rem]",
-                  )}
-                >
-                  <Label className="text-xs font-medium">{filter.label}</Label>
-                  <Select
+          if (filter.type === "select") {
+            return (
+              <div
+                key={filter.key}
+                className={cn(
+                  inline
+                    ? "flex items-center gap-2 min-w-[170px] flex-1 sm:flex-initial"
+                    : "space-y-1.5 mx-auto w-full max-w-[26rem]",
+                )}
+              >
+                <Label className="text-xs font-semibold text-foreground whitespace-nowrap shrink-0">{filter.label}</Label>
+                <Select
                     value={typeof current === "string" ? current : "all"}
                     onValueChange={(nextValue) =>
                       onValueChange(filter.key, nextValue)
@@ -595,7 +582,6 @@ export function FilterPanel({
             return null;
           })}
         </div>
-      </div>
 
       {!inline ? (
         <div className="flex flex-col gap-1.5 sm:flex-row sm:justify-end">
