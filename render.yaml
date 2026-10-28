@@ -1,0 +1,62 @@
+# Render Blueprint — free web service for the ExamTrust API.
+#
+# Import this repository on Render (New -> Blueprint) and Render creates the
+# service below; the values marked `sync: false` must be filled in the
+# dashboard (or with the Render API) before the first deploy succeeds.
+#
+# Free instance: 0.1 CPU / 512 MB, spins down after 15 minutes of inactivity
+# and takes about a minute to wake up. Keep the database outside Render
+# (Aiven free MySQL) so data survives restarts.
+
+services:
+  - type: web
+    name: examtrust-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerContext: .
+    dockerfilePath: ./deploy/render/Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      - key: RUN_DB_PUSH
+        value: "true"
+      - key: RUN_AI_WORKER
+        value: "true"
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: AI_PROVIDER
+        value: deepseek
+
+      # --- filled in the dashboard, never committed -------------------------
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        value: examtrust-media
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
