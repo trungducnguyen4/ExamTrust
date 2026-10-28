@@ -27,10 +27,11 @@ Vercel (FE) ──HTTPS──▶ Render Free Web Service (API + AI worker, 1 con
    - `DATABASE_URL`: Service URI MySQL của Aiven, thêm `?sslaccept=accept_invalid_certs`
      (Aiven dùng CA riêng). Ví dụ:
      `mysql://avnadmin:PASS@mysql-examtrust-xxx.c.aivencloud.com:25569/defaultdb?sslaccept=accept_invalid_certs`
-   - `REDIS_URL`: URI Valkey của Aiven (`rediss://default:...`) hoặc URL nội bộ của Render Key Value.
-   - `JWT_SECRET`: chuỗi ngẫu nhiên ≥32 ký tự.
-   - `FRONTEND_URL`, `APP_BASE_URL`, `CORS_ORIGINS`: `https://exam-trust.vercel.app`.
-   - `DEEPSEEK_API_KEY` và 6 biến `R2_*` nếu dùng AI/upload media.
+   - **Chỉ còn `DATABASE_URL` phải điền tay.** `REDIS_URL` (Render Key Value), `JWT_SECRET`
+     (Render tự sinh), `FRONTEND_URL` / `APP_BASE_URL` / `CORS_ORIGINS` đều đã khai báo sẵn
+     trong `render.yaml`.
+   - `DEEPSEEK_API_KEY` và các biến `R2_*` (ảnh/webcam) thêm sau ở **Environment** khi cần;
+     app vẫn chạy nếu chưa có, chỉ các tính năng AI/upload bị tắt.
 4. **Apply** → Render build Docker (~5–8 phút) → deploy.
 
 > Không có Blueprint? Làm tay: **New → Web Service** → repo → Runtime **Docker** →
