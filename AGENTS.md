@@ -27,6 +27,14 @@ Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
 
 ---
 
+## Session Hygiene — Context & `/compact`
+
+- Khi context đã dài, vừa xong một task/PR, chuẩn bị sang task lớn mới, hoặc agent bắt đầu quên ràng buộc cũ: agent phải **lưu handoff ra file** (`docs/runs/<YYYY-MM-DD>-<ticket>.md`), ghi rõ nhánh + PR + bước tiếp theo, rồi **đề nghị người dùng bấm `/compact`**.
+- Agent **KHÔNG tự gọi được `/compact`** (đây là lệnh UI, chỉ chạy khi agent rảnh). Không được nói "tôi đã compact" hay bịa số token.
+- Chi tiết ngưỡng auto-compact của DSH và cách xử lý khi IDE không có `/compact`: skill `context-hygiene` (`.agents/skills/context-hygiene/SKILL.md`).
+
+---
+
 ## Git Flow, Bugfix & Pull Request (PR) Protocol
 
 Mọi quy trình phát triển tính năng, sửa lỗi (bugfix/hotfix) và mở Pull Request (PR) của AI Agent bắt buộc phải tuân thủ nghiêm ngặt mô hình phân nhánh và vòng đời phát hành dưới đây:
