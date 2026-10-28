@@ -20,13 +20,14 @@ Nền tảng hỗ trợ tổ chức thi và đánh giá học thuật, tập tru
 
 ## Kiến trúc tổng quan
 
-Dự án gồm 3 phần chính, triển khai và vận hành độc lập với nhau:
+ExamTrust được thiết kế theo mô hình **Modular Monolith kết hợp Asynchronous Background Worker (BullMQ/Redis)** — một quyết định kỹ thuật có chủ đích nhằm đảm bảo tính toàn vẹn giao dịch (ACID transactions) tuyệt đối cho quá trình nộp bài/chấm điểm, đồng thời bảo vệ Node.js Event Loop khỏi các tác vụ AI nặng:
 
-- **FE/** — Ứng dụng frontend xây dựng bằng Next.js (App Router), giao diện cho quản trị viên, giảng viên và sinh viên.
-- **BE/** — API backend xây dựng bằng NestJS, quản lý nghiệp vụ, xác thực, hàng đợi xử lý AI, và kết nối cơ sở dữ liệu. Đi kèm một tiến trình worker riêng để xử lý các tác vụ AI theo hàng đợi mà không chặn API chính.
+- **FE/** — Ứng dụng frontend xây dựng bằng Next.js (App Router), giao diện 3 phân hệ (Admin, Giảng viên, Sinh viên) với công cụ thi `exam-engine` chạy phía client.
+- **BE/** — API backend xây dựng bằng NestJS theo kiến trúc Modular Monolith. Đảm nhiệm xác thực, phân quyền (RBAC), quản lý ngân hàng câu hỏi có versioning, thực thi hạn chót nộp bài, và đóng băng snapshot đề thi.
+- **BE (AI Worker)** — Tiến trình nền độc lập ([BE/src/ai-worker.ts](BE/src/ai-worker.ts)) kết nối qua Redis / BullMQ queue. Chuyên trách các tác vụ tốn I/O và CPU: sinh đề thi, vector embedding search, và phân tích thị giác webcam mà không làm nghẽn API chính.
 - **zalo-webhook-lambda/** — Hàm serverless nhỏ, độc lập với backend chính, tiếp nhận webhook từ Zalo phục vụ tính năng thông báo.
 
-Giao tiếp giữa các phần chủ yếu qua REST API (FE gọi BE) và hàng đợi nội bộ (BE ↔ AI worker qua Redis).
+> 📖 **Xem chi tiết:** [5 Minh chứng Kỹ thuật Cốt lõi & Luận điểm Bảo vệ Phỏng vấn](docs/INTERVIEW_DEFENSE_AND_TECHNICAL_PROOF.md) giải thích cặn kẽ 5 bài toán hóc búa (Idempotency, Answer Stripping, Server-side Deadline, Queue Resiliency, và lý do không dùng Microservices).
 
 ## Tính năng chính
 
@@ -37,17 +38,21 @@ Giao tiếp giữa các phần chủ yếu qua REST API (FE gọi BE) và hàng 
 **Dành cho giảng viên**
 - Tạo và quản lý khoá học, danh sách sinh viên tham gia
 - Xây dựng ngân hàng câu hỏi, hỗ trợ versioning để tra soát lịch sử chỉnh sửa
-- Sinh câu hỏi gợi ý bằng AI, có bước duyệt/chỉnh sửa trước khi đưa vào ngân hàng câu hỏi chính thức
-- Tạo liên kết thi (exam link), cấu hình thời gian và cách trộn đề
+- Hỗ trợ sinh câu hỏi gợi ý bằng AI (tích hợp Gemini, DeepSeek, OpenRouter, NVIDIA, Ollama) với bộ tự sửa lỗi JSON (`jsonrepair`), có bước duyệt/chỉnh sửa của giảng viên trước khi lưu chính thức
+- Tạo liên kết thi (exam link), cấu hình thời gian, phòng thi và cách trộn đề ngẫu nhiên
 - Xem thống kê, phân tích độ khó câu hỏi và kết quả bài thi
+- **Thẩm định Tín hiệu Toàn vẹn (Human-in-the-Loop):** Xem xét các cờ cảnh báo bất thường trong ca thi và đối soát ảnh chụp định kỳ trước khi quyết định can thiệp điểm số
 
 **Dành cho sinh viên**
-- Làm bài thi với đề được sinh ngẫu nhiên riêng cho từng người
-- Bài thi được chốt (snapshot) ngay khi bắt đầu làm, đảm bảo không thay đổi nội dung giữa chừng
-- Theo dõi lịch sử làm bài, xem lại kết quả
+- Làm bài thi với đề được sinh ngẫu nhiên riêng cho từng người (`randomizationSeed`)
+- Bài thi được chốt (snapshot) ngay khi bắt đầu làm, loại bỏ hoàn toàn đáp án (`answerKey`) khỏi payload client
+- Tự động lưu bài định kỳ (debounced autosave) chống mất dữ liệu khi gián đoạn mạng
+- Cơ chế nộp bài đảm bảo tính Idempotent (chống double-submit) và thực thi deadline nghiêm ngặt phía server
+- Theo dõi lịch sử làm bài, xem lại kết quả sau khi giảng viên công bố
 
-**Chung**
-- Theo dõi tín hiệu bất thường trong quá trình làm bài phục vụ giám sát tính trung thực
+**Giám sát tính toàn vẹn (Integrity Signals / Privacy-First)**
+- Thu thập các tín hiệu toàn vẹn khách quan từ Browser APIs (`fullscreenchange`, `visibilitychange`, `screen.isExtended`, Clipboard tracking) và ảnh webcam chu kỳ
+- **Nguyên tắc Human-in-the-Loop:** Hệ thống không tự động phán xét hay quy kết gian lận; AI chỉ gắn cờ tín hiệu để hỗ trợ Giảng viên đánh giá công bằng
 - Gửi email thông báo (kích hoạt tài khoản, đặt lại mật khẩu, nhắc lịch thi...)
 - Hỗ trợ thông báo qua Zalo cho một số sự kiện quan trọng
 

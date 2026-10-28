@@ -28,7 +28,7 @@ describe('ExamsService snapshot publishing', () => {
       exam: {
         findUnique: jest
           .fn()
-          .mockResolvedValueOnce(overrides.exam ?? { id: 'exam-1', title: 'Midterm', creatorId: 'lecturer-1', settings: {}, examQuestions: [{}] })
+          .mockResolvedValueOnce(overrides.exam ?? { id: 'exam-1', status: 'DRAFT', title: 'Midterm', creatorId: 'lecturer-1', settings: {}, examQuestions: [{}] })
           .mockResolvedValueOnce(null),
       },
       $transaction: jest.fn((callback: any) => callback(tx)),
@@ -36,7 +36,6 @@ describe('ExamsService snapshot publishing', () => {
     const service = new ExamsService(
       prisma as any,
       { createForUsers: jest.fn(), createForRole: jest.fn() } as any,
-      {} as any,
     );
     return { service, prisma, tx };
   };

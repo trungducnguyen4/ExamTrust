@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài Liệu Ôn Tập Phỏng Vấn Chuyên Sâu: Dự Án ExamTrust</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --primary: #1e40af;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --heading: #0f172a;
+      --border: #e2e8f0;
+      --card-bg: #f8fafc;
+      --accent: #7c3aed;
+      --danger: #b91c1c;
+      --success: #15803d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background-color: #f1f5f9;
+      line-height: 1.6;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 2rem auto;
+      background: #ffffff;
+      padding: 3rem 3.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background-color: #ffffff;
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      .container {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        max-width: 100%;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .no-print {
+        display: none !important;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+    }
+
+    .header-box {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--heading);
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      font-size: 12.5px;
+      margin-top: 1rem;
+    }
+
+    .meta-item strong {
+      color: var(--heading);
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--heading);
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 0.75rem;
+      text-align: justify;
+    }
+
+    ul, ol {
+      margin-left: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    li {
+      margin-bottom: 0.35rem;
+    }
+
+    blockquote {
+      background: #f8fafc;
+      border-left: 3.5px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+      font-style: normal;
+      color: #334155;
+    }
+
+    blockquote p {
+      margin-bottom: 0.5rem;
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .alert-box {
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 13px;
+    }
+
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+
+    .alert-danger {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      color: #991b1b;
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      color: #166534;
+    }
+
+    pre, code {
+      font-family: 'JetBrains Mono', Consolas, Menlo, monospace;
+      font-size: 12px;
+    }
+
+    code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.45;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 12.5px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--heading);
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(30, 64, 175, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      z-index: 999;
+    }
+
+    .print-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <button onclick="window.print()" class="print-btn no-print">
+    🖨️ In ra PDF (A4)
+  </button>
+
+  <div class="container">
+    
+    <!-- HEADER -->
+    <div class="header-box">
+      <div class="doc-badge">Bản Chuẩn Hóa Kỹ Thuật 100% Theo Mã Nguồn Thực Tế</div>
+      <h1>📘 TÀI LIỆU ÔN TẬP PHỎNG VẤN CHUYÊN SÂU: DỰ ÁN EXAMTRUST</h1>
+      
+      <div class="meta-grid">
+        <div class="meta-item"><strong>Dự án:</strong> ExamTrust (Academic Assessment & Integrity Proctoring)</div>
+        <div class="meta-item"><strong>Khóa luận:</strong> ĐH Tôn Đức Thắng (Tốt nghiệp Loại Giỏi, GPA 8.34/10)</div>
+        <div class="meta-item"><strong>Vai trò:</strong> Lead Full-stack Architecture & AI Integration</div>
+        <div class="meta-item"><strong>Target:</strong> Junior/Mid Backend (NestJS), Full-stack, AI Engineer</div>
+      </div>
+    </div>
+
+    <!-- 1. ELEVATOR PITCH -->
+    <section>
+      <h2>1. ELEVATOR PITCH (GIỚI THIỆU DỰ ÁN TRONG 60 - 90 GIÂY)</h2>
+      <p><strong>Kịch bản trả lời mẫu:</strong></p>
+      <blockquote>
+        <p>"Em xin phép chia sẻ về <strong>ExamTrust</strong>, đây là đề tài Khóa luận Tốt nghiệp chuyên ngành Kỹ thuật Phần mềm của em tại Đại học Tôn Đức Thắng, nơi em đảm nhiệm vai trò <strong>Lead Full-stack Architecture & Tích hợp AI</strong> (Đề tài được hội đồng đánh giá xuất sắc, góp phần vào kết quả tốt nghiệp loại Giỏi GPA 8.34 của em).</p>
+        <p>Vấn đề lớn nhất của khảo thí trực tuyến hiện nay là <strong>nguy cơ lộ đề, gian lận tinh vi</strong>, và hệ thống <strong>bị nghẽn Event Loop/cạn kiệt connection pool</strong> khi tích hợp các mô hình AI xử lý tác vụ nặng. Để giải quyết bài toán này, em đã thiết kế kiến trúc chuẩn phân tán phân tách thành 2 tiến trình độc lập:</p>
+        <p><strong>1. API Web Server (NestJS 10):</strong> Phục vụ trả lời HTTP nhanh dưới 50ms cho thí sinh làm bài, nộp bài và tương tác thời gian thực.<br>
+        <strong>2. AI Worker độc lập (<code>ai-worker.ts</code> qua Bull Queue + Redis):</strong> Chuyên xử lý hàng đợi các tác vụ AI nặng như sinh câu hỏi, vector matching, và phân tích ảnh webcam giám sát mà không làm nghẽn luồng xử lý chính.</p>
+        <p>Hệ thống nổi bật với 3 trụ cột kỹ thuật:<br>
+        • <strong>Snapshot Đề thi Bất biến (Immutable Exam State):</strong> Khóa cứng toàn bộ câu hỏi và đáp án đã xáo trộn vào bản ghi <code>ExamInstance.snapshotPayload</code>, cấp <code>randomizationSeed</code> riêng biệt. Đảm bảo dù giảng viên sửa ngân hàng câu hỏi hay thí sinh reload trang thì đề thi vẫn bất biến 100%.<br>
+        • <strong>Giám sát liêm chính Privacy-First & Không xâm phạm:</strong> Khai thác Browser Standard APIs (thoát fullscreen, chuyển tab, phát hiện cắm màn hình phụ qua <code>screen.isExtended</code>, phát hiện dán tài liệu từ ngoài qua Clipboard Tracking) kết hợp Computer Vision phân tích ảnh webcam chu kỳ qua Cloudflare R2, tự động gán nhãn 9 nguy cơ gian lận.<br>
+        • <strong>Multi-Provider LLM Gateway với JSON Repair tự phục hồi:</strong> Tích hợp 5 nhà cung cấp (Gemini, DeepSeek, OpenRouter, NVIDIA, Ollama), cơ chế circuit breaker tự động fallback và vòng lặp <code>jsonrepair</code> đảm bảo tỷ lệ parse JSON thành công 100%.</p>
+        <p>Dự án được em quản lý nghiêm ngặt qua <strong>28 Pull Requests chuẩn hóa trên GitHub</strong>, mỗi PR đều đính kèm báo cáo kiểm tra tĩnh (<code>tsc -b pass 0 lỗi</code>) cùng ảnh chụp UI và video thực tế trước khi merge."</p>
+      </blockquote>
+    </section>
+
+    <div class="page-break"></div>
+
+    <!-- 2. SYSTEM ARCHITECTURE -->
+    <section>
+      <h2>2. KIẾN TRÚC TỔNG THỂ & DÒNG DỮ LIỆU (SYSTEM ARCHITECTURE)</h2>
+      <pre><code>[ Client: Next.js 15 App Router + React 18 + TailwindCSS ]
+    │ (HTTPS / SSE Realtime / Telemetry Integrity Events)
+    ▼
+[ API Gateway & Web Server: NestJS 10 (Port 3001) ]
+    ├── Auth Guard (JWT HTTP-Only Cookies + 3-Tier RBAC: Admin/Lecturer/Student)
+    ├── Input Guardrails (< 100k ký tự) & ThrottlerGuard (Rate Limiting)
+    ├── Exam Lifecycle & Snapshot Service
+    └── Telemetry Listener Service (Xử lý chuỗi sự kiện giám sát)
+    │
+    ├── [ MySQL Database via Prisma ORM 6 ]
+    │     ├── exams, questions, question_versions (Versioning 1-N)
+    │     ├── exam_snapshots, exam_question_snapshots (Publish Snapshot)
+    │     ├── exam_instances (snapshotPayload, randomizationSeed, questionOrder)
+    │     └── exam_submissions, submission_answers (Debounced Auto-save)
+    │
+    └── [ Redis 7.0 Message Broker (Bull Queue) ]
+          └── Queue 'ai-generation': single-question, exam-questions, 
+                                     proctoring-evidence, question-duplicate-analysis
+    ▼
+[ Independent AI Background Worker (ai-worker.ts) ]
+    ├── Concurrency: 5 jobs song song (Exponential backoff: 2s, 4s, 8s)
+    ├── Multi-Provider Gateway (Gemini 2.0, DeepSeek, OpenRouter, NVIDIA, Ollama)
+    ├── Dynamic Fallback Chain & Circuit Breaker (Opossum)
+    ├── Safe JSON Parser Loop (Regex Stripping + jsonrepair + Zod Schema)
+    ├── Vector Embedding & Cosine Similarity (128-dim Normalized Vector Projection)
+    ├── Computer Vision Proctoring (Gemini 2.0 Flash / Ollama Moondream: 9 Tags)
+    └── Cloudflare R2 Object Storage (Webcam snapshots, auto-purge 30 ngày)</code></pre>
+    </section>
+
+    <!-- 3. TECHNICAL HIGHLIGHTS -->
+    <section>
+      <h2>3. 6 ĐIỂM SÁNG KỸ THUẬT CỐT LÕI (TECHNICAL HIGHLIGHTS)</h2>
+
+      <h3>1. Phân tách API Web Server & AI Background Worker (Distributed Bull Queue)</h3>
+      <p><strong>Vấn đề:</strong> Các tác vụ AI như Giảng viên yêu cầu AI sinh câu hỏi, trích xuất tài liệu hoặc mô hình thị giác phân tích ảnh webcam phòng thi tốn từ 3 đến 15 giây. Nếu gọi trực tiếp trong HTTP Controller của NestJS, Event Loop của Node.js sẽ bị giữ kết nối (holding connection), gây cạn kiệt connection pool và nghẽn toàn bộ HTTP API khi hàng trăm thí sinh đang thi và nộp bài.<br>
+      <em>(Lưu ý mấu chốt: Nghiệp vụ bốc đề thi cho thí sinh hoàn toàn chạy bằng thuật toán truy vấn ma trận câu hỏi từ DB chỉ mất vài mili-giây, tuyệt đối KHÔNG gọi AI đồng bộ lúc thí sinh bắt đầu thi).</em></p>
+      <p><strong>Giải pháp:</strong></p>
+      <ul>
+        <li>Khi có yêu cầu AI, API Server chỉ validate DTO, lưu <code>AIGenerationRecord</code> ở trạng thái <code>QUEUED</code>, đẩy job vào Redis Bull Queue (<code>queue: 'ai-generation'</code>) và trả ngay <code>HTTP 202 Accepted</code> kèm <code>jobId</code> trong <strong>&lt; 10ms</strong>.</li>
+        <li>Tiến trình <code>ai-worker.ts</code> chạy độc lập, lắng nghe job theo định mức concurrency (5 jobs song song), gọi AI Gateway qua AbortSignal timeout 60s, chạy JSON Repair Loop và cập nhật kết quả vào database.</li>
+        <li>Phía Client sử dụng Polling định kỳ hoặc SSE để cập nhật trạng thái khi hoàn tất.</li>
+      </ul>
+      <p><strong>Kết quả:</strong> Web Server luôn phản hồi tức thì (&lt; 50ms), luồng làm bài và nộp bài của sinh viên hoàn toàn cách ly, không bị ảnh hưởng bởi tải xử lý của AI.</p>
+
+      <h3>2. Nguyên tắc Human-in-the-Loop & Snapshot Đề thi Bất biến (Immutable Exam State)</h3>
+      <p><strong>Triết lý Thiết kế — Tuyệt đối không để AI tự ý phát đề thi trực tiếp:</strong><br>
+      Trong khảo thí học thuật, việc cho LLM tự động sinh hoàn chỉnh cả một đề thi rồi phát trực tiếp cho thí sinh là điều tối kỵ vì rủi ro ảo giác (hallucination) và sai lệch chuẩn đào tạo. Trong ExamTrust: <strong>AI CHỈ đóng vai trò trợ lý sinh bản thảo câu hỏi (Question Drafts)</strong>. Giảng viên bắt buộc phải kiểm duyệt (review), tinh chỉnh nội dung, đáp án, độ khó trước khi lưu thành câu hỏi chính thức trong Ngân hàng câu hỏi.</p>
+      <p><strong>Cơ chế Snapshot Đề thi Bất biến:</strong></p>
+      <ul>
+        <li><strong>Cấp 1 (Lúc Công bố Đề):</strong> Hệ thống đóng băng đề thi thành <code>ExamSnapshot</code> và <code>ExamQuestionSnapshot</code>.</li>
+        <li><strong>Cấp 2 (Lúc Thí sinh Bắt đầu làm bài):</strong> Hệ thống sinh một <code>randomizationSeed</code> ngẫu nhiên (UUID), xáo trộn thứ tự câu hỏi và thứ tự đáp án theo seed, rồi đóng băng toàn bộ đề thi vào bản ghi <strong><code>ExamInstance</code></strong> (qua trường <strong><code>snapshotPayload: Json</code></strong> và <strong><code>questionOrder: Json</code></strong>).</li>
+        <li><strong>Tính Bất biến:</strong> Trong suốt thời gian thi, thí sinh chỉ đọc và tương tác với bản Snapshot này. Dù giảng viên có sửa/xóa câu hỏi trong ngân hàng câu hỏi hay thí sinh F5 reload trang 100 lần, nội dung và vị trí đáp án vẫn giữ nguyên vẹn 100%.</li>
+      </ul>
+
+      <h3>3. Ngân hàng Câu hỏi Git-Like Versioning (<code>QuestionVersion</code>)</h3>
+      <p><strong>Vấn đề:</strong> Đề thi cần kiểm toán (Audit Trail) phục vụ công tác thanh tra đào tạo. Nếu chỉ cập nhật trực tiếp dòng dữ liệu trong DB, hệ thống sẽ mất dấu ai đã sửa nội dung gì và không thể khôi phục phiên bản trước.</p>
+      <p><strong>Giải pháp:</strong> Thiết kế bảng <code>Question</code> quan hệ 1-N với <code>QuestionVersion</code>. Mỗi lần giảng viên chỉnh sửa, hệ thống tạo bản ghi version mới lưu diff (thay đổi nội dung stem, options, answerKey), trạng thái duyệt, thời gian và ID người sửa. Khi tạo đề, hệ thống liên kết chính xác tới <code>questionVersionId</code>, hỗ trợ đối soát lịch sử và rollback phiên bản dễ dàng.</p>
+
+      <div class="page-break"></div>
+
+      <h3>4. Giám sát Liêm chính Privacy-First Qua Browser Standard APIs</h3>
+      <p><strong>Vấn đề:</strong> Nhiều phần mềm thi cử bắt buộc sinh viên cài phần mềm can thiệp sâu vào kernel OS hoặc chiếm quyền webcam liên tục, gây lo ngại rò rỉ quyền riêng tư và dễ bị hệ điều hành/antivirus chặn.</p>
+      <p><strong>Giải pháp:</strong> Thu thập các tín hiệu phòng thi hoàn toàn qua các Web Standard APIs chuẩn:</p>
+      <ol>
+        <li><code>fullscreenchange</code>: Bắt sự kiện thoát chế độ toàn màn hình (<code>fullscreen_exit</code>), cấp thời gian ân hạn 15s để sinh viên quay lại.</li>
+        <li><code>visibilitychange</code> & <code>window.blur</code>: Bắt sự kiện chuyển tab hoặc minimize trình duyệt (<code>tab_switch</code>).</li>
+        <li><code>window.screen.isExtended</code> & <code>window.getScreenDetails()</code>: Phát hiện thí sinh cắm thêm màn hình thứ 2 hoặc mở rộng màn hình trong lúc làm bài (<code>multi_monitor_detected</code>).</li>
+        <li><strong>External Clipboard Tracking:</strong> Lưu vết các đoạn văn bản sinh viên đã copy trong bài thi; nếu sinh viên paste một đoạn văn bản lạ từ ngoài vào, hệ thống kích hoạt sự kiện <code>paste_external</code>.</li>
+        <li><strong>Mouse/Keyboard Inactivity Tracking:</strong> Lắng nghe <code>pointermove</code> và <code>keydown</code> để phát hiện thí sinh treo máy không thao tác (<code>mouse_idle</code>).</li>
+        <li><strong>MediaStream Recovery Tracking:</strong> Lắng nghe sự cố mất luồng webcam hoặc ngắt chia sẻ màn hình quá 15s (<code>camera_recovery_timeout</code>, <code>screen_share_recovery_timeout</code>).</li>
+      </ol>
+      <p><strong>Xử lý:</strong> Điểm rủi ro tổng hợp (Risk Score 0 - 100) được tính toán theo trọng số thời gian thực và lưu vào audit log làm bằng chứng minh bạch cho giảng viên.</p>
+
+      <h3>5. Multi-Provider LLM Gateway & JSON Repair Loop</h3>
+      <p><strong>Vấn đề:</strong> Các API LLM đám mây (Gemini, DeepSeek, OpenRouter) thường gặp lỗi: Rate limit (HTTP 429), server timeout (504), hoặc trả về chuỗi JSON bị lỗi cú pháp (thiếu ngoặc nhọn, trailing comma, lẫn markdown fence).</p>
+      <p><strong>Giải pháp:</strong></p>
+      <ul>
+        <li><strong>Trừu tượng hóa Đa Nhà cung cấp:</strong> Hỗ trợ runtime switching giữa Google Gemini, DeepSeek, OpenRouter, NVIDIA, và Local Ollama. Có Circuit Breaker (Opossum) tự động ngắt mạch và fallback sang provider dự phòng khi tỷ lệ lỗi vượt ngưỡng.</li>
+        <li><strong>Vòng lặp JSON Repair tự phục hồi (<code>safeJsonParse</code>):</strong>
+          <br>1. Bóc tách regex loại bỏ các khối markdown fence và ký tự rác.
+          <br>2. Đưa qua thư viện <code>jsonrepair</code> để tự động vá các lỗi cú pháp phổ biến của LLM (thiếu dấu phẩy, dùng nháy đơn, thiếu đóng ngoặc do chạm max tokens).
+          <br>3. Validate dữ liệu đầu ra qua Zod Schema.</li>
+      </ul>
+      <p><strong>Kết quả:</strong> Đạt tỷ lệ phân tích cú pháp JSON thành công <strong>100%</strong>, loại bỏ hoàn toàn nguy cơ sập tiến trình worker do malformed JSON.</p>
+
+      <h3>6. Khung Benchmark Tự động LLM-as-a-Judge (<code>golden-dataset.ts</code> & <code>eval-judge.ts</code>)</h3>
+      <p><strong>Vấn đề:</strong> Làm sao biết prompt mới tốt hơn prompt cũ? Làm sao kiểm soát ảo giác (hallucination) và đảm bảo LLM sinh câu hỏi gợi ý đúng chủ đề, đúng thang nhận thức Bloom và an toàn trước prompt injection?</p>
+      <p><strong>Giải pháp:</strong> Xây dựng bộ <code>golden-dataset.ts</code> chuẩn hóa bao phủ 3 nhóm bài toán cốt lõi:</p>
+      <ul>
+        <li><strong>Bloom Taxonomy (5 ca):</strong> Kiểm thử sinh câu hỏi từ cấp độ Remember, Understand, Apply đến Analyze.</li>
+        <li><strong>Chấm Tự luận & Phòng thủ Đối kháng (4 ca):</strong> Đánh giá độ chính xác chấm điểm và năng lực kháng cự Prompt Injection Jailbreak (bọc thẻ <code>&lt;student_untrusted_response&gt;</code>).</li>
+        <li><strong>Giám sát Gian lận Đa biến (3 ca):</strong> Mô phỏng các mức độ vi phạm phòng thi (Low, Medium, High).</li>
+      </ul>
+      <p>Module <code>AiEvaluationJudge</code> sử dụng mô hình thẩm định (Gemini / DeepSeek) chấm điểm chất lượng câu hỏi theo thang Rubric: Độ chính xác học thuật, độ phân hóa câu hỏi, tính rõ ràng và tuân thủ schema.</p>
+    </section>
+
+    <div class="page-break"></div>
+
+    <!-- 4. STAR INTERVIEW Q&A -->
+    <section>
+      <h2>4. BỘ CÂU HỎI & CÂU TRẢ LỜI PHỎNG VẤN THỰC CHIẾN (STAR MODEL)</h2>
+
+      <h3>❓ Câu 1: Em hãy giải thích lý do tại sao chọn tách biệt API Web Server và Worker Process qua Redis Bull Queue mà không dùng trực tiếp Promise/Async trong NestJS?</h3>
+      <blockquote>
+        <p>"Node.js hoạt động trên cơ chế Single-Threaded Event Loop. Khi một async operation như gọi API LLM sinh câu hỏi từ tài liệu hoặc phân tích ảnh webcam diễn ra, nó giữ kết nối HTTP TCP kết nối tới server trong hàng chục giây.</p>
+        <p>Nếu chỉ dùng <code>async/await</code> nội bộ trong Controller:<br>
+        1. <strong>Mất mát dữ liệu (In-memory Loss):</strong> Nếu server bị restart, deploy bản mới hoặc crash giữa chừng, toàn bộ các tác vụ AI đang chạy dở dang sẽ bị mất vĩnh viễn trong RAM.<br>
+        2. <strong>Cạn kiệt Connection Pool & Nghẽn I/O:</strong> Khi nhiều giảng viên cùng yêu cầu AI sinh đề hoặc nhiều webcam đẩy ảnh lên, số lượng concurrent request giữ kết nối quá lâu sẽ làm nghẽn Event Loop và cạn kiệt socket/database pool, kéo sập các request làm bài và nộp bài của hàng trăm thí sinh.</p>
+        <p><em>(Lưu ý mấu chốt: Nghiệp vụ tạo đề thi và nộp bài trong hệ thống hoàn toàn chạy bằng thuật toán database chỉ mất vài chục mili-giây, không hề đợi AI).</em></p>
+        <p>Vì vậy, em dùng <strong>Redis Bull Queue</strong> để tách thành Background Job: API Server chỉ nhận yêu cầu và đẩy vào Redis (mất &lt; 10ms), trả về <code>jobId</code> cho client. Tiến trình <code>ai-worker.ts</code> chạy độc lập xử lý hàng đợi theo cơ chế concurrency kiểm soát được (5 jobs song song để tránh vượt rate-limit của LLM provider), có cơ chế tự retry với exponential backoff (2s, 4s, 8s) khi mạng chập chờn và lưu trạng thái bền vững vào Redis/MySQL."</p>
+      </blockquote>
+
+      <h3>❓ Câu 2: Giả sử trong phòng thi có 500 sinh viên cùng nộp bài cùng một thời điểm (kết thúc giờ làm bài), hệ thống của em xử lý áp lực ghi vào Database như thế nào để không bị Deadlock hoặc sập DB?</h3>
+      <blockquote>
+        <p>"Đây là bài toán cao điểm kinh điển của hệ thống thi cử (<strong>Thundering Herd Problem</strong>). Em đã giải quyết bài toán này qua 3 tầng giảm tải:</p>
+        <p><strong>1. Debounced Auto-save (Lưu bài làm định kỳ 1 giây):</strong> Trong suốt quá trình làm bài, mỗi khi sinh viên tick chọn đáp án, client tự động gửi cập nhật đáp án với cơ chế Debounce 1000ms (<code>use-exam-autosave.ts</code>). Nhờ đó, 95% dữ liệu bài làm đã được lưu rải rác vào bảng <code>submission_answers</code> từ trước.<br>
+        <strong>2. Thời điểm 'Nộp bài' chỉ là chốt trạng thái:</strong> Khi bấm Nộp bài hoặc khi server tự động chốt giờ (<code>finalizeExpiredSubmissions</code>), request nộp bài chỉ cần kiểm tra nhanh các câu còn lại và cập nhật trường <code>status = 'SUBMITTED'</code> trong bảng <code>exam_submissions</code> kèm mốc thời gian <code>submittedAt</code>.<br>
+        <strong>3. Transaction Ngắn & Chấm điểm Tự luận Bất đồng bộ:</strong> Prisma transaction được thiết kế cực ngắn để giải phóng connection ngay lập tức. Đối với các câu trắc nghiệm khách quan, điểm số được tính toán nhanh bằng thuật toán in-memory; đối với các câu hỏi tự luận cần AI chấm, hệ thống đẩy tiếp job vào Bull Queue để chấm bất đồng bộ phía sau, tuyệt đối không giữ kết nối DB của thí sinh."</p>
+      </blockquote>
+
+      <h3>❓ Câu 3: Làm thế nào em đảm bảo LLM trả về đúng định dạng JSON mà hệ thống Backend có thể parse được 100% không bị crash?</h3>
+      <blockquote>
+        <p>"Mô hình ngôn ngữ lớn bản chất là sinh xác suất từ tiếp theo, nên không có gì bảo đảm nó luôn trả về JSON hợp lệ nếu chỉ dùng prompt thông thường. Em áp dụng chiến lược phòng thủ 4 lớp:</p>
+        <p>1. <strong>System Prompt & Schema Enforcing:</strong> Ép mô hình ở tầng system prompt chỉ trả về raw JSON, cấm hoàn toàn lời chào, giải thích hoặc markdown.<br>
+        2. <strong>Trích xuất chuỗi Regex:</strong> Bóc tách chuỗi nằm giữa khối <code>{...}</code> hoặc <code>[...]</code> để loại bỏ các đoạn văn bản thừa hoặc markdown fence.<br>
+        3. <strong>Vòng lặp <code>jsonrepair</code>:</strong> Sử dụng thư viện <code>jsonrepair</code> trong hàm <code>safeJsonParse()</code> để tự động vá các lỗi cú pháp LLM hay mắc phải như: thiếu dấu phẩy giữa các object, dùng nháy đơn thay cho nháy kép, trailing comma, hoặc chuỗi chưa đóng ngoặc nhọn do chạm giới hạn max tokens.<br>
+        4. <strong>Zod Validation & Fallback:</strong> Đưa JSON đã parse qua Zod Schema. Nếu Zod báo thiếu trường bắt buộc, worker tự động trigger retry với nhiệt độ (temperature) thấp hơn (0.1) hoặc chuyển sang model dự phòng.</p>
+        <p>Nhờ pipeline này, hệ thống đạt tỷ lệ parse thành công <strong>100%</strong> trên toàn bộ tập dữ liệu kiểm thử mà không bao giờ bị crash tiến trình."</p>
+      </blockquote>
+
+      <div class="page-break"></div>
+
+      <h3>❓ Câu 4: Em xử lý vấn đề Cheating Detection (chống gian lận) như thế nào mà không cần bắt sinh viên cài ứng dụng can thiệp sâu vào máy tính?</h3>
+      <blockquote>
+        <p>"Em lựa chọn triết lý <strong>Privacy-first Proctoring</strong>. Thay vì cài phần mềm can thiệp sâu vào kernel OS gây lo ngại bảo mật riêng tư và dễ bị antivirus chặn, em khai thác triệt để các Browser Standard APIs kết hợp AI phân tích ảnh webcam chu kỳ:</p>
+        <p>• <strong>Tầng 1 — Tín hiệu Trình duyệt Tiêu chuẩn:</strong> Bắt sự kiện <code>visibilitychange</code> và <code>window.blur</code> để biết khi thí sinh đổi tab hoặc mở ứng dụng khác (<code>tab_switch</code>); bắt <code>fullscreenchange</code> để phát hiện thoát toàn màn hình; khai thác <code>window.screen.isExtended</code> và <code>getScreenDetails()</code> để phát hiện hành vi cắm thêm màn hình ngoài (<code>multi_monitor_detected</code>); và theo dõi Clipboard để phát hiện dán nội dung từ tài liệu ngoài (<code>paste_external</code>).<br>
+        • <strong>Tầng 2 — Thị giác Máy tính Đa phương thức:</strong> Định kỳ chụp ảnh webcam độ phân giải tối ưu gửi về Cloudflare R2 qua Pre-signed URL an toàn. Tiến trình worker gọi mô hình vision (Gemini 2.0 Flash hoặc Ollama Moondream) để gán nhãn <strong>9 nguy cơ verifiably visible</strong>: vắng mặt trước camera, nhiều người trước màn hình, sử dụng điện thoại, che camera...<br>
+        • <strong>Tầng 3 — Risk Scoring & Human-in-the-Loop:</strong> Hệ thống tổng hợp điểm rủi ro từ 0 đến 100. AI hoàn toàn <strong>không tự ý đánh trượt</strong> sinh viên mà chỉ đóng vai trò cung cấp bằng chứng timestamp cho giảng viên xem xét lại (Human-in-the-Loop). Toàn bộ ảnh webcam trên R2 được cấu hình tự động xóa sau 30 ngày để tuân thủ quyền riêng tư dữ liệu."</p>
+      </blockquote>
+
+      <h3>❓ Câu 5: Trong dự án ExamTrust, em đã áp dụng quy trình Git Flow và Pull Request như thế nào?</h3>
+      <blockquote>
+        <p>"Ngay từ đầu dự án, em đặt mục tiêu phát triển sản phẩm với kỷ luật như một dự án Enterprise thực thụ, không làm theo kiểu 'code một lèo commit thẳng vào main'.</p>
+        <p>Quy trình em tuân thủ gồm:<br>
+        1. <strong>Phân nhánh độc lập:</strong> Mọi tính năng đều được phát triển trên nhánh làm việc riêng biệt (<code>duc</code>), cách ly hoàn toàn khỏi nhánh sản phẩm chính.<br>
+        2. <strong>Quy chuẩn PR Proof of Work:</strong> Trong mỗi Pull Request trên GitHub, em bắt buộc phải có: Mô tả rõ ràng phạm vi thay đổi (Scope of Changes), Báo cáo kết quả kiểm tra tĩnh (<code>tsc -b pass 0 lỗi</code>), và Đính kèm ảnh chụp màn hình UI hoặc video quay màn hình chạy thực tế làm minh chứng xác thực.</p>
+        <p>Tổng cộng qua toàn bộ quá trình phát triển, em đã hoàn thành <strong>28 Closed Pull Requests chuẩn hóa</strong> được review và merge sạch sẽ vào nhánh <code>main</code>. Điều này giúp lịch sử commit của dự án vô cùng rõ ràng, dễ dàng truy vết và loại bỏ hoàn toàn rủi ro xung đột mã nguồn lớn."</p>
+      </blockquote>
+    </section>
+
+    <!-- 5. TRAP QUESTIONS -->
+    <section>
+      <h2>5. CÁC CÂU HỎI BẪY CỦA INTERVIEWER & CÁCH PHẢN ỨNG KHÔN NGOAN</h2>
+
+      <h3>⚠️ Bẫy 1: "Em dùng AI nhiều như vậy (Gemini, DeepSeek, Cursor...), có phải toàn bộ code của em là do AI viết giùm không?"</h3>
+      <div class="alert-box alert-success">
+        <strong>Cách phản ứng bản lĩnh:</strong><br>
+        "Dạ thưa anh/chị, AI là đòn bẩy gia tăng năng suất gõ mã nguồn của em lên gấp 3 đến 5 lần, nhưng <strong>toàn bộ tư duy kiến trúc, thiết kế cơ sở dữ liệu và ràng buộc nghiệp vụ là do em trực tiếp làm chủ</strong>.<br><br>
+        Nếu chỉ giao phó cho AI mà không có nền tảng học thuật vững (em tốt nghiệp loại Giỏi chuyên ngành Kỹ thuật Phần mềm TDTU, GPA 8.34), AI sẽ sinh ra code rời rạc, xung đột schema, không xử lý được race condition trong database và không thể tự thiết kế được một pipeline phân tán ổn định giữa NestJS và Redis Bull Queue.<br><br>
+        Em đóng vai trò là <strong>Architect-in-the-Loop</strong>: Em thiết kế data model, định nghĩa interface contracts, thiết lập các ràng buộc bảo mật RBAC; AI chỉ là trợ lý thực thi thần tốc. Mọi dòng code merge vào 28 PRs đều qua khâu kiểm chứng kiểu tĩnh và chạy thử thực tế của em."
+      </div>
+
+      <h3>⚠️ Bẫy 2: "Tại sao em dùng MySQL kết hợp Prisma ORM mà không dùng MongoDB cho linh hoạt khi lưu trữ câu hỏi và đề thi?"</h3>
+      <div class="alert-box alert-warning">
+        <strong>Cách phản ứng chuẩn kỹ thuật:</strong><br>
+        "Đối với hệ thống khảo thí và chấm điểm học thuật, <strong>tính chất ACID (Atomicity, Consistency, Isolation, Durability)</strong> và <strong>tính toàn vẹn dữ liệu quan hệ</strong> là ưu tiên sống còn. Ví dụ: một bài thi bắt buộc phải gắn liền với sinh viên hợp lệ, câu hỏi thuộc về đề thi, và số điểm không được phép sai lệch do race condition.<br><br>
+        Nếu dùng NoSQL như MongoDB, ta sẽ dễ rơi vào tình trạng dữ liệu không đồng nhất (data inconsistency) khi cập nhật đồng thời nhiều quan hệ hoặc xử lý audit trail. Với MySQL kết hợp Prisma ORM, em vừa có được <strong>Foreign Key Constraints chặt chẽ</strong>, vừa có <strong>Strict TypeScript Types đồng bộ tự động từ schema sang code backend</strong>, giúp loại bỏ hoàn toàn lỗi mismatch kiểu dữ liệu ở compile-time.<br><br>
+        Đồng thời, đối với các trường dữ liệu có cấu trúc linh hoạt như cấu hình đề thi hoặc mảng đáp án, MySQL hỗ trợ rất tốt kiểu dữ liệu <code>Json</code> native, mang lại sự kết hợp hoàn hảo giữa tính toàn vẹn quan hệ và tính linh hoạt."
+      </div>
+
+      <div class="page-break"></div>
+
+      <h3>⚠️ Bẫy 3: "Nếu sinh viên mở DevTools (F12) xem Network Tab, họ có thể lấy được đáp án đúng trong Snapshot trả về không?"</h3>
+      <div class="alert-box alert-success">
+        <strong>Cách phản ứng chuẩn an ninh:</strong><br>
+        "Dạ hoàn toàn không thể ạ. Hệ thống của em áp dụng nguyên tắc <strong>Information Hiding & Sanitize Layer</strong> rất chặt chẽ giữa Backend và Frontend:<br><br>
+        • Bản ghi <code>ExamInstance.snapshotPayload</code> lưu trong Database có chứa <code>answerKey</code> để phục vụ việc tự động chấm điểm độc lập khi thí sinh nộp bài mà không cần truy vấn lại ngân hàng câu hỏi.<br>
+        • Tuy nhiên, khi API trả dữ liệu đề thi về cho trình duyệt thí sinh, hàm <code>sanitizeExamInstanceForStudent</code> ở backend <strong>bắt buộc bóc tách và loại bỏ 100% các trường nhạy cảm</strong> (<code>answerKey</code>, <code>correctAnswer</code>, <code>explanation</code>). Thí sinh dù có mở F12, bắt gói tin qua Burp Suite hay xem state Redux thì cũng chỉ thấy được nội dung câu hỏi và các phương án đã xáo trộn."
+      </div>
+
+      <h3>⚠️ Bẫy 4: "Làm thế nào JavaScript trên trình duyệt phát hiện được thí sinh đang dùng 2 màn hình?"</h3>
+      <div class="alert-box alert-warning">
+        <strong>Cách phản ứng sâu sắc về Web APIs:</strong><br>
+        "Dạ thưa anh/chị, em kết hợp 2 tầng API của trình duyệt:<br>
+        1. <strong>Chromium Screen Details API (<code>window.getScreenDetails()</code>):</strong> Trên các trình duyệt nhân Chromium, API này trả về danh sách các màn hình vật lý (<code>screens.length</code>) và bắn sự kiện <code>change</code> ngay khi có màn hình mới được cắm vào máy.<br>
+        2. <strong>Fallback với <code>window.screen.isExtended</code>:</strong> Đối với các trình duyệt chưa hỗ trợ đầy đủ hoặc khi chưa được cấp quyền chi tiết, thuộc tính <code>isExtended</code> là một boolean chuẩn cho biết desktop có đang mở rộng qua nhiều màn hình hay không. Bằng cách kết hợp lắng nghe sự kiện và kiểm tra định kỳ thuộc tính này, hệ thống phát hiện chính xác khi số lượng màn hình tăng lên trong lúc làm bài và ghi nhận sự kiện <code>multi_monitor_detected</code>."
+      </div>
+    </section>
+
+    <!-- 6. CHEAT SHEET TABLE -->
+    <section>
+      <h2>6. BẢNG TRA CỨU THÔNG SỐ & SỐ LIỆU ĐỊNH LƯỢNG (CHEAT SHEET CHUẨN)</h2>
+      
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Hạng mục kỹ thuật</th>
+            <th style="width: 35%;">Thông số thực tế trong ExamTrust</th>
+            <th style="width: 40%;">Ý nghĩa thuyết phục nhà tuyển dụng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Pull Requests</strong></td>
+            <td><strong>28 Closed PRs trên GitHub</strong></td>
+            <td>Kỷ luật làm việc nhóm chuẩn mực, quản lý mã nguồn chặt chẽ qua PR</td>
+          </tr>
+          <tr>
+            <td><strong>Thời gian phản hồi API</strong></td>
+            <td><strong>&lt; 50ms cho HTTP endpoints</strong></td>
+            <td>Nhờ bốc đề từ Snapshot và đẩy toàn bộ tải nặng sang Bull Queue</td>
+          </tr>
+          <tr>
+            <td><strong>Dung sai JSON LLM</strong></td>
+            <td><strong>100% Parse Success</strong></td>
+            <td>Áp dụng Regex fence stripping + thư viện <code>jsonrepair</code> + Zod Schema</td>
+          </tr>
+          <tr>
+            <td><strong>Auto-save Debounce</strong></td>
+            <td><strong>1000ms (1 giây)</strong></td>
+            <td>Giảm tải I/O ghi đĩa, 95% bài làm được lưu trước giờ nộp</td>
+          </tr>
+          <tr>
+            <td><strong>Mô hình Snapshot</strong></td>
+            <td><strong><code>ExamInstance.snapshotPayload</code></strong></td>
+            <td>Đóng băng đề thi và đáp án theo <code>randomizationSeed</code> bất biến</td>
+          </tr>
+          <tr>
+            <td><strong>Browser Telemetry</strong></td>
+            <td><strong>6+ nhóm sự kiện chuẩn Web</strong></td>
+            <td><code>fullscreenchange</code>, <code>visibilitychange</code>, <code>isExtended</code>, <code>paste_external</code>, <code>mouse_idle</code></td>
+          </tr>
+          <tr>
+            <td><strong>Multi-Provider AI</strong></td>
+            <td><strong>5 Nhà cung cấp tích hợp</strong></td>
+            <td>Google Gemini, DeepSeek, OpenRouter, NVIDIA, Local Ollama</td>
+          </tr>
+          <tr>
+            <td><strong>AI Worker Concurrency</strong></td>
+            <td><strong>5 Jobs song song</strong></td>
+            <td>Kiểm soát tải, tránh vượt rate limit của LLM API</td>
+          </tr>
+          <tr>
+            <td><strong>Bộ Golden Dataset</strong></td>
+            <td><strong>12 ca kiểm thử chuẩn hóa</strong></td>
+            <td>5 ca Bloom, 4 ca Chấm tự luận (kèm Jailbreak), 3 ca Giám sát</td>
+          </tr>
+          <tr>
+            <td><strong>Lưu trữ Bằng chứng</strong></td>
+            <td><strong>Cloudflare R2 (Auto-purge 30 ngày)</strong></td>
+            <td>Tối ưu chi phí $0 hạ tầng và đảm bảo quyền riêng tư học thuật</td>
+          </tr>
+          <tr>
+            <td><strong>Học vấn</strong></td>
+            <td><strong>Tốt nghiệp Loại Giỏi (GPA 8.34/10)</strong></td>
+            <td>Nền tảng thuật toán, công nghệ phần mềm bài bản từ ĐH Tôn Đức Thắng</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+</body>
+</html>

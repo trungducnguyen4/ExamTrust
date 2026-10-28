@@ -18,7 +18,7 @@
     --secondary: 205 22% 93%;
     --secondary-foreground: 215 28% 24%;
     --muted: 207 20% 94%;
-    --muted-foreground: 215 13% 43%;
+    --muted-foreground: 215 32% 17%;
     --accent: 195 48% 91%;
     --accent-foreground: 195 72% 24%;
 
@@ -65,7 +65,7 @@
     --secondary: 214 23% 17%;
     --secondary-foreground: 205 22% 88%;
     --muted: 214 23% 17%;
-    --muted-foreground: 210 14% 65%;
+    --muted-foreground: 205 24% 91%;
     --accent: 193 38% 20%;
     --accent-foreground: 190 48% 82%;
 
@@ -243,4 +243,40 @@
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==========================================================
+   ExamTrust Global Text Clarity: Không dùng text chữ xám
+   Đảm bảo tất cả văn bản, tiêu đề, nhãn, dữ liệu bảng đều rõ nét, tương phản cao.
+   ========================================================== */
+.text-muted-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+.text-gray-400,
+.text-gray-500,
+.text-gray-600,
+.text-slate-400,
+.text-slate-500,
+.text-slate-600,
+.text-zinc-400,
+.text-zinc-500,
+.text-zinc-600,
+.text-neutral-400,
+.text-neutral-500,
+.text-neutral-600 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Tiêu đề bảng rõ nét, tương phản cao */
+th,
+.table-head {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600;
+}
+
+/* Placeholder vẫn giữ nét nhẹ nhàng để phân biệt với dữ liệu nhập */
+input::placeholder,
+textarea::placeholder {
+  color: hsl(var(--foreground) / 0.5) !important;
 }

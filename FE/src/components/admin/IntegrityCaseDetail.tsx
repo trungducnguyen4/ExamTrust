@@ -41,7 +41,7 @@ import {
 import type { FlaggedSubmission, IntegrityReason } from '@/features/admin/IntegrityOverview';
 import { useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
-import { INTEGRITY_EVENT_LABELS, getIntegrityEventLabel } from '@/lib/integrity-event-labels';
+import { INTEGRITY_EVENT_LABELS, getIntegrityEventLabel, formatSignalDescription } from '@/lib/integrity-event-labels';
 import { toast } from 'sonner';
 
 interface IntegrityCaseDetailProps {
@@ -133,10 +133,10 @@ export function IntegrityCaseDetail({ submission, onBack, onReview, isSaving = f
   }[confidence] ?? confidence);
 
   const getReasonLabel = (type: IntegrityReason['type']) => ({
-    similarity: 'Phát hiện tương đồng',
-    timing: 'Phát hiện bất thường thời gian',
-    pattern: 'Phát hiện mẫu bất thường',
-    behavior: 'Phát hiện hành vi',
+    similarity: 'Tương đồng bài làm',
+    timing: 'Bất thường thời gian',
+    pattern: 'Mẫu bất thường',
+    behavior: 'Hành vi làm bài',
   }[type] ?? 'Tín hiệu cần xem xét');
 
   const getSeverityPresentation = (severity: IntegrityTimelineEvent['severity']) => {
@@ -598,8 +598,8 @@ export function IntegrityCaseDetail({ submission, onBack, onReview, isSaving = f
                           <p className="font-medium text-foreground capitalize">
                             {getReasonLabel(reason.type)}
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            {reason.description}
+                          <p className="text-sm text-foreground">
+                            {formatSignalDescription(reason.description)}
                           </p>
                         </div>
                       </div>
@@ -849,8 +849,8 @@ export function IntegrityCaseDetail({ submission, onBack, onReview, isSaving = f
                     <AlertTriangle className="h-10 w-10" />
                   </div>
                   <p className="mt-3 text-lg font-semibold">Mức tín hiệu {getConfidenceLabel(submission.confidence)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {submission.reasons.length} tín hiệu phát hiện
+                  <p className="text-sm text-foreground">
+                    {submission.reasons.length} tín hiệu ghi nhận
                   </p>
                 </div>
                 <Separator />
