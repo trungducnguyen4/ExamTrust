@@ -32,7 +32,7 @@ process.stdin.on("end", () => {
     hookSpecificOutput: {
       hookEventName: "PostToolUse",
       additionalContext:
-        "Bạn vừa sửa file có thể liên quan tới nhiều role (admin/lecturer/student). Hãy dùng skill 'sync-role-screens' (Skill tool, skill name: sync-role-screens) để trace và đồng bộ các màn/role khác trước khi kết thúc task, bao gồm double-check bằng codegraph MCP.",
+        "Bạn vừa sửa file có thể liên quan tới nhiều role (admin/lecturer/student). Hãy dùng skill 'sync-role-screens' (Skill tool, skill name: sync-role-screens) để trace và đồng bộ các màn/role khác trước khi kết thúc task, bao gồm double-check bằng graphify (graphify query/path/explain trên .graphify/).",
     },
   };
   process.stdout.write(JSON.stringify(output));

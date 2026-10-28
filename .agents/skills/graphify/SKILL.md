@@ -1,7 +1,8 @@
 ---
 name: graphify
 description: "any input (code, docs, papers, images) -> knowledge graph -> clustered communities -> static Ontology Studio + JSON + audit report. Use when user asks any question about a codebase, project content, architecture, or file relationships, especially if .graphify/ exists. Provides persistent graph with god nodes, community detection, and BFS/DFS query tools."
-trigger: $graphify
+whenToUse: >-
+  Gọi khi user hỏi về codebase, kiến trúc, nội dung dự án hoặc quan hệ giữa các file — đặc biệt khi `.graphify/` đã tồn tại. Trong DeepSeek Harness: load skill qua tool `skill` với name `graphify` (hoặc `/graphify`); trong Codex: `$graphify`.
 ---
 
 # $graphify
