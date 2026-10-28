@@ -5,9 +5,9 @@ This project has a graphify knowledge graph at .graphify/.
 Rules:
 - For codebase or architecture questions, when `.graphify/graph.json` exists, first run `graphify query "<question>"` (or `graphify path "<A>" "<B>"` / `graphify explain "<concept>"`); these return a scoped subgraph, usually much smaller than `GRAPH_REPORT.md` or raw grep output
 - If .graphify/wiki/index.md exists, navigate it instead of reading raw files
-- In Codex, the reliable explicit skill invocation is `$graphify ...`; do not rely on `/graphify ...`
-- `$graphify ...` is a Codex skill trigger, not a Bash subcommand like `graphify .`
-- A successful TypeScript-backed Codex build should leave `.graphify/.graphify_runtime.json` with `runtime: typescript`
+- Skill `graphify` nằm ở `.agents/skills/graphify/SKILL.md`. Trong DeepSeek Harness, gọi qua tool `skill` với name `graphify` (hoặc gõ `/graphify`), còn `graphify ...` trong terminal là lệnh CLI thật
+- Trong Codex, trigger tường minh là `$graphify ...` (chỉ Codex mới có cú pháp này, không dùng trong DeepSeek Harness)
+- A successful TypeScript-backed graphify build should leave `.graphify/.graphify_runtime.json` with `runtime: typescript`
 - If .graphify/graph.json is missing but graphify-out/graph.json exists, run `graphify migrate-state --dry-run` first; if tracked legacy artifacts are reported, ask before using the recommended `git mv -f graphify-out .graphify` and commit message
 - If .graphify/needs_update exists or .graphify/branch.json has stale=true, warn before relying on semantic results and run the graphify skill with --update when appropriate
 - If the user asks to build, update, query, path, or explain the graph, use the installed `graphify` skill instead of ad-hoc file traversal

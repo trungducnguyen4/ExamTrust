@@ -1,6 +1,7 @@
 ---
 name: release-versioning
-description: Quy trình đặt tên commit, ghi CHANGELOG.md, và gắn git tag cho mỗi lần bump version trong ExamTrust. PHẢI dùng khi user yêu cầu "tạo version mới", "bump version", "release", "gắn tag version", hoặc bất kỳ lúc nào chuẩn bị đóng gói một đợt thay đổi (feature/fix) thành 1 version chính thức. Không dùng cho commit thường ngày không liên quan tới version.
+description: >-
+  Quy trình đặt tên commit, ghi CHANGELOG.md, và gắn git tag cho mỗi lần bump version trong ExamTrust. PHẢI dùng khi user yêu cầu "tạo version mới", "bump version", "release", "gắn tag version", hoặc bất kỳ lúc nào chuẩn bị đóng gói một đợt thay đổi (feature/fix) thành 1 version chính thức. Không dùng cho commit thường ngày không liên quan tới version.
 ---
 
 # Release & Versioning (đặt tên commit + CHANGELOG + tag)
