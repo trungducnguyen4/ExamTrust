@@ -1,0 +1,71 @@
+﻿# Render Blueprint â€” free web service for the ExamTrust API.
+#
+# Import this repository on Render (New -> Blueprint) and Render creates both
+# services below. Only DATABASE_URL has to be pasted by hand; the Redis URL,
+# JWT secret and public URLs are wired automatically.
+#
+# Free instance: 0.1 CPU / 512 MB, spins down after 15 minutes of inactivity
+# and takes about a minute to wake up. Keep the database outside Render
+# (Aiven free MySQL) so data survives restarts.
+
+services:
+  # Free Redis-compatible Key Value, reachable only from this workspace.
+  # In-memory only (data is lost on restart) â€” fine for BullMQ queues and cache.
+  - type: keyvalue
+    name: examtrust-kv
+    plan: free
+    region: singapore
+    ipAllowList: []
+
+  - type: web
+    name: examtrust-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerContext: .
+    dockerfilePath: ./deploy/render/Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+      # The schema is already synced (first boot ran db push). Keeping it off
+      # shortens every cold start: db push adds several seconds of introspection
+      # against a remote Aiven instance. Set it to "true" for one deploy after a
+      # schema change or a fresh database, then turn it back off.
+      - key: RUN_DB_PUSH
+        value: "false"
+      - key: RUN_AI_WORKER
+        value: "true"
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: AI_PROVIDER
+        value: deepseek
+
+      # Public frontend address (Vercel) â€” needed for CORS and exam links.
+      - key: FRONTEND_URL
+        value: https://exam-trust.vercel.app
+      - key: APP_BASE_URL
+        value: https://exam-trust.vercel.app
+      - key: CORS_ORIGINS
+        value: https://exam-trust.vercel.app
+
+      # Render generates a strong value on first sync.
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Internal connection string of the Key Value service above.
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: examtrust-kv
+          property: connectionString
+
+      # The only value that must be pasted: Aiven MySQL Service URI with
+      # ?sslaccept=accept_invalid_certs appended. Add R2_* and
+      # DEEPSEEK_API_KEY later from the dashboard (Environment) when needed.
+      - key: DATABASE_URL
+        sync: false
