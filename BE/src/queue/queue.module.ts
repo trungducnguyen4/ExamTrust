@@ -8,15 +8,12 @@ import { AIGenerationProcessor } from './processors/ai-generation.processor';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EventsModule } from '../events/events.module';
 import { AiModule } from '../ai/ai.module';
+import { buildRedisOptions } from '../redis/redis-options';
 
 @Module({
   imports: [
     BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
-      },
+      redis: buildRedisOptions(),
     }),
     BullModule.registerQueue(
       { name: 'integrity-logs' },
