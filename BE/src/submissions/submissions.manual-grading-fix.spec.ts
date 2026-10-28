@@ -206,6 +206,9 @@ describe('SubmissionsService manual-question isCorrect/statistics fix', () => {
         }),
         update: jest.fn().mockResolvedValue({}),
       },
+      integrityReview: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
     };
     prisma.$transaction.mockImplementation((callback) => callback(tx));
 

@@ -234,7 +234,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3 mt-2 overflow-y-auto">
         {(isMobile || !collapsed) && (
-          <p className="px-3 mb-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+          <p className="px-3 mb-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/85">
             Điều hướng
           </p>
         )}
@@ -251,7 +251,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 !isMobile && collapsed && "justify-center px-0",
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground",
               )}
             >
               <span className="shrink-0">{item.icon}</span>
@@ -313,7 +313,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <p className="text-sm font-semibold text-sidebar-foreground truncate">
                 {user.fullName}
               </p>
-              <span className="text-xs font-medium uppercase tracking-wider text-sidebar-foreground/50">
+              <span className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/85">
                 {roleLabel}
               </span>
             </div>
@@ -325,7 +325,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-md"
+              className="w-full justify-start text-sidebar-foreground/85 hover:text-destructive hover:bg-destructive/10 rounded-md"
               onClick={logout}
             >
               <LogOut className="mr-2 h-4 w-4" />

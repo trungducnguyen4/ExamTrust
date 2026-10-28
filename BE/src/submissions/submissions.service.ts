@@ -2345,7 +2345,7 @@ export class SubmissionsService implements OnModuleInit, OnModuleDestroy {
       if (tabSwitchCount > 0) {
         reasons.push({
           type: 'behavior',
-          description: 'Phát hiện hành vi chuyển tab',
+          description: 'Chuyển tab',
           weight: Math.min(1, tabSwitchCount / 10),
           evidence: `Đã ghi nhận ${tabSwitchCount} lần chuyển tab`,
         });
@@ -2353,7 +2353,7 @@ export class SubmissionsService implements OnModuleInit, OnModuleDestroy {
       if (mouseAnomalies > 0) {
         reasons.push({
           type: 'behavior',
-          description: 'Phát hiện chuyển động chuột bất thường',
+          description: 'Chuyển động chuột bất thường',
           weight: Math.min(1, mouseAnomalies / 10),
           evidence: `Đã ghi nhận ${mouseAnomalies} lần chuyển động chuột bất thường`,
         });

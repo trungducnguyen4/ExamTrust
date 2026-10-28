@@ -69,6 +69,7 @@ import {
   getFilterChips,
 } from "@/components/common/list/filter-utils";
 import api, { unwrapPaginatedData } from "@/lib/api";
+import { formatSignalDescription } from "@/lib/integrity-event-labels";
 import { COURSE_TERM_OPTIONS, getAcademicYearOptions } from "@/lib/course-term";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -1006,17 +1007,17 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
                         ) : (
                           submissions.map((submission) => (
                             <TableRow key={submission.id}>
-                              <TableCell>
+                                <TableCell>
                                 <div>
                                   <p className="font-medium text-foreground">
                                     {submission.studentName}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs font-medium text-foreground">
                                     {submission.studentId}
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-center text-sm text-muted-foreground">
+                              <TableCell className="text-center text-sm font-medium text-foreground">
                                 {submission.attemptNo ?? "-"}
                               </TableCell>
                               <TableCell>
@@ -1025,7 +1026,7 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
                                 </p>
                               </TableCell>
                               <TableCell>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm font-medium text-foreground">
                                   {formatDate(submission.submittedAt)}
                                 </p>
                               </TableCell>
@@ -1046,8 +1047,8 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
                                 </StatusBadge>
                               </TableCell>
                               <TableCell>
-                                <p className="text-sm text-muted-foreground max-w-xs truncate">
-                                  {submission.reasons[0]?.description || "—"}
+                                <p className="text-sm font-medium text-foreground max-w-xs truncate">
+                                  {formatSignalDescription(submission.reasons[0]?.description)}
                                 </p>
                               </TableCell>
                               <TableCell className="text-right">

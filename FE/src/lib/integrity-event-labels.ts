@@ -34,8 +34,8 @@ export const INTEGRITY_EVENT_LABELS: Record<string, string> = {
   screen_share_ended: "Chia sẻ màn hình không còn khả dụng",
   screen_share_recovery_timeout: "Chia sẻ màn hình không được khôi phục kịp thời",
   screen_share_restored: "Chia sẻ màn hình đã được khôi phục",
-  multi_monitor_detected: "Phát hiện cắm thêm màn hình trong lúc làm bài",
-  multi_monitor_at_start: "Phát hiện dùng nhiều màn hình ngay khi bắt đầu làm bài",
+  multi_monitor_detected: "Cắm thêm màn hình trong lúc làm bài",
+  multi_monitor_at_start: "Dùng nhiều màn hình ngay khi bắt đầu làm bài",
   navigation_attempt: "Cố gắng rời khỏi trang làm bài",
   page_reload: "Tải lại hoặc rời trang khi đang làm bài",
   network_disconnected: "Mất kết nối mạng",
@@ -45,4 +45,18 @@ export const INTEGRITY_EVENT_LABELS: Record<string, string> = {
 export function getIntegrityEventLabel(eventType?: string | null): string {
   const key = String(eventType || "").toLowerCase();
   return INTEGRITY_EVENT_LABELS[key] || "Sự kiện giám sát";
+}
+
+/**
+ * Rút gọn chuỗi mô tả tín hiệu/hành vi giám sát:
+ * - Bỏ các tiền tố dài dòng như "Phát hiện hành vi", "Phát hiện"
+ * - Giữ lại tên hành vi ngắn gọn, súc tích (vd: "Chuyển tab", "Chuyển động chuột bất thường")
+ */
+export function formatSignalDescription(desc?: string | null): string {
+  if (!desc) return "—";
+  const cleaned = desc
+    .replace(/^phát hiện\s+(hành vi\s+)?/i, "")
+    .trim();
+  if (!cleaned) return desc;
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }

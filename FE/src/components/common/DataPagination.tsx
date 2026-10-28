@@ -128,7 +128,7 @@ export function DataPagination({
       )}
     >
       {/* Left: page info */}
-      <p className="text-sm text-muted-foreground whitespace-nowrap">
+      <p className="text-sm font-medium text-foreground whitespace-nowrap">
         Trang {currentPage} / {effectiveTotalPages}
         {totalItems !== undefined && (
           <span>
@@ -163,7 +163,7 @@ export function DataPagination({
             onBlur={handleInputBlur}
             className="h-8 w-16 text-center text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
-          <span className="text-sm text-muted-foreground">/ {effectiveTotalPages}</span>
+          <span className="text-sm font-medium text-foreground">/ {effectiveTotalPages}</span>
         </div>
 
         <Button

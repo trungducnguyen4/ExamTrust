@@ -53,6 +53,9 @@ describe('SubmissionsService snapshot and score normalization', () => {
       integrityLog: {
         createMany: jest.fn(),
       },
+      integrityReview: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
       $transaction: jest.fn(),
       ...prismaOverrides,
     };
@@ -247,7 +250,9 @@ describe('SubmissionsService snapshot and score normalization', () => {
     prisma.examSubmission.update.mockResolvedValue({});
     prisma.examInstance.update.mockResolvedValue({});
     prisma.exam = { update: jest.fn().mockResolvedValue({}) } as any;
-    prisma.$transaction.mockResolvedValue([]);
+    prisma.$transaction.mockImplementation((cb: any) =>
+      typeof cb === 'function' ? cb(prisma) : Promise.all(cb),
+    );
 
     await service.publishExamResults('exam-1', { id: 'lecturer-1', role: 'LECTURER' });
 
