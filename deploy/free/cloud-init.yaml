@@ -1,0 +1,48 @@
+#cloud-config
+# ExamTrust — first-boot setup for a fresh Ubuntu 24.04 VM
+# (Oracle Cloud Always Free Ampere A1, or any small Ubuntu box).
+#
+# Paste this file into "Advanced options -> Management -> cloud-init script"
+# when creating the instance, or run it manually over SSH:
+#   sudo cloud-init single --name cc_examtrust  (or just run the runcmd block)
+#
+# It installs Docker + Compose v2, opens 22/80/443, clones the repo and runs
+# deploy/free/bootstrap.sh (which builds the stack and syncs the DB schema).
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - docker.io
+  - docker-compose-v2
+  - git
+  - curl
+  - openssl
+  - iptables-persistent
+
+write_files:
+  - path: /etc/sysctl.d/99-examtrust.conf
+    permissions: "0644"
+    content: |
+      vm.swappiness=10
+      vm.overcommit_memory=1
+
+runcmd:
+  # 2 GB swap: MySQL + NestJS + the AI worker on a small shape.
+  - [bash, -c, "if [ ! -f /swapfile ]; then fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab; fi"]
+  - [systemctl, enable, --now, docker]
+
+  # Oracle Ubuntu images ship iptables rules that drop everything except SSH.
+  # Ingress rules must also be opened in the VCN Security List (see README).
+  - [bash, -c, "iptables -C INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || iptables -I INPUT 2 -p tcp --dport 80 -j ACCEPT"]
+  - [bash, -c, "iptables -C INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null || iptables -I INPUT 3 -p tcp --dport 443 -j ACCEPT"]
+  - [bash, -c, "netfilter-persistent save || true"]
+
+  # The repository is public; for a private fork use a deploy key instead.
+  - [bash, -c, "git clone --depth 1 https://github.com/trungducnguyen4/ExamTrust.git /opt/examtrust || (cd /opt/examtrust && git pull --ff-only)"]
+
+  # Build + start the stack and sync the Prisma schema.
+  # Add --seed to also load the demo data (slow on first run).
+  - [bash, -c, "cd /opt/examtrust && bash deploy/free/bootstrap.sh"]
+
+final_message: "ExamTrust stack bootstrapped. Check: docker compose -f deploy/free/docker-compose.yml ps"

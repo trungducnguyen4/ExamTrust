@@ -1,0 +1,107 @@
+name: Deploy free VM
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to run on the VM"
+        type: choice
+        default: deploy
+        options:
+          - deploy
+          - dbpush
+          - seed
+
+env:
+  VM_DIR: /opt/examtrust
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required secrets
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+        run: |
+          missing=""
+          [ -n "$VM_HOST" ] || missing="$missing VM_HOST"
+          [ -n "$VM_USER" ] || missing="$missing VM_USER"
+          [ -n "$VM_SSH_KEY" ] || missing="$missing VM_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing (Settings -> Secrets and variables -> Actions)"
+            exit 1
+          fi
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VM_SSH_KEY }}
+
+      - name: Add VM to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Write env file from secret (optional)
+        env:
+          VM_ENV_FILE: ${{ secrets.VM_ENV_FILE }}
+        run: |
+          if [ -n "$VM_ENV_FILE" ]; then
+            printf '%s\n' "$VM_ENV_FILE" > /tmp/examtrust.env
+            echo "env file prepared ($(wc -l < /tmp/examtrust.env) lines)"
+          else
+            echo "VM_ENV_FILE not set — keeping the .env already on the VM"
+          fi
+
+      - name: Sync env file
+        run: |
+          if [ -f /tmp/examtrust.env ]; then
+            scp -o StrictHostKeyChecking=no /tmp/examtrust.env \
+              "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:${{ env.VM_DIR }}/deploy/free/.env"
+          fi
+
+      - name: Deploy on VM
+        run: |
+          MODE="${{ inputs.mode }}"
+          ssh -o StrictHostKeyChecking=no "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}" \
+            "MODE='$MODE' VM_DIR='${{ env.VM_DIR }}' bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd "$VM_DIR"
+          git fetch origin main
+          git reset --hard origin/main
+
+          COMPOSE="docker compose --env-file deploy/free/.env -f deploy/free/docker-compose.yml"
+
+          case "$MODE" in
+            deploy)
+              bash deploy/free/bootstrap.sh
+              ;;
+            dbpush)
+              $COMPOSE exec -T backend npx prisma db push \
+                --schema prisma/schema.prisma --accept-data-loss --skip-generate
+              ;;
+            seed)
+              $COMPOSE exec -T backend npx --yes ts-node --transpile-only \
+                --compiler-options '{"module":"commonjs","moduleResolution":"node"}' \
+                prisma/seed-master.ts
+              ;;
+            *)
+              echo "Unknown mode: $MODE" >&2
+              exit 1
+              ;;
+          esac
+          REMOTE
+
+      - name: Smoke check API
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 10 "https://${{ vars.API_DOMAIN }}/api/health" > /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::API health check failed (is the vars.API_DOMAIN repository variable set?)"
+          exit 1

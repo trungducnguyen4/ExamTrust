@@ -1,0 +1,23 @@
+# Caddy reverse proxy for the ExamTrust API.
+# API_DOMAIN is injected by docker compose from .env (e.g. 140-238-1-2.sslip.io).
+# Automatic HTTPS: Caddy obtains and renews a Let's Encrypt certificate.
+# Ports 80 and 443 must be reachable from the internet (Oracle Security List
+# + the VM firewall; cloud-init opens both).
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# All API traffic, including /api and /docs.
+	reverse_proxy backend:3001 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 10MiB
+			roll_keep 3
+		}
+	}
+}
