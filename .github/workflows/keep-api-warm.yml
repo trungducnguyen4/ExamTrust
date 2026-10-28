@@ -2,12 +2,15 @@ name: Keep API warm
 
 # Render's free web service spins down after 15 minutes without traffic and the
 # next request waits ~1 minute for the container to boot. Pinging the health
-# endpoint keeps the demo responsive; the 10-minute interval stays below the
-# 750 free instance-hours per month (~744 hours in a 31-day month).
+# endpoint keeps the demo responsive.
+#
+# Schedule window: 00:00-15:50 UTC = 07:00-22:50 Asia/Saigon, roughly the hours
+# a demo is used. That is ~16 h/day => ~480 instance-hours/month, safely below
+# the 750 free hours (keeping it warm 24/7 would use ~744 and leave no margin).
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/10 0-15 * * *"
   workflow_dispatch:
 
 jobs:
