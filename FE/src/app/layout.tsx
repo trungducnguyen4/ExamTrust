@@ -5,8 +5,26 @@ import "./../index.css";
 
 import { Providers } from "./providers";
 
+// `NEXT_PUBLIC_APP_URL` is baked in at build time. An empty or malformed value
+// used to crash `next build` ("TypeError: Invalid URL") while collecting page
+// data for /_not-found, so resolve it defensively and fall back to a valid URL.
+const FALLBACK_APP_URL = "https://exam-trust.vercel.app";
+
+function resolveMetadataBase(): URL {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  for (const candidate of [configured, FALLBACK_APP_URL, "http://localhost:3000"]) {
+    if (!candidate) continue;
+    try {
+      return new URL(candidate);
+    } catch {
+      // try the next candidate
+    }
+  }
+  return new URL("http://localhost:3000");
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: resolveMetadataBase(),
   title: {
     default: "ExamTrust | Nền tảng đánh giá học thuật tin cậy",
     template: "%s | ExamTrust",
