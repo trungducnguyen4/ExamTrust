@@ -15,7 +15,8 @@ Vercel (FE) ──HTTPS──▶ Render Free Web Service (API + AI worker, 1 con
 - `deploy/render/Dockerfile` build đúng `BE/` (giống `deploy/free/docker-compose.yml`).
 - `deploy/render/start.sh` chạy **API ở foreground + AI worker ở background** trong cùng 1
   container — Render free không có background worker, nên đây là cách giữ được chấm bài/AI queue.
-- `prisma db push` chạy 1 lần lúc boot (`RUN_DB_PUSH=true`), nhờ vậy DB Aiven trống vẫn tự có 40 bảng.
+- `prisma db push` chỉ bật khi cần (`RUN_DB_PUSH=true` ở lần deploy đầu hoặc sau khi đổi schema);
+  để `false` giúp **cold start ngắn hơn** vì không phải introspect DB Aiven mỗi lần thức dậy.
 - `REDIS_URL` (đã hỗ trợ từ EX-034) dùng được cả `redis://` nội bộ Render lẫn `rediss://` Aiven.
 
 ## 2. Tạo service trên Render (~4 phút)

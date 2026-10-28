@@ -32,8 +32,12 @@ services:
         value: "10000"
       - key: NODE_ENV
         value: production
+      # The schema is already synced (first boot ran db push). Keeping it off
+      # shortens every cold start: db push adds several seconds of introspection
+      # against a remote Aiven instance. Set it to "true" for one deploy after a
+      # schema change or a fresh database, then turn it back off.
       - key: RUN_DB_PUSH
-        value: "true"
+        value: "false"
       - key: RUN_AI_WORKER
         value: "true"
       - key: JWT_EXPIRES_IN
