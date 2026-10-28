@@ -1,4 +1,4 @@
-# Render Blueprint — free web service for the ExamTrust API.
+﻿# Render Blueprint â€” free web service for the ExamTrust API.
 #
 # Import this repository on Render (New -> Blueprint) and Render creates both
 # services below. Only DATABASE_URL has to be pasted by hand; the Redis URL,
@@ -10,7 +10,7 @@
 
 services:
   # Free Redis-compatible Key Value, reachable only from this workspace.
-  # In-memory only (data is lost on restart) — fine for BullMQ queues and cache.
+  # In-memory only (data is lost on restart) â€” fine for BullMQ queues and cache.
   - type: keyvalue
     name: examtrust-kv
     plan: free
@@ -22,7 +22,7 @@ services:
     runtime: docker
     plan: free
     region: singapore
-    branch: feature/EX-035-render-free-deploy
+    branch: main
     dockerContext: .
     dockerfilePath: ./deploy/render/Dockerfile
     healthCheckPath: /api/health
@@ -45,7 +45,7 @@ services:
       - key: AI_PROVIDER
         value: deepseek
 
-      # Public frontend address (Vercel) — needed for CORS and exam links.
+      # Public frontend address (Vercel) â€” needed for CORS and exam links.
       - key: FRONTEND_URL
         value: https://exam-trust.vercel.app
       - key: APP_BASE_URL
