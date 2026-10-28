@@ -58,6 +58,11 @@ curl -s -o /dev/null -w "%{http_code}\n" https://examtrust-api.onrender.com/docs
 
 Lần gọi đầu sau 15 phút nghỉ mất ~1 phút (Render spin-up); các lần sau nhanh.
 
+Workflow **Keep API warm** (`.github/workflows/keep-api-warm.yml`) ping `/api/health` mỗi 10 phút
+trong khung **07:00–22:50 (giờ VN)** để giữ container thức; ngoài khung này service ngủ và lần
+vào đầu tiên trong ngày sẽ chậm ~1 phút. ~16 h/ngày ≈ **480 instance-giờ/tháng**, còn margin so
+với 750 h free (giữ 24/7 sẽ là ~744 h, sát trần).
+
 ## 5. Giới hạn của Render Free (chấp nhận được cho demo)
 
 | Giới hạn | Ảnh hưởng |
