@@ -446,28 +446,45 @@ export class CoursesService {
           ? { status: 'archived' }
           : archiveStatus === 'all' ? {} : { status: { not: 'archived' } }),
       },
+      include: {
+        _count: {
+          select: {
+            enrollments: true,
+            exams: true,
+            questions: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
+    if (courses.length === 0) {
+      return [];
+    }
+
     const results = await Promise.all(
-      courses.map(async (c) => {
-        const [
-          enrolledCount,
-          publishedExamsCount,
-          totalExamsCount,
-          totalSubmissions,
-          lastSubmission,
-        ] = await Promise.all([
-          this.prisma.enrollment.count({ where: { courseId: c.id } }),
-          this.prisma.exam.count({ where: { courseId: c.id, status: 'PUBLISHED' } }),
-          this.prisma.exam.count({ where: { courseId: c.id } }),
-          this.prisma.examSubmission.count({ where: { exam: { courseId: c.id, status: 'PUBLISHED' } } }),
-          this.prisma.examSubmission.findFirst({
-            where: { exam: { courseId: c.id } },
-            orderBy: { submittedAt: 'desc' },
-            select: { submittedAt: true, startedAt: true, createdAt: true },
-          }),
-        ]);
+      courses.map(async (c: any) => {
+        const enrolledCount = c._count?.enrollments ?? 0;
+        const totalExamsCount = c._count?.exams ?? 0;
+
+        let publishedExamsCount = 0;
+        let totalSubmissions = 0;
+        let lastSubmission: any = null;
+
+        if (totalExamsCount > 0) {
+          const [pubExams, subCount, lastSub] = await Promise.all([
+            this.prisma.exam.count({ where: { courseId: c.id, status: 'PUBLISHED' } }),
+            this.prisma.examSubmission.count({ where: { exam: { courseId: c.id, status: 'PUBLISHED' } } }),
+            this.prisma.examSubmission.findFirst({
+              where: { exam: { courseId: c.id } },
+              orderBy: { submittedAt: 'desc' },
+              select: { submittedAt: true, startedAt: true, createdAt: true },
+            }),
+          ]);
+          publishedExamsCount = pubExams;
+          totalSubmissions = subCount;
+          lastSubmission = lastSub;
+        }
 
         const progress = publishedExamsCount > 0 && enrolledCount > 0
           ? Math.round((totalSubmissions / (publishedExamsCount * Math.max(1, enrolledCount))) * 100)
@@ -487,6 +504,7 @@ export class CoursesService {
           enrolledStudents: enrolledCount,
           totalStudents: enrolledCount,
           exams: totalExamsCount,
+          _count: c._count,
           progress,
           lastAccessed,
         };
