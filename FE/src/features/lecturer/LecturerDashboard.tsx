@@ -52,7 +52,7 @@ interface CourseSummary {
   code: string;
   name: string;
   enrolledStudents?: number;
-  _count?: { enrollments?: number; exams?: number };
+  _count?: { enrollments?: number; exams?: number; questions?: number };
 }
 
 interface QuestionItem {
@@ -100,25 +100,9 @@ const difficultyClassName = (value: number) => {
   return difficultyLabel(value).color;
 };
 
-async function fetchAllQuestions(): Promise<QuestionItem[]> {
-  const firstResponse = await api.listQuestions({ page: 1, limit: 100 });
-  const firstPage = unwrapPaginatedData<QuestionItem>(firstResponse);
-  const totalPages = Number(firstResponse?.pagination?.totalPages) || 1;
-
-  if (totalPages <= 1) return firstPage;
-
-  const remainingResponses = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, index) =>
-      api.listQuestions({ page: index + 2, limit: 100 }),
-    ),
-  );
-
-  return [
-    ...firstPage,
-    ...remainingResponses.flatMap((response) =>
-      unwrapPaginatedData<QuestionItem>(response),
-    ),
-  ];
+async function fetchRecentQuestions(): Promise<QuestionItem[]> {
+  const response = await api.listQuestions({ page: 1, limit: 20 });
+  return unwrapPaginatedData<QuestionItem>(response);
 }
 
 const buildQuestionBankSummaries = (
@@ -183,19 +167,26 @@ const buildQuestionBankSummaries = (
   });
 
   return Array.from(grouped.values())
-    .map((item) => ({
-      courseId: item.courseId,
-      courseCode: item.courseCode,
-      courseName: item.courseName,
-      questionCount: item.questionCount,
-      avgDifficulty:
-        item.difficulties.length > 0
-          ? item.difficulties.reduce((sum, value) => sum + value, 0) /
-            item.difficulties.length
-          : 0,
-      questionTypes: Array.from(item.questionTypes),
-      lastUpdatedAt: item.lastUpdatedAt,
-    }))
+    .map((item) => {
+      const course =
+        (item.courseId && courseById.get(item.courseId)) ||
+        (item.courseCode && courseByCode.get(item.courseCode));
+      const totalQuestionCount =
+        (course as any)?._count?.questions ?? item.questionCount;
+      return {
+        courseId: item.courseId,
+        courseCode: item.courseCode,
+        courseName: item.courseName,
+        questionCount: totalQuestionCount,
+        avgDifficulty:
+          item.difficulties.length > 0
+            ? item.difficulties.reduce((sum, value) => sum + value, 0) /
+              item.difficulties.length
+            : 0,
+        questionTypes: Array.from(item.questionTypes),
+        lastUpdatedAt: item.lastUpdatedAt,
+      };
+    })
     .sort((a, b) => {
       const aTime = a.lastUpdatedAt ? new Date(a.lastUpdatedAt).getTime() : 0;
       const bTime = b.lastUpdatedAt ? new Date(b.lastUpdatedAt).getTime() : 0;
@@ -236,15 +227,14 @@ export default function LecturerDashboard() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [questionBanks, setQuestionBanks] = useState<QuestionBankSummary[]>([]);
-  const [questionCount, setQuestionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [examsData, questionsData, coursesData] = await Promise.all([
-        api.getExams(),
-        fetchAllQuestions(),
+        api.getExams({ limit: 6 }),
+        fetchRecentQuestions(),
         api.getMyCourses(),
       ]);
       const questions = questionsData;
@@ -253,7 +243,6 @@ export default function LecturerDashboard() {
         : unwrapPaginatedData<CourseSummary>(coursesData);
 
       setExams(unwrapPaginatedData(examsData));
-      setQuestionCount(questions.length);
       setCourses(normalizedCourses);
       setQuestionBanks(buildQuestionBankSummaries(questions, normalizedCourses));
     } catch (error) {
