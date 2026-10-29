@@ -20,7 +20,8 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const { register, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -32,6 +33,7 @@ export default function Register() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await register({
         email,
@@ -185,9 +187,9 @@ export default function Register() {
                 type="submit"
                 className="group w-full bg-gradient-to-r from-primary to-[hsl(195_72%_40%)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-heavy active:translate-y-0"
                 size="lg"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" />
                     Đang đăng ký

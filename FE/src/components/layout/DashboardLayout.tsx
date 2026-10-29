@@ -279,7 +279,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Collapse toggle (desktop only) */}
       {!isMobile && (
-        <div className="px-3 mb-2">
+        <div className="border-t border-sidebar-border p-3">
           <button
             type="button"
             aria-label={collapsed ? "Mở rộng thanh điều hướng" : "Thu gọn thanh điều hướng"}
@@ -294,61 +294,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
       )}
-
-      {/* User section */}
-      <div className="border-t border-sidebar-border p-3">
-        <div
-          className={cn(
-            "flex items-center gap-3 rounded-md p-2",
-            !isMobile && collapsed && "justify-center",
-          )}
-        >
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
-              {user.fullName.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          {(isMobile || !collapsed) && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                {user.fullName}
-              </p>
-              <span className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/85">
-                {roleLabel}
-              </span>
-            </div>
-          )}
-        </div>
-        {(isMobile || !collapsed) && (
-          <>
-            <Separator className="my-2 bg-sidebar-border" />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-sidebar-foreground/85 hover:text-destructive hover:bg-destructive/10 rounded-md"
-              onClick={logout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
-            </Button>
-          </>
-        )}
-        {!isMobile && collapsed && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                aria-label="Đăng xuất"
-                onClick={logout}
-                className="flex w-full items-center justify-center rounded-md p-2 mt-2 text-sidebar-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
-              >
-                <LogOut className="h-[18px] w-[18px]" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Đăng xuất</TooltipContent>
-          </Tooltip>
-        )}
-      </div>
     </div>
   );
 
@@ -429,7 +374,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-semibold">{user.fullName}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold">{user.fullName}</p>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                          {roleLabel}
+                        </span>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {user.email}
                       </p>

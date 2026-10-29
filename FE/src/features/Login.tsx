@@ -65,13 +65,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [selectedDemoEmail, setSelectedDemoEmail] = useState<string | null>(null);
-  const { login, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent) => {
     const flowStartedAt = nowMs();
     event.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
     try {
       const loginStartedAt = nowMs();
@@ -89,6 +91,8 @@ export default function Login() {
           ? "Không thể kết nối máy chủ. Hãy kiểm tra backend tại cổng 3001."
           : "Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.",
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -223,9 +227,9 @@ export default function Login() {
                 type="submit"
                 className="group w-full bg-gradient-to-r from-primary to-[hsl(195_72%_40%)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-heavy active:translate-y-0"
                 size="lg"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" />
                     Đang đăng nhập
