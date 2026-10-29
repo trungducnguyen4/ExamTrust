@@ -1564,6 +1564,48 @@ class ApiClient {
     return response as any;
   }
 
+  async createAiQuestionJob(data: {
+    prompt: string;
+    questionType?: string;
+    difficulty?: number;
+    language?: string;
+    courseName?: string;
+    useCase?: string;
+    context?: Record<string, any>;
+  }) {
+    return this.request<{
+      jobId: string;
+      status: string;
+    }>('/ai/generate-question', {
+      method: 'POST',
+      body: data,
+    });
+  }
+
+  async createAiExamQuestionsJob(data: {
+    prompt: string;
+    questionCount: number;
+    difficulty?: number;
+    questionType?: string;
+    language?: string;
+    courseName?: string;
+    useCase?: string;
+    courseId?: string;
+    context?: Record<string, any>;
+  }) {
+    return this.request<{
+      jobId: string;
+      status: string;
+    }>('/ai/generate-exam-questions', {
+      method: 'POST',
+      body: data,
+    });
+  }
+
+  async pollAiJob<T>(jobId: string, timeoutMs = 120000, intervalMs = 2000): Promise<T> {
+    return this.waitForAiJob<T>(jobId, timeoutMs, intervalMs);
+  }
+
   async getMyRecentCourses() {
     return this.get('/courses/my-recent-courses');
   }

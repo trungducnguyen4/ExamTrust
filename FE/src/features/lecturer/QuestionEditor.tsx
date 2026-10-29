@@ -37,7 +37,11 @@ import {
   Loader2,
   Sparkles,
   Wand2,
+  BrainCircuit,
+  Check,
 } from "lucide-react";
+import { QuestionClarificationDialog } from "./components/QuestionClarificationDialog";
+import { QuestionBatchReviewDialog } from "./components/QuestionBatchReviewDialog";
 import { toast } from "sonner";
 import { BackToDashboardButton } from "@/components/common/BackToDashboardButton";
 import {
@@ -646,17 +650,59 @@ export default function QuestionEditor() {
                   {/* AI Generator Section */}
                   <Card className="border-primary/20 bg-primary/5">
                     <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                        <CardTitle className="text-sm sm:text-base font-semibold text-primary">
-                          Trợ lý AI
-                        </CardTitle>
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          <CardTitle className="text-sm sm:text-base font-semibold text-primary">
+                            Trợ lý AI
+                          </CardTitle>
+                        </div>
+                        {/* Grill-me Toggle */}
+                        <div className="flex items-center gap-2">
+                          <Label
+                            htmlFor="grillme-mode-switch"
+                            className="text-xs font-medium cursor-pointer flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+                          >
+                            <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+                            Làm rõ yêu cầu (Grill-me)
+                          </Label>
+                          <Switch
+                            id="grillme-mode-switch"
+                            checked={ai.isGrillMeEnabled}
+                            onCheckedChange={ai.toggleGrillMe}
+                            aria-label="Bật hoặc tắt chế độ Grill-me làm rõ yêu cầu"
+                          />
+                        </div>
                       </div>
                       <CardDescription className="text-xs sm:text-sm">
-                        Tạo nội dung bằng AI
+                        {ai.isGrillMeEnabled
+                          ? "Chế độ Grill-me: AI sẽ gợi ý các câu hỏi sư phạm để làm rõ mục tiêu trước khi tạo."
+                          : "Tạo nội dung câu hỏi nhanh bằng AI."}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6 pb-3 sm:pb-6">
+                      {/* Active job recovery banner */}
+                      {ai.activeJobId && ai.isGenerating && (
+                        <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 p-3 text-xs text-primary shadow-sm">
+                          <div className="flex items-center gap-2.5">
+                            <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                            <span>
+                              <strong>Đang tiếp tục tạo câu hỏi...</strong> (Mã tác vụ:{" "}
+                              <code>{ai.activeJobId.slice(0, 8)}...</code> - bạn có thể tải lại trang mà không mất tiến trình)
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={ai.cancelActiveJob}
+                            className="h-7 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            Hủy theo dõi
+                          </Button>
+                        </div>
+                      )}
+
                       <div className="flex flex-col sm:flex-row gap-2">
                         <Input
                           placeholder="Ví dụ: Hệ thống phân tán, Raft và Paxos..."
@@ -666,28 +712,77 @@ export default function QuestionEditor() {
                           onKeyDown={(e) =>
                             e.key === "Enter" && ai.generate()
                           }
+                          disabled={ai.isGenerating}
                         />
+
+                        {/* Batch Question Count Selector */}
+                        <Select
+                          value={String(ai.questionCount)}
+                          onValueChange={(val) => ai.setQuestionCount(Number(val))}
+                          disabled={ai.isGenerating}
+                        >
+                          <SelectTrigger className="w-full sm:w-[130px] h-11 bg-background text-xs">
+                            <SelectValue placeholder="Số lượng" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 câu hỏi</SelectItem>
+                            <SelectItem value="3">Bộ 3 câu</SelectItem>
+                            <SelectItem value="5">Bộ 5 câu</SelectItem>
+                            <SelectItem value="10">Bộ 10 câu</SelectItem>
+                          </SelectContent>
+                        </Select>
+
                         <Button
                           onClick={ai.generate}
                           disabled={ai.isGenerating || !ai.aiPrompt.trim() || !course}
-                          className="h-11 w-full gap-2 sm:w-auto"
+                          className="h-11 w-full gap-2 sm:w-auto font-semibold shadow-sm"
                           title={!course ? "Chọn học phần để dùng tính năng tạo bằng AI" : ""}
                         >
                           {ai.isGenerating ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : ai.isGrillMeEnabled ? (
+                            <BrainCircuit className="h-4 w-4" />
                           ) : (
                             <Wand2 className="h-4 w-4" />
                           )}
-                          Tạo
+                          {ai.isGenerating
+                            ? "Đang tạo..."
+                            : ai.isGrillMeEnabled
+                              ? "Làm rõ & Tạo"
+                              : ai.questionCount > 1
+                                ? "Tạo " + ai.questionCount + " câu"
+                                : "Tạo"}
                         </Button>
                       </div>
+
+                      {/* Reopen batch review if questions exist */}
+                      {ai.batchQuestions.length > 0 && !ai.isBatchReviewOpen && (
+                        <div className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-2.5 text-xs">
+                          <span className="text-muted-foreground">
+                            Đang có <strong>{ai.batchQuestions.length} câu hỏi AI</strong> đã sinh ở bộ gần nhất.
+                          </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => ai.setIsBatchReviewOpen(true)}
+                            className="h-7 text-xs gap-1.5"
+                          >
+                            <Sparkles className="h-3.5 w-3.5 text-primary" />
+                            Xem lại bộ câu hỏi
+                          </Button>
+                        </div>
+                      )}
+
                       {!course && (
                         <p className="text-[10px] text-amber-600 font-medium px-1">
                           ⚠️ Chọn học phần ở cột bên phải để bật tạo câu hỏi bằng AI.
                         </p>
                       )}
                       <p className="text-[10px] text-muted-foreground italic px-1">
-                        * Nội dung do AI tạo sẽ được chèn vào ô soạn để bạn xem lại trước khi lưu.
+                        * {ai.questionCount > 1
+                          ? "Hệ thống sẽ sinh " + ai.questionCount + " câu hỏi và mở bảng xem trước để bạn duyệt hoặc lưu hàng loạt."
+                          : "Nội dung do AI tạo sẽ được chèn vào ô soạn để bạn xem lại trước khi lưu."}
                       </p>
                       {ai.aiSimilarityWarning && (
                         <p className="text-[10px] text-red-600 font-medium px-1">
@@ -1191,6 +1286,26 @@ export default function QuestionEditor() {
           onSelect={topics.selectTopic}
           onCreate={topics.createTopic}
           onCheckSimilarity={topics.checkSimilarTopics}
+        />
+
+        <QuestionClarificationDialog
+          open={ai.isGrillMeOpen}
+          prompt={ai.aiPrompt}
+          questionCount={ai.questionCount}
+          courseName={courses.find((c) => c.id === course)?.name}
+          onClose={() => ai.setIsGrillMeOpen(false)}
+          onConfirm={ai.handleGrillMeConfirm}
+          onSkip={ai.handleGrillMeSkip}
+        />
+
+        <QuestionBatchReviewDialog
+          open={ai.isBatchReviewOpen}
+          questions={ai.batchQuestions}
+          courseName={courses.find((c) => c.id === course)?.name}
+          onClose={() => ai.setIsBatchReviewOpen(false)}
+          onApplySingle={ai.applyBatchQuestionSingle}
+          onSaveToBank={ai.saveBatchQuestionToBank}
+          onSaveAllToBank={ai.saveAllBatchQuestionsToBank}
         />
       </div>
     </DashboardLayout>
