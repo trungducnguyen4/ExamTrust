@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Plus,
@@ -222,54 +223,109 @@ function AiAssistantCard() {
   );
 }
 
+
+function RecentExamsSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border/50 p-4"
+        >
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="h-5 w-44" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-14" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-8 w-24 rounded-xl" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function QuestionBanksSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="rounded-lg border border-border/60 p-3 space-y-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1.5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="h-5 w-16 rounded-md" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-20 rounded-md" />
+            <Skeleton className="h-4 w-20 rounded-md" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function LecturerDashboard() {
   const { user } = useAuth();
   const [exams, setExams] = useState<Exam[]>([]);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [questionBanks, setQuestionBanks] = useState<QuestionBankSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingExams, setLoadingExams] = useState(true);
+  const [loadingBanks, setLoadingBanks] = useState(true);
 
-  const fetchData = async () => {
+  const fetchExams = async () => {
     try {
-      setLoading(true);
-      const [examsData, questionsData, coursesData] = await Promise.all([
-        api.getExams({ limit: 6 }),
+      setLoadingExams(true);
+      const examsData = await api.getExams({ limit: 6 });
+      setExams(unwrapPaginatedData(examsData));
+    } catch (error) {
+      console.error("Failed to fetch exams:", error);
+    } finally {
+      setLoadingExams(false);
+    }
+  };
+
+  const fetchBankSummaries = async () => {
+    try {
+      setLoadingBanks(true);
+      const [questionsResult, coursesResult] = await Promise.allSettled([
         fetchRecentQuestions(),
         api.getMyCourses(),
       ]);
-      const questions = questionsData;
+
+      const questions = questionsResult.status === "fulfilled" ? questionsResult.value : [];
+      const coursesData = coursesResult.status === "fulfilled" ? coursesResult.value : [];
       const normalizedCourses = Array.isArray(coursesData)
         ? coursesData
         : unwrapPaginatedData<CourseSummary>(coursesData);
 
-      setExams(unwrapPaginatedData(examsData));
       setCourses(normalizedCourses);
       setQuestionBanks(buildQuestionBankSummaries(questions, normalizedCourses));
     } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
+      console.error("Failed to fetch question bank summaries:", error);
     } finally {
-      setLoading(false);
+      setLoadingBanks(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const reloadAll = () => {
+    fetchExams();
+    fetchBankSummaries();
+  };
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-              Đang tải trang tổng quan...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  useEffect(() => {
+    fetchExams();
+    fetchBankSummaries();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -288,11 +344,11 @@ export default function LecturerDashboard() {
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchData}
-              disabled={loading}
+              onClick={reloadAll}
+              disabled={loadingExams && loadingBanks}
               className="gap-2"
             >
-              {loading ? (
+              {loadingExams || loadingBanks ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <RefreshCw className="h-4 w-4" />
@@ -342,7 +398,9 @@ export default function LecturerDashboard() {
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="space-y-3">
-                  {exams.length === 0 ? (
+                  {loadingExams ? (
+                    <RecentExamsSkeleton />
+                  ) : exams.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
                         <FileText className="h-6 w-6 text-muted-foreground" />
@@ -494,7 +552,9 @@ export default function LecturerDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col space-y-3">
-                {questionBanks.length === 0 ? (
+                {loadingBanks ? (
+                  <QuestionBanksSkeleton />
+                ) : questionBanks.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/70 bg-muted/30 p-4 text-center">
                     <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Database className="h-5 w-5" />

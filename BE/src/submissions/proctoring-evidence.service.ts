@@ -439,7 +439,12 @@ export class ProctoringEvidenceService implements OnModuleInit {
           // Retention purge must still clear the DB row even if the R2 delete fails.
         }
       }
-      await this.prisma.proctoringEvidenceCapture.update({ where: { id: capture.id }, data: { status: 'PURGED', storageKey: null, contentHash: null, mimeType: null, sizeBytes: null, purgedAt: new Date() } });
+    }
+    if (captures.length > 0) {
+      await this.prisma.proctoringEvidenceCapture.updateMany({
+        where: { id: { in: captures.map((c) => c.id) } },
+        data: { status: 'PURGED', storageKey: null, contentHash: null, mimeType: null, sizeBytes: null, purgedAt: new Date() },
+      });
     }
     return captures.length;
   }

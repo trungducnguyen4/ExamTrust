@@ -489,15 +489,22 @@ export class QuestionsService {
     let copied = 0;
     let skipped = 0;
 
+    // Batch pre-fetch existing questions in target course to eliminate N+1 findFirst queries
+    const existingTargetQuestions = await this.prisma.question.findMany({
+      where: { courseId: targetCourseId },
+      select: { type: true, content: true },
+    });
+    const existingKeySet = new Set(
+      existingTargetQuestions.map((q) => q.type + ':::' + (q.content || '').trim()),
+    );
+
     for (const question of filtered) {
-      const existing = await this.prisma.question.findFirst({
-        where: { courseId: targetCourseId, type: question.type, content: question.content },
-        select: { id: true },
-      });
-      if (existing && !forceIds.has(question.id)) {
+      const key = question.type + ':::' + (question.content || '').trim();
+      if (existingKeySet.has(key) && !forceIds.has(question.id)) {
         skipped += 1;
         continue;
       }
+      existingKeySet.add(key);
 
       const sourceTopic = question.topicLinks[0]?.topic ?? null;
       let targetTopicId: string | null = null;

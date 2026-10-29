@@ -462,55 +462,88 @@ export class CoursesService {
       return [];
     }
 
-    const results = await Promise.all(
-      courses.map(async (c: any) => {
-        const enrolledCount = c._count?.enrollments ?? 0;
-        const totalExamsCount = c._count?.exams ?? 0;
+    const courseIds = courses.map((c) => c.id);
 
-        let publishedExamsCount = 0;
-        let totalSubmissions = 0;
-        let lastSubmission: any = null;
-
-        if (totalExamsCount > 0) {
-          const [pubExams, subCount, lastSub] = await Promise.all([
-            this.prisma.exam.count({ where: { courseId: c.id, status: 'PUBLISHED' } }),
-            this.prisma.examSubmission.count({ where: { exam: { courseId: c.id, status: 'PUBLISHED' } } }),
-            this.prisma.examSubmission.findFirst({
-              where: { exam: { courseId: c.id } },
-              orderBy: { submittedAt: 'desc' },
-              select: { submittedAt: true, startedAt: true, createdAt: true },
-            }),
-          ]);
-          publishedExamsCount = pubExams;
-          totalSubmissions = subCount;
-          lastSubmission = lastSub;
-        }
-
-        const progress = publishedExamsCount > 0 && enrolledCount > 0
-          ? Math.round((totalSubmissions / (publishedExamsCount * Math.max(1, enrolledCount))) * 100)
-          : 0;
-
-        const lastAccessed = lastSubmission ? lastSubmission.submittedAt ?? lastSubmission.startedAt ?? lastSubmission.createdAt : null;
-
-        return {
-          id: c.id,
-          code: c.code,
-          name: c.name,
-          academicYear: c.academicYear,
-          term: c.term,
-          description: c.description,
-          credits: c.credits,
-          lecturerId: c.lecturerId,
-          enrolledStudents: enrolledCount,
-          totalStudents: enrolledCount,
-          exams: totalExamsCount,
-          _count: c._count,
-          progress,
-          lastAccessed,
-        };
-      }),
+    // Batch query 1: Count published exams per course in a single query
+    const publishedExamCounts = await this.prisma.exam.groupBy({
+      by: ['courseId'],
+      where: {
+        courseId: { in: courseIds },
+        status: 'PUBLISHED',
+        deletedAt: null,
+      },
+      _count: { _all: true },
+    });
+    const publishedCountByCourseId = new Map<string, number>(
+      publishedExamCounts.map((item) => [item.courseId, Number(item._count?._all || 0)]),
     );
 
-    return results;
+    // Batch query 2: Fetch all relevant submissions once, ordered by most recent
+    const submissions = await this.prisma.examSubmission.findMany({
+      where: { exam: { courseId: { in: courseIds } } },
+      select: {
+        id: true,
+        submittedAt: true,
+        startedAt: true,
+        createdAt: true,
+        exam: { select: { courseId: true, status: true } },
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+
+    const totalSubmissionsByCourseId = new Map<string, number>();
+    const lastSubmissionByCourseId = new Map<string, (typeof submissions)[number]>();
+
+    for (const sub of submissions) {
+      const courseId = sub.exam?.courseId;
+      if (!courseId) continue;
+
+      if (sub.exam?.status === 'PUBLISHED') {
+        totalSubmissionsByCourseId.set(
+          courseId,
+          (totalSubmissionsByCourseId.get(courseId) || 0) + 1,
+        );
+      }
+
+      if (!lastSubmissionByCourseId.has(courseId)) {
+        lastSubmissionByCourseId.set(courseId, sub);
+      }
+    }
+
+    return courses.map((c: any) => {
+      const enrolledCount = c._count?.enrollments ?? 0;
+      const totalExamsCount = c._count?.exams ?? 0;
+      const publishedExamsCount = publishedCountByCourseId.get(c.id) ?? 0;
+      const totalSubmissions = totalSubmissionsByCourseId.get(c.id) ?? 0;
+      const lastSubmission = lastSubmissionByCourseId.get(c.id);
+
+      const progress =
+        publishedExamsCount > 0 && enrolledCount > 0
+          ? Math.round(
+              (totalSubmissions / (publishedExamsCount * Math.max(1, enrolledCount))) * 100,
+            )
+          : 0;
+
+      const lastAccessed = lastSubmission
+        ? lastSubmission.submittedAt ?? lastSubmission.startedAt ?? lastSubmission.createdAt
+        : null;
+
+      return {
+        id: c.id,
+        code: c.code,
+        name: c.name,
+        academicYear: c.academicYear,
+        term: c.term,
+        description: c.description,
+        credits: c.credits,
+        lecturerId: c.lecturerId,
+        enrolledStudents: enrolledCount,
+        totalStudents: enrolledCount,
+        exams: totalExamsCount,
+        _count: c._count,
+        progress: Math.min(100, progress),
+        lastAccessed,
+      };
+    });
   }
 }

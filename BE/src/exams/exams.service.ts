@@ -1055,24 +1055,28 @@ export class ExamsService {
       }
     }
 
-    for (const questionId of questionIds) {
-      const question = await this.prisma.question.findUnique({
-        where: { id: questionId },
-        select: { id: true, points: true, defaultPoints: true },
-      });
+    const questions = await this.prisma.question.findMany({
+      where: { id: { in: questionIds } },
+      select: { id: true, points: true, defaultPoints: true },
+    });
+    const questionById = new Map<string, any>(questions.map((q) => [q.id, q]));
 
+    const existingExamQuestions = await this.prisma.examQuestion.findMany({
+      where: {
+        examId,
+        questionId: { in: questionIds },
+      },
+      select: { questionId: true },
+    });
+    const existingQuestionIds = new Set(existingExamQuestions.map((eq) => eq.questionId));
+
+    for (const questionId of questionIds) {
+      const question = questionById.get(questionId);
       if (!question) {
         continue; // Skip invalid questions
       }
 
-      // Check if already added
-      const existing = await this.prisma.examQuestion.findUnique({
-        where: {
-          examId_questionId: { examId, questionId },
-        },
-      });
-
-      if (!existing) {
+      if (!existingQuestionIds.has(questionId)) {
         const createdId = await this.insertExamQuestionCompat(this.prisma, {
           examId,
           questionId,

@@ -26,8 +26,11 @@ Sau khi hoàn thành bất kỳ thay đổi nào, AI agent phải xuất báo c�
   - Phải thể hiện các trạng thái: Normal, Empty state, Loading, Active, Mobile responsive.
 - **Luồng người dùng / Quy trình nghiệp vụ (User Flows / Multi-step Journey)**:
   - **BẮT BUỘC quay video màn hình hoặc tạo Animated GIF** thể hiện trọn vẹn hành trình (gõ phím, chọn tùy chọn, click mở modal, loading/tiến trình, và kết quả hiển thị ra sao).
+- **Tối ưu hóa hiệu năng & độ trễ (Performance & Latency Optimization)**:
+  - **BẮT BUỘC quay Video màn hình (Screen Recording / `.mp4` lưu tại `docs/videos/`)** hoặc Animated GIF thời gian thực ghi lại trọn vẹn quá trình thao tác thực tế (F5, reload, DevTools Network timing) thể hiện rõ ràng sự khác biệt trước và sau khi tối ưu.
+  - Phải thể hiện trực quan các chỉ số kỹ thuật: Latency trước vs sau (ví dụ: 5.44s -> 80ms), số lượng queries (ví dụ: 37 -> 2), và loại bỏ hoàn toàn blocking spinner/giật lag.
 - **Quy chuẩn nhúng vào Pull Request (PR)**:
-  - **BẮT BUỘC nhúng trực tiếp bằng cú pháp Markdown Image**: `![Mô tả hoạt ảnh](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.gif)` để bất kỳ ai mở PR trên GitHub đều nhìn thấy ngay video/GIF chuyển động mà không phải clone repo hay tải file về.
+  - **BẮT BUỘC nhúng trực tiếp bằng cú pháp Markdown Image**: `![Mô tả hoạt ảnh](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.gif)` kèm liên kết tới Video MP4 `[Xem Video Full-HD](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/videos/<file>.mp4)` để bất kỳ ai mở PR trên GitHub đều nhìn thấy ngay video/GIF chuyển động mà không phải clone repo hay tải file về.
   - **NGHIÊM CẤM** chỉ ghi text đường dẫn file cục bộ (như `docs/screenshots/...`) trong PR description.
   - Tham khảo chi tiết tại skill `verification-visual-proof` (`.agents/skills/verification-visual-proof/SKILL.md`).
 - **Chỉnh sửa Backend thuần (Backend only)**:

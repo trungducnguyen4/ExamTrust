@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, getStatusBadgeLabel } from "@/components/ui/status-badge";
 import {
@@ -59,20 +60,7 @@ export default function StudentDashboard() {
         ).toFixed(2))
       : 0;
 
-  if (loading && !initialized) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-              Đang tải trang tổng quan...
-            </p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+
 
   return (
     <DashboardLayout>
@@ -127,9 +115,13 @@ export default function StudentDashboard() {
                     <p className="text-sm font-medium text-muted-foreground">
                       {stat.label}
                     </p>
-                    <p className="text-3xl font-bold text-foreground mt-1">
-                      {stat.value}
-                    </p>
+                    {loading && !initialized ? (
+                      <Skeleton className="h-9 w-16 mt-1 rounded-lg" />
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground mt-1">
+                        {stat.value}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <TrendingUp className="h-3 w-3" />
                       {stat.sub}
@@ -173,7 +165,22 @@ export default function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {upcomingExams.length === 0 ? (
+                  {loading && !initialized ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/50">
+                          <div className="space-y-2">
+                            <Skeleton className="h-5 w-48" />
+                            <div className="flex gap-3">
+                              <Skeleton className="h-4 w-20" />
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </div>
+                          <Skeleton className="h-8 w-24 rounded-xl" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : upcomingExams.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
                         <Calendar className="h-6 w-6 text-muted-foreground" />

@@ -25,7 +25,8 @@ Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
 3. **Visual**: BẮT BUỘC tạo bằng chứng trực quan:
    - **UI tĩnh**: Chụp ảnh màn hình (Screenshot).
    - **Luồng người dùng (User Flow)**: BẮT BUỘC quay video hoặc tạo Animated GIF ghi lại trọn vẹn chuỗi thao tác thực tế (gõ phím, chọn tùy chọn, bật switch, modal/dialog hiện lên, trạng thái loading, và kết quả hiển thị ra sao).
-   - **BẮT BUỘC nhúng trực tiếp vào Pull Request (PR)**: Sử dụng cú pháp Markdown Image (`![Mô tả](https://raw.githubusercontent.com/.../docs/screenshots/...)`) để reviewer mở PR là nhìn thấy ngay toàn bộ thao tác. Tuyệt đối KHÔNG ĐƯỢC chỉ ghi text đường dẫn file local!
+   - **Tối ưu hóa hiệu năng (Performance Optimization)**: BẮT BUỘC quay Video màn hình (Screen Recording / `.mp4` lưu tại `docs/videos/`) hoặc Animated GIF thời gian thực ghi lại trọn vẹn sự cải thiện: thao tác reload/F5 liên tục, độ phản hồi tức thì, loại bỏ độ trễ/giật lag, kèm số liệu so sánh thời gian thực (Network response time ms, số lượng database queries trước và sau).
+   - **BẮT BUỘC nhúng trực tiếp vào Pull Request (PR)**: Sử dụng cú pháp Markdown Image (`![Mô tả](https://raw.githubusercontent.com/.../docs/screenshots/...)`) kèm link dẫn tới Video minh chứng để reviewer mở PR là nhìn thấy ngay toàn bộ thao tác. Tuyệt đối KHÔNG ĐƯỢC chỉ ghi text đường dẫn file local!
    - Chi tiết quy trình thực thi tại skill `verification-visual-proof` (`.agents/skills/verification-visual-proof/SKILL.md`).
 4. **Confidence**: Đánh giá độ tin cậy kèm những gì đã kiểm và chưa kiểm.
 

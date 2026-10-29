@@ -116,43 +116,53 @@ export class EnrollmentsService {
       failed: [] as { studentId: string; reason: string }[],
     };
 
-    for (const studentId of studentIds) {
-      try {
-        const student = await this.prisma.user.findUnique({
-          where: { id: studentId },
-        });
-
-        if (!student) {
-          results.failed.push({ studentId, reason: 'Không tìm thấy sinh viên' });
-          continue;
-        }
-
-        if (student.role !== 'STUDENT') {
-          results.failed.push({ studentId, reason: 'Người dùng này không phải là sinh viên' });
-          continue;
-        }
-
-        const existingEnrollment = await this.prisma.enrollment.findUnique({
-          where: {
-            courseId_studentId: { studentId, courseId },
-          },
-        });
-
-        if (existingEnrollment) {
-          results.failed.push({ studentId, reason: 'Đã được ghi danh trước đó' });
-          continue;
-        }
-
-        await this.prisma.enrollment.create({
-          data: { studentId, courseId },
-        });
-
-        results.success.push(studentId);
-      } catch (error) {
-        results.failed.push({ studentId, reason: 'Lỗi không xác định' });
-      }
+    if (studentIds.length === 0) {
+      return results;
     }
 
+    // Batch query 1: Fetch all requested users in 1 query
+    const students = await this.prisma.user.findMany({
+      where: { id: { in: studentIds } },
+      select: { id: true, role: true },
+    });
+    const studentById = new Map<string, { id: string; role: string }>(students.map((s) => [s.id, s]));
+
+    // Batch query 2: Fetch all existing enrollments in 1 query
+    const existingEnrollments = await this.prisma.enrollment.findMany({
+      where: {
+        courseId,
+        studentId: { in: studentIds },
+      },
+      select: { studentId: true },
+    });
+    const existingStudentIds = new Set(existingEnrollments.map((e) => e.studentId));
+
+    const validNewStudentIds: string[] = [];
+
+    for (const studentId of studentIds) {
+      const student = studentById.get(studentId);
+      if (!student) {
+        results.failed.push({ studentId, reason: 'Không tìm thấy sinh viên' });
+        continue;
+      }
+      if (student.role !== 'STUDENT') {
+        results.failed.push({ studentId, reason: 'Người dùng này không phải là sinh viên' });
+        continue;
+      }
+      if (existingStudentIds.has(studentId)) {
+        results.failed.push({ studentId, reason: 'Đã được ghi danh trước đó' });
+        continue;
+      }
+      validNewStudentIds.push(studentId);
+    }
+
+    if (validNewStudentIds.length > 0) {
+      await this.prisma.enrollment.createMany({
+        data: validNewStudentIds.map((studentId) => ({ studentId, courseId })),
+        skipDuplicates: true,
+      });
+      results.success.push(...validNewStudentIds);
+    }
 
 
     return results;
