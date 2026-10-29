@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { GenerateQuestionDto, GenerateExamQuestionsDto, SuggestSimilarTopicsDto } from './dto/generate-question.dto';
+import { VerifyApiKeyDto } from './dto/verify-api-key.dto';
 import { AiJobsService } from './ai-jobs.service';
 import { AiService } from './ai.service';
 import { AISection } from '../questions-v2/dto/question-draft.dto';
@@ -106,4 +107,15 @@ export class AiController {
       },
     });
   }
+
+  @Post('verify-key')
+  async verifyApiKey(@Body() dto: VerifyApiKeyDto) {
+    return this.aiService.verifyApiKey(dto);
+  }
+
+  @Post('detect-key')
+  detectKey(@Body('apiKey') apiKey: string) {
+    return this.aiService.detectApiKeyProvider(apiKey || '');
+  }
+
 }

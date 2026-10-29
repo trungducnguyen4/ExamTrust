@@ -4,6 +4,12 @@ import { RedisService, DEFAULT_REDIS } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
+import { VerifyApiKeyDto, VerifyApiKeyResult } from './dto/verify-api-key.dto';
+import {
+  detectAiProvider,
+  verifyApiKeyWithProvider,
+  ProviderDetectionResult,
+} from './ai-key-verifier';
 import {
   buildExamTrustPromptHeader,
   ExamTrustAiContext,
@@ -433,7 +439,9 @@ Rules:
     try {
       let responseText: string;
 
-      if (this.provider === 'ollama') {
+      if (context?.userApiKey) {
+        responseText = await this._callWithUserKey(systemPrompt, context);
+      } else if (this.provider === 'ollama') {
         responseText = await this._callOllama(
           systemPrompt,
           this.buildOllamaOptions('question_generation'),
@@ -637,7 +645,9 @@ ${typeInstruction}
     try {
       let responseText: string;
 
-      if (this.provider === 'ollama') {
+      if (context?.userApiKey) {
+        responseText = await this._callWithUserKey(systemPrompt, context);
+      } else if (this.provider === 'ollama') {
         responseText = await this._callOllama(
           systemPrompt,
           this.buildOllamaOptions('exam_generation'),
@@ -1969,4 +1979,50 @@ Rules:
 
     return map[normalized] || 'MIXED';
   }
+
+  async verifyApiKey(dto: VerifyApiKeyDto): Promise<VerifyApiKeyResult> {
+    return verifyApiKeyWithProvider(dto);
+  }
+
+  detectApiKeyProvider(apiKey: string): ProviderDetectionResult {
+    return detectAiProvider(apiKey);
+  }
+
+  private async _callWithUserKey(prompt: string, context?: Record<string, any>): Promise<string> {
+    const userApiKey = String(context?.userApiKey || '').trim();
+    if (!userApiKey) {
+      throw new Error('Khóa API người dùng không hợp lệ.');
+    }
+
+    const detected = detectAiProvider(userApiKey);
+    const provider = String(context?.userProvider || detected.provider || 'google').toLowerCase();
+    const model = String(context?.userModel || detected.recommendedModel || 'gemini-1.5-flash');
+
+    if (provider === 'google') {
+      const client = new GoogleGenerativeAI(userApiKey);
+      const generativeModel = client.getGenerativeModel({ model });
+      const res = await generativeModel.generateContent(prompt);
+      return res.response.text();
+    }
+
+    let baseURL: string | undefined;
+    if (provider === 'deepseek') baseURL = 'https://api.deepseek.com';
+    else if (provider === 'groq') baseURL = 'https://api.groq.com/openai/v1';
+    else if (provider === 'openrouter') baseURL = 'https://openrouter.ai/api/v1';
+    else if (provider === 'nvidia') baseURL = 'https://integrate.api.nvidia.com/v1';
+
+    const client = new OpenAI({
+      apiKey: userApiKey,
+      baseURL,
+    });
+
+    const completion = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+    });
+
+    return completion.choices?.[0]?.message?.content || '';
+  }
+
 }

@@ -48,6 +48,9 @@ export interface ExamTrustAiContext {
   instruction?: string;
   analytics?: ExamTrustAiAnalyticsSummary;
   extra?: Record<string, any>;
+  userApiKey?: string;
+  userProvider?: string;
+  userModel?: string;
 }
 
 export interface ExamTrustAiPromptParams {

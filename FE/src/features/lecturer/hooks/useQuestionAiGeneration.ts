@@ -5,6 +5,7 @@ import { findMostSimilarQuestion, snapQuestionDifficulty } from "../question-edi
 import type { CourseOption, QuestionOption } from "../question-editor-types";
 import type { ClarificationConfig } from "../components/QuestionClarificationDialog";
 import type { BatchGeneratedQuestion } from "../components/QuestionBatchReviewDialog";
+import { getUserAiConfig, UserAiConfig } from "@/lib/ai-key-storage";
 
 export type GeneratedQuestion = {
   content: string;
@@ -70,6 +71,14 @@ export function useQuestionAiGeneration(params: Params) {
   // Batch review modal & state
   const [isBatchReviewOpen, setIsBatchReviewOpen] = useState(false);
   const [batchQuestions, setBatchQuestions] = useState<BatchGeneratedQuestion[]>([]);
+
+  // User AI Key state
+  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
+  const [userAiConfig, setUserAiConfig] = useState<UserAiConfig | null>(null);
+
+  useEffect(() => {
+    setUserAiConfig(getUserAiConfig());
+  }, []);
 
   const isRestoringRef = useRef(false);
 
@@ -288,6 +297,14 @@ export function useQuestionAiGeneration(params: Params) {
 
     const backendType = typeMap[params.questionType] || "MULTIPLE_CHOICE";
     const selectedCourse = params.courses.find((course) => course.id === params.courseId);
+    const activeConfig = getUserAiConfig();
+    const userKeyContext = activeConfig?.apiKey
+      ? {
+          userApiKey: activeConfig.apiKey,
+          userProvider: activeConfig.provider,
+          userModel: activeConfig.model,
+        }
+      : {};
 
     try {
       if (questionCount > 1) {
@@ -307,6 +324,7 @@ export function useQuestionAiGeneration(params: Params) {
             courseCode: selectedCourse?.code,
             questionType: backendType,
             source: "question_editor_batch",
+            ...userKeyContext,
           },
         });
 
@@ -339,6 +357,7 @@ export function useQuestionAiGeneration(params: Params) {
             courseCode: selectedCourse?.code,
             questionType: backendType,
             source: "question_editor_single",
+            ...userKeyContext,
           },
         });
 
@@ -481,5 +500,9 @@ export function useQuestionAiGeneration(params: Params) {
     applyBatchQuestionSingle,
     saveBatchQuestionToBank,
     saveAllBatchQuestionsToBank,
+    isApiKeyDialogOpen,
+    setIsApiKeyDialogOpen,
+    userAiConfig,
+    setUserAiConfig,
   };
 }

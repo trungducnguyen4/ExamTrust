@@ -39,7 +39,9 @@ import {
   Wand2,
   BrainCircuit,
   Check,
+  Key,
 } from "lucide-react";
+import { ApiKeyConfigDialog } from "@/components/ai/ApiKeyConfigDialog";
 import { QuestionClarificationDialog } from "./components/QuestionClarificationDialog";
 import { QuestionBatchReviewDialog } from "./components/QuestionBatchReviewDialog";
 import { toast } from "sonner";
@@ -657,21 +659,42 @@ export default function QuestionEditor() {
                             Trợ lý AI
                           </CardTitle>
                         </div>
-                        {/* Grill-me Toggle */}
-                        <div className="flex items-center gap-2">
-                          <Label
-                            htmlFor="grillme-mode-switch"
-                            className="text-xs font-medium cursor-pointer flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+                        {/* BYOK Key Config & Grill-me Toggle */}
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => ai.setIsApiKeyDialogOpen(true)}
+                            className="h-8 gap-1.5 text-xs border-primary/30 bg-background/80 hover:bg-background"
+                            title="Cấu hình khóa API cá nhân (Google Gemini, OpenAI, Claude...)"
                           >
-                            <BrainCircuit className="h-3.5 w-3.5 text-primary" />
-                            Làm rõ yêu cầu (Grill-me)
-                          </Label>
-                          <Switch
-                            id="grillme-mode-switch"
-                            checked={ai.isGrillMeEnabled}
-                            onCheckedChange={ai.toggleGrillMe}
-                            aria-label="Bật hoặc tắt chế độ Grill-me làm rõ yêu cầu"
-                          />
+                            <Key className="h-3.5 w-3.5 text-primary" />
+                            <span>
+                              {ai.userAiConfig?.isValidated
+                                ? ai.userAiConfig.providerName
+                                : "Cấu hình AI Key"}
+                            </span>
+                            {ai.userAiConfig?.isValidated && (
+                              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                            )}
+                          </Button>
+
+                          <div className="flex items-center gap-2">
+                            <Label
+                              htmlFor="grillme-mode-switch"
+                              className="text-xs font-medium cursor-pointer flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+                            >
+                              <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+                              Làm rõ yêu cầu (Grill-me)
+                            </Label>
+                            <Switch
+                              id="grillme-mode-switch"
+                              checked={ai.isGrillMeEnabled}
+                              onCheckedChange={ai.toggleGrillMe}
+                              aria-label="Bật hoặc tắt chế độ Grill-me làm rõ yêu cầu"
+                            />
+                          </div>
                         </div>
                       </div>
                       <CardDescription className="text-xs sm:text-sm">
@@ -1286,6 +1309,12 @@ export default function QuestionEditor() {
           onSelect={topics.selectTopic}
           onCreate={topics.createTopic}
           onCheckSimilarity={topics.checkSimilarTopics}
+        />
+
+        <ApiKeyConfigDialog
+          open={ai.isApiKeyDialogOpen}
+          onOpenChange={ai.setIsApiKeyDialogOpen}
+          onConfigChange={ai.setUserAiConfig}
         />
 
         <QuestionClarificationDialog
