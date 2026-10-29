@@ -20,9 +20,13 @@ Rules:
 
 ## Verification Protocol — Proof of Change & Confidence Report
 Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
-1. **Tests**: Kiểm tra cú pháp, lint, test case thực tế.
-2. **Runtime**: Chạy API / hàm thực tế, xác minh DB data.
-3. **Visual**: BẮT BUỘC chụp ảnh (Screenshot) nếu sửa UI, quay video màn hình (Video/GIF) nếu sửa luồng người dùng (User Flow).
+1. **Tests**: Kiểm tra cú pháp, lint, test case thực tế (TypeScript `tsc`, Vitest/Jest).
+2. **Runtime**: Chạy API / hàm thực tế, xác minh DB data, HTTP status 200.
+3. **Visual**: BẮT BUỘC tạo bằng chứng trực quan:
+   - **UI tĩnh**: Chụp ảnh màn hình (Screenshot).
+   - **Luồng người dùng (User Flow)**: BẮT BUỘC quay video hoặc tạo Animated GIF ghi lại trọn vẹn chuỗi thao tác thực tế (gõ phím, chọn tùy chọn, bật switch, modal/dialog hiện lên, trạng thái loading, và kết quả hiển thị ra sao).
+   - **BẮT BUỘC nhúng trực tiếp vào Pull Request (PR)**: Sử dụng cú pháp Markdown Image (`![Mô tả](https://raw.githubusercontent.com/.../docs/screenshots/...)`) để reviewer mở PR là nhìn thấy ngay toàn bộ thao tác. Tuyệt đối KHÔNG ĐƯỢC chỉ ghi text đường dẫn file local!
+   - Chi tiết quy trình thực thi tại skill `verification-visual-proof` (`.agents/skills/verification-visual-proof/SKILL.md`).
 4. **Confidence**: Đánh giá độ tin cậy kèm những gì đã kiểm và chưa kiểm.
 
 ---
@@ -128,7 +132,9 @@ Mỗi khi tạo PR, AI Agent phải cung cấp đầy đủ thông tin theo mẫ
 #### 4. Bằng chứng kiểm thử (Verification Protocol — 4 Trụ Cột)
 - [x] **Tests:** Cú pháp sạch, TypeScript / Jest pass 100%.
 - [x] **Runtime:** Đã gọi API / reload trang thành công với HTTP Status 200.
-- [x] **Visual:** [Đính kèm Screenshot / Video màn hình chứng minh giao diện hoạt động]
+- [x] **Visual:** BẮT BUỘC nhúng ảnh/GIF trực tiếp hiển thị trên GitHub PR:
+  ![Minh chứng User Flow](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.gif)
+  *(Hoặc ảnh chụp màn hình nếu là UI tĩnh: `![Minh chứng UI](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.png)`)*
 - [x] **Confidence:** High (Đã kiểm tra luồng trực tiếp).
 
 #### 5. Nhánh đích & Kế hoạch Merge (Target & Back-merge Plan)
@@ -136,4 +142,3 @@ Mỗi khi tạo PR, AI Agent phải cung cấp đầy đủ thông tin theo mẫ
 - **Target Branch:** `develop` (hoặc `release/vX.Y.Z`)
 - **Back-merge required:** [Có / Không - Nếu là hotfix thì bắt buộc merge ngược về `develop`]
 ```
-

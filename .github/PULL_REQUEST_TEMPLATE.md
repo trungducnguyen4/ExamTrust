@@ -19,10 +19,12 @@
 
 ### 3. 👁️ Visual (Inspect what the user will see)
 <!-- 
-BẮT BUỘC:
-- Nếu chỉnh UI / Component: ĐÍNH KÈM SCREENSHOT (Kéo thả ảnh vào đây)
-- Nếu chỉnh Luồng người dùng (User Flow): ĐÍNH KÈM VIDEO QUAY MÀN HÌNH / GIF (Kéo thả file video mp4/mov hoặc gif vào đây)
-- Nếu chỉnh Backend/API: Minh họa Toast thông báo, Modal popup cảnh báo hoặc dữ liệu bảng hiển thị
+BẮT BUỘC NHÚNG TRỰC TIẾP HÌNH ẢNH / HOẠT ẢNH VÀO ĐÂY:
+- Nếu chỉnh UI / Component: BẮT BUỘC nhúng SCREENSHOT:
+  ![Minh chứng UI](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-or-commit>/docs/screenshots/<file>.png)
+- Nếu chỉnh Luồng người dùng (User Flow): BẮT BUỘC nhúng ANIMATED GIF / VIDEO quay lại thao tác thực tế (gõ, click chọn, modal/dialog, tiến trình xử lý, kết quả):
+  ![Minh chứng User Flow](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-or-commit>/docs/screenshots/<file>.gif)
+- NGHIÊM CẤM chỉ ghi text đường dẫn file cục bộ. Reviewer phải nhìn thấy hình ảnh/hoạt ảnh chuyển động ngay trên trang PR.
 -->
 
 ### 4. 🎯 Confidence (State what was verified — and what was not)

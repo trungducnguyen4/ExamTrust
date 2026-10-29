@@ -25,7 +25,11 @@ Sau khi hoàn thành bất kỳ thay đổi nào, AI agent phải xuất báo c�
   - **BẮT BUỘC chụp ảnh màn hình (Screenshot)** đính kèm vào báo cáo.
   - Phải thể hiện các trạng thái: Normal, Empty state, Loading, Active, Mobile responsive.
 - **Luồng người dùng / Quy trình nghiệp vụ (User Flows / Multi-step Journey)**:
-  - **BẮT BUỘC quay video màn hình (Screen Recording Video / GIF)** thể hiện trọn vẹn hành trình (click mở modal, nhập form, bấm submit, chuyển trang, toast thông báo thành công).
+  - **BẮT BUỘC quay video màn hình hoặc tạo Animated GIF** thể hiện trọn vẹn hành trình (gõ phím, chọn tùy chọn, click mở modal, loading/tiến trình, và kết quả hiển thị ra sao).
+- **Quy chuẩn nhúng vào Pull Request (PR)**:
+  - **BẮT BUỘC nhúng trực tiếp bằng cú pháp Markdown Image**: `![Mô tả hoạt ảnh](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.gif)` để bất kỳ ai mở PR trên GitHub đều nhìn thấy ngay video/GIF chuyển động mà không phải clone repo hay tải file về.
+  - **NGHIÊM CẤM** chỉ ghi text đường dẫn file cục bộ (như `docs/screenshots/...`) trong PR description.
+  - Tham khảo chi tiết tại skill `verification-visual-proof` (`.agents/skills/verification-visual-proof/SKILL.md`).
 - **Chỉnh sửa Backend thuần (Backend only)**:
   - Minh họa Toast thông báo, Modal cảnh báo hoặc cột dữ liệu hiển thị trên giao diện người dùng.
 
