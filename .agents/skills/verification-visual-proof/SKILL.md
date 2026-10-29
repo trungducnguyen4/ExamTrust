@@ -18,15 +18,20 @@ Khi phát triển tính năng hoặc sửa lỗi liên quan đến giao diện n
    - Mọi thay đổi về UI/UX bắt buộc phải có bằng chứng trực quan nhìn thấy được ngay trên GitHub PR.
    - Nghiêm cấm tuyệt đối việc chỉ ghi text đường dẫn local như: `Visual: Đã chụp ảnh màn hình lưu tại docs/screenshots/abc.png`. Reviewer và người dùng không thể mở file local đó trên trình duyệt GitHub!
 
-2. **"Moving Proof for User Flow" (Luồng chuyển động cho tương tác người dùng):**
+2. **"Moving Proof for User Flow & Performance" (Minh chứng chuyển động cho luồng người dùng và hiệu năng):**
    - **UI Tĩnh (Static UI):** Đổi màu nút, sửa căn lề, đổi layout danh sách $\rightarrow$ Chụp ảnh màn hình (Screenshot) trước & sau.
    - **Luồng người dùng (User Flow):** Gồm chuỗi thao tác nhập liệu (typing), bấm nút chọn số lượng, bật/tắt toggle, mở modal/dialog, trạng thái loading/tiến trình, và kết quả hiển thị cuối cùng $\rightarrow$ **BẮT BUỘC tạo Animated GIF hoặc Video màn hình** ghi lại từ đầu đến cuối luồng thao tác thực tế.
+   - **Tối ưu hóa hiệu năng (Performance Optimization):** Các bài toán N+1 query, tối ưu thời gian tải trang, rendering/caching $\rightarrow$ **BẮT BUỘC xuất Video màn hình (`.mp4` tại `docs/videos/`) hoặc Animated GIF thời gian thực** thể hiện rõ:
+     1. Hành vi reload/F5 liên tục để chứng minh độ phản hồi tức thì (<100ms).
+     2. So sánh trực quan Trước (Before: treo spinner, chờ lâu) vs Sau (After: Skeleton UI, dữ liệu lên ngay).
+     3. Bảng đối chiếu chỉ số đo lường (Database queries, latency ms, HTTP status).
 
 3. **"Directly Embedded in PR" (Bắt buộc nhúng trực tiếp vào PR):**
-   - Trong phần `#### 4. Bằng chứng kiểm thử (Verification Protocol — 4 Trụ Cột)` của Pull Request, BẮT BUỘC dùng cú pháp Markdown Image:
+   - Trong phần `#### 4. Bằng chứng kiểm thử (Verification Protocol — 4 Trụ Cột)` của Pull Request, BẮT BUỘC dùng cú pháp Markdown Image kèm link video:
      ```markdown
      - [x] **Visual:**
        ![Demo User Flow](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<filename>.gif)
+       🎥 **Video Full-HD minh chứng:** [Xem Video MP4](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/videos/<filename>.mp4)
      ```
    - Nhờ đó, bất kỳ ai mở PR trên GitHub đều nhìn thấy ngay hình ảnh/hoạt ảnh chuyển động đang phát mà không phải clone repo hay tải file về.
 
