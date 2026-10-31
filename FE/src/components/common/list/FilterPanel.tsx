@@ -53,6 +53,7 @@ type FilterPanelProps = {
   activeCount?: number;
   className?: string;
   inline?: boolean;
+  bare?: boolean;
 };
 
 const getNumberFieldKey = (filterKey: string, bound: "min" | "max") =>
@@ -70,6 +71,7 @@ export function FilterPanel({
   activeCount = 0,
   className,
   inline = true,
+  bare = false,
 }: FilterPanelProps) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -192,7 +194,10 @@ export function FilterPanel({
     <div
       className={cn(
         inline
-          ? "flex flex-wrap items-center gap-3.5 rounded-xl border border-border bg-card p-3 shadow-sm"
+          ? cn(
+              "flex flex-wrap items-center gap-3.5",
+              !bare && "rounded-xl border border-border bg-card p-3 shadow-sm",
+            )
           : "flex min-h-0 flex-col gap-3.5 max-h-[min(50vh,20rem)]",
       )}
     >

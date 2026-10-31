@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Database, BookOpen, BarChart3 } from "lucide-react";
+import { Database, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { difficultyLabel, typeLabels as questionTypeLabels } from "../question-bank-utils";
 import type { Question } from "../question-bank-utils";
 
 export interface QuestionBankDonutStatsProps {
   questions: Question[];
-  courses: Array<{ id?: string; code: string; name: string; faculty?: string }>;
   avgDifficulty: string;
+  courses?: Array<{ id?: string; code: string; name: string; faculty?: string }>;
 }
 
 export interface DonutSegment {
@@ -116,11 +116,9 @@ export function MiniDonutChart({
 
 export function QuestionBankDonutStats({
   questions,
-  courses,
   avgDifficulty,
 }: QuestionBankDonutStatsProps) {
   const totalQuestions = questions.length;
-  const totalCourses = courses.length;
 
   // 1. Phân loại câu hỏi (Question Types)
   const typeSegments = useMemo(() => {
@@ -168,37 +166,7 @@ export function QuestionBankDonutStats({
     ];
   }, [typeSegments]);
 
-  // 2. Thống kê khóa học (Courses coverage)
-  const coursesWithQuestionsCount = useMemo(() => {
-    return courses.filter((c) =>
-      questions.some((q) => q.course?.code === c.code || q.courseId === c.id),
-    ).length;
-  }, [courses, questions]);
-
-  const coursesWithoutQuestionsCount = Math.max(0, totalCourses - coursesWithQuestionsCount);
-  const courseCoveragePct =
-    totalCourses > 0 ? Math.round((coursesWithQuestionsCount / totalCourses) * 100) : 0;
-  const avgQuestionsPerCourse =
-    totalCourses > 0 ? (totalQuestions / totalCourses).toFixed(1) : "0";
-
-  const courseSegments: DonutSegment[] = useMemo(() => {
-    return [
-      {
-        key: "WITH_QUESTIONS",
-        label: "Đã có đề",
-        value: coursesWithQuestionsCount,
-        color: "#10b981", // emerald-500
-      },
-      {
-        key: "WITHOUT_QUESTIONS",
-        label: "Chưa có đề",
-        value: coursesWithoutQuestionsCount,
-        color: "#cbd5e1", // slate-300
-      },
-    ];
-  }, [coursesWithQuestionsCount, coursesWithoutQuestionsCount]);
-
-  // 3. Phân bố độ khó (Difficulty Distribution)
+  // 2. Phân bố độ khó (Difficulty Distribution)
   const easyCount = useMemo(
     () => questions.filter((q) => difficultyLabel(q.difficulty || 1).text === "Dễ").length,
     [questions],
@@ -243,7 +211,7 @@ export function QuestionBankDonutStats({
   return (
     <div
       data-testid="question-bank-donut-stats"
-      className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 mb-8"
+      className="grid gap-4 sm:grid-cols-2 mb-8"
     >
       {/* CARD 1: TỔNG SỐ CÂU HỎI & CÁC LOẠI CÂU HỎI */}
       <Card className="rounded-xl shadow-sm border-border/80 bg-card hover:border-primary/30 transition-colors">
@@ -284,7 +252,7 @@ export function QuestionBankDonutStats({
                           className="h-2 w-2 rounded-full shrink-0"
                           style={{ backgroundColor: seg.color }}
                         />
-                        <span className="text-muted-foreground truncate max-w-[95px] text-[11px]">
+                        <span className="text-muted-foreground truncate max-w-[120px] text-[11px]">
                           {seg.label}
                         </span>
                       </div>
@@ -301,65 +269,8 @@ export function QuestionBankDonutStats({
         </CardContent>
       </Card>
 
-      {/* CARD 2: KHÓA HỌC */}
-      <Card className="rounded-xl shadow-sm border-border/80 bg-card hover:border-emerald-500/30 transition-colors">
-        <CardHeader className="p-3.5 pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                <BookOpen className="h-3.5 w-3.5" />
-              </span>
-              Khóa học đào tạo
-            </CardTitle>
-            <span className="text-[11px] font-semibold text-emerald-600 tabular-nums">
-              {courseCoveragePct}% có đề
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="p-3.5 pt-0">
-          <div className="flex items-center gap-3.5 pt-1">
-            <MiniDonutChart
-              segments={courseSegments}
-              total={totalCourses}
-              centerPrimary={totalCourses}
-              centerSecondary="Khóa học"
-            />
-            <div className="flex-1 min-w-0 space-y-1.5">
-              <div className="flex items-center justify-between text-xs gap-1.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="text-muted-foreground truncate text-[11px]">Đã có đề</span>
-                </div>
-                <span className="font-medium text-foreground tabular-nums text-[11px] shrink-0">
-                  {coursesWithQuestionsCount}{" "}
-                  <span className="text-muted-foreground font-normal">({courseCoveragePct}%)</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs gap-1.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0" />
-                  <span className="text-muted-foreground truncate text-[11px]">Chưa có đề</span>
-                </div>
-                <span className="font-medium text-foreground tabular-nums text-[11px] shrink-0">
-                  {coursesWithoutQuestionsCount}{" "}
-                  <span className="text-muted-foreground font-normal">
-                    ({100 - courseCoveragePct}%)
-                  </span>
-                </span>
-              </div>
-              <div className="pt-1 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Trung bình:</span>
-                <span className="font-semibold text-foreground tabular-nums">
-                  {avgQuestionsPerCourse} câu / môn
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* CARD 3: ĐỘ KHÓ TRUNG BÌNH & PHÂN BỐ DỄ / TRUNG BÌNH / KHÓ */}
-      <Card className="rounded-xl shadow-sm border-border/80 bg-card hover:border-amber-500/30 transition-colors sm:col-span-2 lg:col-span-1">
+      {/* CARD 2: ĐỘ KHÓ TRUNG BÌNH & PHÂN BỐ DỄ / TRUNG BÌNH / KHÓ */}
+      <Card className="rounded-xl shadow-sm border-border/80 bg-card hover:border-amber-500/30 transition-colors">
         <CardHeader className="p-3.5 pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -385,7 +296,7 @@ export function QuestionBankDonutStats({
               <div className="flex items-center justify-between text-xs gap-1.5">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="text-muted-foreground truncate text-[11px]">Dễ</span>
+                  <span className="text-muted-foreground truncate text-[11px]">Dễ (1-4)</span>
                 </div>
                 <span className="font-medium text-foreground tabular-nums text-[11px] shrink-0">
                   {easyCount} câu{" "}
@@ -395,7 +306,7 @@ export function QuestionBankDonutStats({
               <div className="flex items-center justify-between text-xs gap-1.5">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
-                  <span className="text-muted-foreground truncate text-[11px]">Trung bình</span>
+                  <span className="text-muted-foreground truncate text-[11px]">Trung bình (5)</span>
                 </div>
                 <span className="font-medium text-foreground tabular-nums text-[11px] shrink-0">
                   {mediumCount} câu{" "}
@@ -405,7 +316,7 @@ export function QuestionBankDonutStats({
               <div className="flex items-center justify-between text-xs gap-1.5">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                  <span className="text-muted-foreground truncate text-[11px]">Khó</span>
+                  <span className="text-muted-foreground truncate text-[11px]">Khó (6-10)</span>
                 </div>
                 <span className="font-medium text-foreground tabular-nums text-[11px] shrink-0">
                   {hardCount} câu{" "}
