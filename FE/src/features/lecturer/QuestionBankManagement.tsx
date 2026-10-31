@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DataPagination } from "@/components/common/DataPagination";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
-import { AdminStatCard } from "@/components/admin/AdminStatCard";
+
 import { ContextHelp } from "@/components/common/ContextHelp";
 import { ListPageHeader } from "@/components/common/list/ListPageHeader";
 import { SearchBar } from "@/components/common/list/SearchBar";
@@ -106,6 +106,7 @@ import {
 } from "./question-bank-utils";
 import type { Question, QuestionDraftSummary } from "./question-bank-utils";
 import { QuestionPreviewInfoCard as InfoCard, QuestionPreviewSection as Section } from "./components/QuestionPreviewSections";
+import { QuestionBankDonutStats } from "./components/QuestionBankDonutStats";
 import {
   buildQuestionFilterDefinitions,
   courseFilterDefinitions,
@@ -961,39 +962,12 @@ export default function QuestionBankManagement() {
               }
             />
 
-            {/* Stats Row */}
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-              <AdminStatCard
-                icon={Database}
-                value={questions.length}
-                label="Tổng số câu hỏi"
-              />
-              <AdminStatCard
-                icon={CheckCircle2}
-                value={courses.length}
-                label="Khóa học"
-                iconWrapClassName="bg-green-100"
-                iconClassName="text-green-600"
-              />
-              <AdminStatCard
-                icon={BarChart3}
-                value={avgDifficulty}
-                label="Độ khó TB"
-                iconWrapClassName="bg-blue-100"
-                iconClassName="text-blue-600"
-              />
-              <AdminStatCard
-                icon={Tag}
-                value={
-                  Object.keys(questionTypeLabels).filter((t) =>
-                    questions.some((q) => q.type === t),
-                  ).length
-                }
-                label="Loại câu hỏi"
-                iconWrapClassName="bg-purple-100"
-                iconClassName="text-purple-600"
-              />
-            </div>
+            {/* Stats Row with Donut Charts */}
+            <QuestionBankDonutStats
+              questions={questions}
+              courses={courses}
+              avgDifficulty={avgDifficulty}
+            />
 
             <div className="mb-6 space-y-3">
               <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">

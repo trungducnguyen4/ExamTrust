@@ -1606,6 +1606,35 @@ class ApiClient {
     return this.waitForAiJob<T>(jobId, timeoutMs, intervalMs);
   }
 
+  async verifyAiKey(data: { apiKey: string; provider?: string; model?: string }) {
+    return this.request<{
+      valid: boolean;
+      provider: string;
+      providerName: string;
+      detectedProvider?: string;
+      model?: string;
+      responseTimeMs: number;
+      message: string;
+      error?: string;
+      details?: Record<string, any>;
+    }>('/ai/verify-key', {
+      method: 'POST',
+      body: data,
+    });
+  }
+
+  async detectAiKey(apiKey: string) {
+    return this.request<{
+      provider: string;
+      providerName: string;
+      confidence: 'high' | 'medium' | 'low';
+      recommendedModel: string;
+    }>('/ai/detect-key', {
+      method: 'POST',
+      body: { apiKey },
+    });
+  }
+
   async getMyRecentCourses() {
     return this.get('/courses/my-recent-courses');
   }
