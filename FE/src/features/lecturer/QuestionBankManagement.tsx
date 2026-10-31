@@ -970,7 +970,7 @@ export default function QuestionBankManagement() {
             />
 
             <div className="mb-6 space-y-3">
-              <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
+              <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 lg:flex-row lg:items-center">
                 <SearchBar
                   value={courseSearchInput}
                   onChange={setCourseSearchInput}
@@ -978,7 +978,9 @@ export default function QuestionBankManagement() {
                   placeholder="Tìm khóa học theo mã, tên hoặc khoa"
                   className="min-w-0 flex-1"
                 />
+                <div className="hidden lg:block h-6 w-px bg-border/70 shrink-0" />
                 <FilterPanel
+                  bare
                   title="Bộ lọc khóa học"
                   description="Lọc khóa học theo trạng thái câu hỏi và độ khó trung bình."
                   filters={courseFilterDefinitions}

@@ -4,11 +4,6 @@ import { QuestionBankDonutStats } from "./QuestionBankDonutStats";
 import type { Question } from "../question-bank-utils";
 
 describe("QuestionBankDonutStats component", () => {
-  const mockCourses = [
-    { id: "c1", code: "CS101", name: "Nhập môn Lập trình" },
-    { id: "c2", code: "CS102", name: "Cấu trúc dữ liệu" },
-  ];
-
   const mockQuestions: Question[] = [
     {
       id: "q1",
@@ -52,24 +47,22 @@ describe("QuestionBankDonutStats component", () => {
     },
   ];
 
-  it("renders 3 donut cards with total questions, courses and average difficulty", () => {
+  it("renders 2 donut cards: total questions and difficulty distribution", () => {
     render(
       <QuestionBankDonutStats
         questions={mockQuestions}
-        courses={mockCourses}
         avgDifficulty="4.5"
       />,
     );
 
     // Verify main card titles
     expect(screen.getByText("Tổng số câu hỏi")).toBeInTheDocument();
-    expect(screen.getByText("Khóa học đào tạo")).toBeInTheDocument();
     expect(screen.getByText("Phân bố độ khó")).toBeInTheDocument();
+    expect(screen.queryByText("Khóa học đào tạo")).not.toBeInTheDocument();
 
     // Verify center values in donuts
     const centerValues = screen.getAllByTestId("donut-center-primary").map((el) => el.textContent);
     expect(centerValues).toContain("4"); // 4 total questions
-    expect(centerValues).toContain("2"); // 2 courses
     expect(centerValues).toContain("4.5"); // avg difficulty
 
     // Verify difficulty breakdown: 2 Dễ (q1, q4), 1 Trung bình (q2), 1 Khó (q3)
@@ -81,7 +74,6 @@ describe("QuestionBankDonutStats component", () => {
     render(
       <QuestionBankDonutStats
         questions={[]}
-        courses={mockCourses}
         avgDifficulty="0"
       />,
     );
