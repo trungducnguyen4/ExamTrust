@@ -970,15 +970,15 @@ export default function QuestionBankManagement() {
             />
 
             <div className="mb-6 space-y-3">
-              <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 xl:flex-row xl:items-center">
                 <SearchBar
                   value={courseSearchInput}
                   onChange={setCourseSearchInput}
                   onSearch={runCourseSearch}
                   placeholder="Tìm khóa học theo mã, tên hoặc khoa"
-                  className="min-w-0 flex-1"
+                  className="min-w-0 flex-1 sm:min-w-[280px]"
                 />
-                <div className="hidden lg:block h-6 w-px bg-border/70 shrink-0" />
+                <div className="hidden xl:block h-6 w-px bg-border/70 shrink-0" />
                 <FilterPanel
                   bare
                   title="Bộ lọc khóa học"
@@ -1360,7 +1360,7 @@ export default function QuestionBankManagement() {
                   onChange={setQuestionSearchInput}
                   onSearch={runQuestionSearch}
                   placeholder="Tìm câu hỏi hoặc ID..."
-                  className="min-w-0 flex-1"
+                  className="min-w-0 flex-1 sm:min-w-[280px]"
                 />
                 <FilterPanel
                   title="Bộ lọc câu hỏi"

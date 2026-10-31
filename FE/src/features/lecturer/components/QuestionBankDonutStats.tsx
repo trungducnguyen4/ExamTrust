@@ -223,9 +223,6 @@ export function QuestionBankDonutStats({
               </span>
               Tổng số câu hỏi
             </CardTitle>
-            <span className="text-[11px] font-semibold text-primary tabular-nums">
-              {typeSegments.length} loại
-            </span>
           </div>
         </CardHeader>
         <CardContent className="p-3.5 pt-0">

@@ -23,6 +23,7 @@ Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
 1. **Tests**: Kiểm tra cú pháp, lint, test case thực tế (TypeScript `tsc`, Vitest/Jest).
 2. **Runtime**: Chạy API / hàm thực tế, xác minh DB data, HTTP status 200.
 3. **Visual**: BẮT BUỘC tạo bằng chứng trực quan:
+   - **BẮT BUỘC chụp từ Live Dev Server thật**: Phải chạy ứng dụng thật (pm run dev) có đầy đủ Layout Shell (Sidebar 240px, Header) để kiểm tra độ co giãn Flexbox/Grid thực tế. **TUYỆT ĐỐI CẤM tạo file mock preview HTML tĩnh (preview-*.html) để đối phó nộp PR!**
    - **UI tĩnh**: Chụp ảnh màn hình (Screenshot).
    - **Luồng người dùng (User Flow)**: BẮT BUỘC quay video hoặc tạo Animated GIF ghi lại trọn vẹn chuỗi thao tác thực tế (gõ phím, chọn tùy chọn, bật switch, modal/dialog hiện lên, trạng thái loading, và kết quả hiển thị ra sao).
    - **Tối ưu hóa hiệu năng (Performance Optimization)**: BẮT BUỘC quay Video màn hình (Screen Recording / `.mp4` lưu tại `docs/videos/`) hoặc Animated GIF thời gian thực ghi lại trọn vẹn sự cải thiện: thao tác reload/F5 liên tục, độ phản hồi tức thì, loại bỏ độ trễ/giật lag, kèm số liệu so sánh thời gian thực (Network response time ms, số lượng database queries trước và sau).

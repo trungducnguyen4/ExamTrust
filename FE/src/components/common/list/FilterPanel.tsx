@@ -623,7 +623,11 @@ export function FilterPanel({
   }
 
   if (inline) {
-    return <section className={cn("w-full", className)}>{content}</section>;
+    return (
+      <section className={cn(bare ? "w-auto" : "w-full", className)}>
+        {content}
+      </section>
+    );
   }
 
   return (
