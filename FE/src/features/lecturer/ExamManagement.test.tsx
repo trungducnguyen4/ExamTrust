@@ -86,7 +86,7 @@ describe("ExamManagement client-side pagination", () => {
     await waitFor(() => expect(screen.getByText("Exam 1")).toBeInTheDocument());
     expect(screen.getByTestId("pagination")).toHaveTextContent("Trang 1 / 3");
     expect(mocks.getExams).toHaveBeenCalledTimes(1);
-    expect(mocks.getExams).toHaveBeenCalledWith({ page: 1, limit: 500 });
+    expect(mocks.getExams).toHaveBeenCalledWith({ includeArchived: true, page: 1, limit: 500 });
 
     fireEvent.click(screen.getByRole("button", { name: "Trang sau" }));
 
