@@ -1624,31 +1624,20 @@ export default function AdminCourseManagement() {
         </div>
 
         <div className="mb-6 space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center">
+          <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 2xl:flex-row 2xl:items-center">
             <SearchBar
               value={searchInput}
               onChange={setSearchInput}
               onSearch={runSearch}
               placeholder="Tìm theo mã, tên, năm học, học kỳ hoặc giảng viên"
-              className="flex-1"
+              className="min-w-0 flex-1 sm:min-w-[280px]"
             />
-            <SortButton
-              options={courseSortOptions}
-              value={sortField}
-              order={sortOrder}
-              onSortChange={(field, order) => {
-                setSortField(field);
-                setSortOrder(order);
-              }}
-            />
-            <Select value={archiveScope} onValueChange={(value) => setArchiveScope(value as 'active' | 'archived')}>
-              <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Các khóa học đang hoạt động</SelectItem>
-                <SelectItem value="archived">Các khóa học đã được lưu trữ</SelectItem>
-              </SelectContent>
-            </Select>
-            <FilterPanel
+            <div className="hidden 2xl:block h-6 w-px bg-border/70 shrink-0" />
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <FilterPanel
+              inline
+              bare
+              className="shrink-0"
               title="Bộ lọc khóa học"
               description="Lọc khóa học theo trạng thái, giảng viên, năm học, học kỳ và số tín chỉ."
               filters={courseFilterDefinitions}
@@ -1660,6 +1649,25 @@ export default function AdminCourseManagement() {
               onClear={clearFilters}
               activeCount={activeFilterCount}
             />
+              
+              <Select value={archiveScope} onValueChange={(value) => setArchiveScope(value as 'active' | 'archived')}>
+              <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Các khóa học đang hoạt động</SelectItem>
+                <SelectItem value="archived">Các khóa học đã được lưu trữ</SelectItem>
+              </SelectContent>
+            </Select>
+              <div className="hidden sm:block h-6 w-px bg-border/70 shrink-0" />
+              <SortButton
+              options={courseSortOptions}
+              value={sortField}
+              order={sortOrder}
+              onSortChange={(field, order) => {
+                setSortField(field);
+                setSortOrder(order);
+              }}
+            />
+            </div>
           </div>
           <ActiveFilterChips
             chips={activeFilterChips}

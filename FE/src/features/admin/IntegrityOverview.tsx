@@ -548,27 +548,33 @@ export default function IntegrityOverview({ lecturerScope = false }: { lecturerS
         />
 
         <div className="mb-6 space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center">
-            <FilterPanel
-              title="Bộ lọc tính toàn vẹn"
-              description="Lọc theo mức tín hiệu, bài thi, ngày nộp và dấu hiệu bất thường."
-              filters={integrityFilters}
-              value={draftFilters}
-              onValueChange={(key, nextValue) =>
-                setDraftFilters((prev) => ({ ...prev, [key]: nextValue }))
-              }
-              onApply={applyFilters}
-              onClear={clearFilters}
-              activeCount={activeFilterCount}
+          <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 2xl:flex-row 2xl:items-center">
+            <SearchBar
+              value={searchInput}
+              onChange={setSearchInput}
+              onSearch={runSearch}
+              placeholder="Tìm theo sinh viên hoặc bài thi"
+              className="min-w-0 flex-1 sm:min-w-[280px]"
             />
+            <div className="hidden 2xl:block h-6 w-px bg-border/70 shrink-0" />
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <FilterPanel
+                bare
+                title="Bộ lọc tính toàn vẹn"
+                description="Lọc theo mức tín hiệu, bài thi, ngày nộp và dấu hiệu bất thường."
+                filters={integrityFilters}
+                value={draftFilters}
+                onValueChange={(key, nextValue) =>
+                  setDraftFilters((prev) => ({ ...prev, [key]: nextValue }))
+                }
+                onApply={applyFilters}
+                onClear={clearFilters}
+                activeCount={activeFilterCount}
+                inline
+                className="shrink-0"
+              />
+            </div>
           </div>
-          <SearchBar
-            value={searchInput}
-            onChange={setSearchInput}
-            onSearch={runSearch}
-            placeholder="Tìm theo sinh viên hoặc bài thi"
-            showSearchButton
-          />
           <ActiveFilterChips
             chips={activeFilterChips}
             onRemove={removeFilter}

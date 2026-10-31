@@ -418,24 +418,20 @@ export default function CourseManagement() {
         </section>
 
         <section className="space-y-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center">
+          <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 2xl:flex-row 2xl:items-center">
             <SearchBar
               value={searchInput}
               onChange={setSearchInput}
               onSearch={runSearch}
               placeholder="Tìm theo mã, tên, khoa, năm học hoặc học kỳ"
-              className="flex-1"
+              className="min-w-0 flex-1 sm:min-w-[280px]"
             />
-            <SortButton
-              options={courseSortOptions}
-              value={sortField}
-              order={sortOrder}
-              onSortChange={(field, order) => {
-                setSortField(field);
-                setSortOrder(order);
-              }}
-            />
-            <FilterPanel
+            <div className="hidden 2xl:block h-6 w-px bg-border/70 shrink-0" />
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <FilterPanel
+              inline
+              bare
+              className="shrink-0"
               title="Bộ lọc khóa học"
               description="Tìm kiếm và lọc các khóa học theo các tiêu chí khác nhau."
               filters={courseFilterDefinitions}
@@ -447,6 +443,18 @@ export default function CourseManagement() {
               onClear={clearFilters}
               activeCount={activeFilterCount}
             />
+              
+              <div className="hidden sm:block h-6 w-px bg-border/70 shrink-0" />
+              <SortButton
+              options={courseSortOptions}
+              value={sortField}
+              order={sortOrder}
+              onSortChange={(field, order) => {
+                setSortField(field);
+                setSortOrder(order);
+              }}
+            />
+            </div>
           </div>
           <ActiveFilterChips
             chips={activeFilterChips}
