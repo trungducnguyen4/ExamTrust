@@ -36,6 +36,8 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { FormattedText } from "@/components/ui/formatted-text";
+import AutonomousAuditDialog from "./components/AutonomousAuditDialog";
+import { BrainCircuit } from "lucide-react";
 
 type ExamQuestion = {
   id: string;
@@ -182,6 +184,7 @@ export default function ExamPreview() {
   const [exam, setExam] = useState<ExamData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showQRDialog, setShowQRDialog] = useState(false);
+  const [showAuditDialog, setShowAuditDialog] = useState(false);
 
   const loadExam = async () => {
     if (!examId) {
@@ -231,7 +234,19 @@ export default function ExamPreview() {
         <div className="flex items-center justify-center h-48">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
-      </DashboardLayout>
+      
+        {/* Autonomous Exam QA Squad Dialog (LangGraph) */}
+        {exam && (
+          <AutonomousAuditDialog
+            open={showAuditDialog}
+            onOpenChange={setShowAuditDialog}
+            examId={exam.id}
+            examTitle={exam.title}
+            onAuditApplied={loadExam}
+          />
+        )}
+
+    </DashboardLayout>
     );
   }
 
