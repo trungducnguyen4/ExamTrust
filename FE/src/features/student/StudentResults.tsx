@@ -306,24 +306,20 @@ export default function StudentResults() {
               </Button>
             }
           />
-          <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center">
+          <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 2xl:flex-row 2xl:items-center">
             <SearchBar
               value={searchInput}
               onChange={setSearchInput}
               onSearch={runSearch}
               placeholder="Tìm theo tên bài thi hoặc khóa học"
-              className="flex-1"
+              className="min-w-0 flex-1 sm:min-w-[280px]"
             />
-            <SortButton
-              options={resultSortOptions}
-              value={sortField}
-              order={sortOrder}
-              onSortChange={(field, order) => {
-                setSortField(field);
-                setSortOrder(order);
-              }}
-            />
-            <FilterPanel
+            <div className="hidden 2xl:block h-6 w-px bg-border/70 shrink-0" />
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <FilterPanel
+              inline
+              bare
+              className="shrink-0"
               title="Bộ lọc kết quả"
               description="Lọc theo trạng thái, khóa học và khoảng điểm."
               filters={resultFilterDefinitions}
@@ -335,6 +331,18 @@ export default function StudentResults() {
               onClear={clearFilters}
               activeCount={activeFilterCount}
             />
+              
+              <div className="hidden sm:block h-6 w-px bg-border/70 shrink-0" />
+              <SortButton
+              options={resultSortOptions}
+              value={sortField}
+              order={sortOrder}
+              onSortChange={(field, order) => {
+                setSortField(field);
+                setSortOrder(order);
+              }}
+            />
+            </div>
           </div>
           <ActiveFilterChips
             chips={activeFilterChips}

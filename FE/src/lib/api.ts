@@ -1635,6 +1635,38 @@ class ApiClient {
     });
   }
 
+async triggerAutonomousExamAudit(examId: string, maxIterations = 2) {
+    return this.request<{ jobId: string; status: string; examId: string; title: string }>(
+      `/ai/exams/${examId}/autonomous-audit`,
+      {
+        method: 'POST',
+        body: { maxIterations },
+      },
+    );
+  }
+
+  async getAiJobStatus(jobId: string) {
+    return this.request<any>(`/ai/jobs/${jobId}`);
+  }
+
+  async applyAuditImprovements(
+    examId: string,
+    improvements: Array<{
+      questionId: string;
+      improvedContent: string;
+      improvedOptions?: any;
+      improvedExplanation?: string;
+    }>,
+  ) {
+    return this.request<{ success: boolean; appliedCount: number; questionIds: string[] }>(
+      `/ai/exams/${examId}/apply-audit-improvements`,
+      {
+        method: 'POST',
+        body: { improvements },
+      },
+    );
+  }
+
   async getMyRecentCourses() {
     return this.get('/courses/my-recent-courses');
   }

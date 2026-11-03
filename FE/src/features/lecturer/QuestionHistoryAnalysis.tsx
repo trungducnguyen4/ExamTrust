@@ -447,15 +447,19 @@ export default function QuestionHistoryAnalysis() {
 
         {!loading && !error && rows.length > 0 && (
           <div className="mb-6 space-y-3">
-            <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
-              <SearchBar
+            <div className="rounded-xl border border-border bg-card p-2 sm:p-2.5 shadow-sm flex flex-col gap-3 2xl:flex-row 2xl:items-center">
+            <SearchBar
                 value={searchInput}
                 onChange={setSearchInput}
                 onSearch={runSearch}
                 placeholder="Tìm câu hỏi hoặc ID..."
-                className="min-w-0 flex-1"
+                className="min-w-0 flex-1 sm:min-w-[280px]"
               />
+            <div className="hidden 2xl:block h-6 w-px bg-border/70 shrink-0" />
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
               <FilterPanel
+              inline
+              bare
                 title="Bộ lọc câu hỏi"
                 description="Lọc theo loại, xu hướng, lượt làm và hỗ trợ AI."
                 filters={historyFilterDefinitions}
@@ -468,7 +472,10 @@ export default function QuestionHistoryAnalysis() {
                 activeCount={activeFilterCount}
                 className="shrink-0"
               />
+              
+              
             </div>
+          </div>
             <ActiveFilterChips
               chips={activeFilterChips}
               onRemove={removeFilter}

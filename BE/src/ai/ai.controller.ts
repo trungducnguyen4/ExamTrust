@@ -1,4 +1,4 @@
-import { Body, Controller, NotFoundException, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -7,6 +7,7 @@ import { GenerateQuestionDto, GenerateExamQuestionsDto, SuggestSimilarTopicsDto 
 import { VerifyApiKeyDto } from './dto/verify-api-key.dto';
 import { AiJobsService } from './ai-jobs.service';
 import { AiService } from './ai.service';
+import { ExamAuditService } from './langgraph/exam-audit.service';
 import { AISection } from '../questions-v2/dto/question-draft.dto';
 import { AccessPolicyService } from '../common/services/access-policy.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +23,7 @@ export class AiController {
     private readonly aiService: AiService,
     private readonly accessPolicy: AccessPolicyService,
     private readonly prisma: PrismaService,
+    private readonly examAuditService: ExamAuditService,
   ) {}
 
   private async assertCourseContext(data: { courseId?: string; context?: Record<string, any> }, user: any) {
@@ -116,6 +118,58 @@ export class AiController {
   @Post('detect-key')
   detectKey(@Body('apiKey') apiKey: string) {
     return this.aiService.detectApiKeyProvider(apiKey || '');
+  }
+
+
+  @Post('exams/:examId/autonomous-audit')
+  async triggerAutonomousExamAudit(
+    @Param('examId') examId: string,
+    @Body() body: { maxIterations?: number },
+    @Request() req,
+  ) {
+    const exam = await this.prisma.exam.findUnique({
+      where: { id: examId },
+      select: { id: true, courseId: true, title: true },
+    });
+    if (!exam) throw new NotFoundException('Không tìm thấy bài thi');
+    if (exam.courseId) {
+      await this.accessPolicy.assertInstructorCanAccessCourse(exam.courseId, req.user);
+    }
+
+    const job = await this.aiJobsService.createJob({
+      task: 'autonomous-exam-audit',
+      section: AISection.CONTENT,
+      payload: {
+        examId,
+        maxIterations: body?.maxIterations || 2,
+        requestedBy: req.user.id,
+      },
+      requestedBy: req.user.id,
+    });
+
+    return { jobId: job.id, status: job.status, examId, title: exam.title };
+  }
+
+  @Post('exams/:examId/apply-audit-improvements')
+  async applyAuditImprovements(
+    @Param('examId') examId: string,
+    @Body() body: { improvements: Array<{ questionId: string; improvedContent: string; improvedOptions?: any; improvedExplanation?: string }> },
+    @Request() req,
+  ) {
+    const exam = await this.prisma.exam.findUnique({
+      where: { id: examId },
+      select: { id: true, courseId: true },
+    });
+    if (!exam) throw new NotFoundException('Không tìm thấy bài thi');
+    if (exam.courseId) {
+      await this.accessPolicy.assertInstructorCanAccessCourse(exam.courseId, req.user);
+    }
+
+    return this.examAuditService.applyAuditImprovements({
+      examId,
+      improvements: body.improvements || [],
+      userId: req.user.id,
+    });
   }
 
 }

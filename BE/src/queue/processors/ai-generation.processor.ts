@@ -9,8 +9,9 @@ import { EmbeddingService } from '../../ai/embedding.service';
 import { AiTelemetryService } from '../../ai/telemetry.service';
 import { AISection } from '../../questions-v2/dto/question-draft.dto';
 import { ExamTrustAiContext } from '../../ai/ai-profile';
+import { ExamAuditService } from '../../ai/langgraph/exam-audit.service';
 
-type AiTaskType = 'single-question' | 'exam-questions' | 'draft-section' | 'exam-quality-review' | 'exam-risk-assessment' | 'question-improvement' | 'proctoring-evidence' | 'question-duplicate-analysis';
+type AiTaskType = 'single-question' | 'exam-questions' | 'draft-section' | 'exam-quality-review' | 'exam-risk-assessment' | 'question-improvement' | 'proctoring-evidence' | 'question-duplicate-analysis' | 'autonomous-exam-audit';
 
 @Processor('ai-generation')
 export class AIGenerationProcessor {
@@ -19,6 +20,7 @@ export class AIGenerationProcessor {
   private readonly bucket: string;
   private readonly embeddingService: EmbeddingService;
   private readonly telemetryService: AiTelemetryService;
+  private readonly examAuditService: ExamAuditService;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -26,9 +28,11 @@ export class AIGenerationProcessor {
     private readonly config: ConfigService,
     embeddingService?: EmbeddingService,
     telemetryService?: AiTelemetryService,
+    examAuditService?: ExamAuditService,
   ) {
     this.embeddingService = embeddingService || new EmbeddingService(this.config);
     this.telemetryService = telemetryService || new AiTelemetryService();
+    this.examAuditService = examAuditService || new ExamAuditService(this.prisma, this.telemetryService);
     const accountId = this.config.get<string>('R2_ACCOUNT_ID');
     const endpoint =
       this.config.get<string>('R2_ENDPOINT') ||
@@ -471,6 +475,35 @@ export class AIGenerationProcessor {
             status: 'SUCCEEDED',
             output: {
               questions,
+              telemetry,
+            },
+            completedAt: new Date(),
+          },
+        });
+        return;
+      }
+
+      if (task === 'autonomous-exam-audit') {
+        const result = await this.examAuditService.runExamAudit({
+          examId: payload.examId,
+          maxIterations: payload.maxIterations || 2,
+          requestedBy: payload.requestedBy,
+        });
+
+        const telemetry = this.telemetryService.generateTelemetry({
+          provider: process.env.AI_PROVIDER || 'google',
+          promptText: `autonomous-exam-audit:${payload.examId}`,
+          completionText: JSON.stringify({ score: result.overallQualityScore, iterations: result.iterationCount }),
+          latencyMs: Date.now() - startTime,
+          task: 'autonomous-exam-audit',
+        });
+
+        await this.prisma.aIGenerationRecord.update({
+          where: { id: jobId },
+          data: {
+            status: 'SUCCEEDED',
+            output: {
+              ...result,
               telemetry,
             },
             completedAt: new Date(),

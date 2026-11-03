@@ -5,6 +5,7 @@ import { AiStatusController } from './ai-status.controller';
 import { AiJobsService } from './ai-jobs.service';
 import { EmbeddingService } from './embedding.service';
 import { AiTelemetryService } from './telemetry.service';
+import { ExamAuditService } from './langgraph/exam-audit.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { QueueModule } from '../queue/queue.module';
 import { AccessPolicyService } from '../common/services/access-policy.service';
@@ -12,7 +13,7 @@ import { AccessPolicyService } from '../common/services/access-policy.service';
 @Module({
   imports: [PrismaModule, forwardRef(() => QueueModule)],
   controllers: [AiController, AiStatusController],
-  providers: [AiService, AiJobsService, AccessPolicyService, EmbeddingService, AiTelemetryService],
-  exports: [AiService, AiJobsService, EmbeddingService, AiTelemetryService],
+  providers: [AiService, AiJobsService, AccessPolicyService, EmbeddingService, AiTelemetryService, ExamAuditService],
+  exports: [AiService, AiJobsService, EmbeddingService, AiTelemetryService, ExamAuditService],
 })
 export class AiModule {}
