@@ -14,6 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import {
   Bot,
   BrainCircuit,
   CheckCircle2,
@@ -30,19 +36,36 @@ import {
   RotateCcw,
 } from "lucide-react";
 import api from "@/lib/api";
+import {
+  QUESTION_TYPE_LABELS,
+  getDifficultyLabel,
+  buildComparisonSnapshot,
+  getChangedComparisonFields,
+  EditableOption,
+  QuestionComparisonSnapshot,
+  ComparisonFieldKey,
+} from "../exam-analytics-model";
 
 export interface QuestionImprovementItem {
   questionId: string;
   originalQuestion: {
     content: string;
+    type?: string;
     options?: any;
+    correctAnswer?: any;
     explanation?: string;
+    difficulty?: number;
+    points?: number;
   };
   flawSummary: string;
   improvedQuestion: {
     content: string;
+    type?: string;
     options?: any;
+    correctAnswer?: any;
     explanation?: string;
+    difficulty?: number;
+    points?: number;
   };
   improvementRationale: string;
 }
@@ -199,31 +222,67 @@ export default function AutonomousAuditDialog({
           questionId: "q-sim-1",
           originalQuestion: {
             content: "Trong lập trình hướng đối tượng, đặc tính nào KHÔNG phải là trụ cột chính?",
-            options: ["A. Đóng gói", "B. Kế thừa", "C. Đa hình", "D. Đa luồng"],
-            explanation: "Đa luồng là khái niệm về xử lý đồng thời, không phải trụ cột OOP.",
+            type: "MULTIPLE_CHOICE",
+            options: [
+              { id: "A", text: "Tính đóng gói" },
+              { id: "B", text: "Tính kế thừa" },
+              { id: "C", text: "Tính đa hình" },
+              { id: "D", text: "Xử lý đa luồng" },
+            ],
+            correctAnswer: "D",
+            explanation: "Đa luồng là khái niệm về xử lý đồng thời trong hệ thống, không phải trụ cột cơ bản của OOP.",
+            difficulty: 3,
+            points: 1,
           },
           flawSummary: "Sinh viên Giỏi phát hiện: Câu hỏi phủ định ngắn dễ gây nhầm lẫn khi đọc lướt, phương án D cần làm nổi bật tính đối kháng với 3 trụ cột còn lại.",
           improvedQuestion: {
             content: "Đặc tính nào sau đây KHÔNG thuộc bốn trụ cột cơ bản của lập trình hướng đối tượng (OOP)?",
-            options: ["A. Tính đóng gói (Encapsulation)", "B. Tính kế thừa (Inheritance)", "C. Tính đa hình (Polymorphism)", "D. Xử lý đa luồng (Multi-threading)"],
-            explanation: "Bốn trụ cột OOP gồm Đóng gói, Kế thừa, Đa hình và Trừu tượng. Xử lý đa luồng là kỹ thuật thực thi của hệ điều hành/runtime.",
+            type: "MULTIPLE_CHOICE",
+            options: [
+              { id: "A", text: "Tính đóng gói (Encapsulation)" },
+              { id: "B", text: "Tính kế thừa (Inheritance)" },
+              { id: "C", text: "Tính đa hình (Polymorphism)" },
+              { id: "D", text: "Xử lý đa luồng (Multi-threading)" },
+            ],
+            correctAnswer: "D",
+            explanation: "Bốn trụ cột cơ bản của OOP bao gồm Đóng gói (Encapsulation), Kế thừa (Inheritance), Đa hình (Polymorphism) và Trừu tượng (Abstraction). Xử lý đa luồng là kỹ thuật thực thi runtime.",
+            difficulty: 4,
+            points: 1,
           },
-          improvementRationale: "Bổ sung tên tiếng Anh chuẩn mực và làm rõ khái niệm 4 trụ cột để học sinh nhận diện kiến thức chính xác.",
+          improvementRationale: "Bổ sung thuật ngữ tiếng Anh chuẩn mực và làm rõ khái niệm bốn trụ cột để sinh viên nhận diện bản chất chính xác, loại trừ bẫy nhầm lẫn.",
         },
         {
           questionId: "q-sim-2",
           originalQuestion: {
             content: "Thuật toán tìm kiếm nhị phân có độ phức tạp thời gian tốt nhất là gì?",
-            options: ["A. O(1)", "B. O(log n)", "C. O(n)", "D. O(n log n)"],
-            explanation: "Khi phần tử cần tìm nằm ngay chính giữa mảng.",
+            type: "MULTIPLE_CHOICE",
+            options: [
+              { id: "A", text: "O(1)" },
+              { id: "B", text: "O(log n)" },
+              { id: "C", text: "O(n)" },
+              { id: "D", text: "O(n log n)" },
+            ],
+            correctAnswer: "A",
+            explanation: "Khi phần tử cần tìm nằm ngay chính giữa mảng ở bước tìm kiếm đầu tiên.",
+            difficulty: 5,
+            points: 1,
           },
-          flawSummary: "Sinh viên Trung bình phản ánh: Đề bài chưa nêu rõ điều kiện tiên quyết là mảng đã được sắp xếp trước, có thể gây tranh cãi.",
+          flawSummary: "Sinh viên Trung bình phản ánh: Đề bài chưa nêu rõ điều kiện tiên quyết là mảng đã được sắp xếp trước, có thể gây tranh cãi về tính đúng đắn.",
           improvedQuestion: {
             content: "[Trong điều kiện mảng đã sắp xếp] Độ phức tạp thời gian trong trường hợp tốt nhất (Best Case) của thuật toán Binary Search là:",
-            options: ["A. O(1) - Phần tử ở vị trí giữa", "B. O(log n)", "C. O(n)", "D. O(n log n)"],
-            explanation: "Trong điều kiện mảng đã sắp xếp, nếu phần tử cần tìm trùng với mid ở bước đầu tiên, thuật toán chỉ mất 1 phép so sánh: O(1).",
+            type: "MULTIPLE_CHOICE",
+            options: [
+              { id: "A", text: "O(1) - Khi phần tử cần tìm nằm ngay vị trí giữa đầu tiên" },
+              { id: "B", text: "O(log n) - Trường hợp trung bình và xấu nhất" },
+              { id: "C", text: "O(n) - Duyệt tuần tự" },
+              { id: "D", text: "O(n log n)" },
+            ],
+            correctAnswer: "A",
+            explanation: "Trong điều kiện mảng đã sắp xếp, nếu phần tử cần tìm trùng với mid ở bước đầu tiên, thuật toán chỉ mất 1 phép so sánh duy nhất: O(1).",
+            difficulty: 4,
+            points: 1,
           },
-          improvementRationale: "Bổ sung giả định tiên quyết [mảng đã sắp xếp] và chú thích rõ trường hợp Best Case để tránh rẽ nhánh suy luận.",
+          improvementRationale: "Bổ sung tiền đề bắt buộc [mảng đã sắp xếp] và chú thích chi tiết cho từng phương án để loại bỏ khả năng gây tranh cãi học thuật.",
         },
       ],
       timeline: [
@@ -331,8 +390,14 @@ ${report.improvements
     (item, idx) => `
 ### Câu ${idx + 1}
 **Câu gốc:** ${item.originalQuestion.content}
+- Phương án gốc: ${Array.isArray(item.originalQuestion.options) ? item.originalQuestion.options.map((o: any) => typeof o === "object" ? `${o.id}. ${o.text}` : String(o)).join(" | ") : "N/A"}
+- Đáp án đúng: ${item.originalQuestion.correctAnswer || "N/A"}
+
 **Phát hiện của AI Squad:** ${item.flawSummary}
+
 **Câu đã tinh chỉnh:** ${item.improvedQuestion.content}
+- Phương án tinh chỉnh: ${Array.isArray(item.improvedQuestion.options) ? item.improvedQuestion.options.map((o: any) => typeof o === "object" ? `${o.id}. ${o.text}` : String(o)).join(" | ") : "N/A"}
+- Đáp án đúng: ${item.improvedQuestion.correctAnswer || "N/A"}
 **Giải thích cải tiến:** ${item.improvementRationale}
 ---`
   )
@@ -350,7 +415,7 @@ ${report.improvements
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl border-border shadow-2xl">
+      <DialogContent className="max-w-5xl max-h-[92vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl border-border shadow-2xl">
         {/* Header */}
         <DialogHeader className="p-5 pb-4 bg-muted/30 border-b border-border/80">
           <div className="flex items-center justify-between">
@@ -588,77 +653,85 @@ ${report.improvements
                 </button>
               </div>
 
-              {/* Tab 1: Improvements (Diff View) */}
+              {/* Tab 1: Improvements (Diff View with Full Options) */}
               {activeTab === "improvements" && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {report.improvements.length === 0 ? (
                     <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
                       Đề thi không phát hiện câu hỏi lỗi. Tất cả câu hỏi đều đạt chuẩn khảo thí!
                     </div>
                   ) : (
-                    report.improvements.map((item, idx) => (
-                      <div
-                        key={item.questionId || idx}
-                        className="rounded-xl border border-border bg-card p-3.5 space-y-3 shadow-xs"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={!!selectedQuestions[item.questionId]}
-                              onCheckedChange={(checked) =>
-                                setSelectedQuestions((prev) => ({
-                                  ...prev,
-                                  [item.questionId]: !!checked,
-                                }))
-                              }
+                    report.improvements.map((item, idx) => {
+                      const beforeSnapshot = buildComparisonSnapshot(item.originalQuestion);
+                      const afterSnapshot = buildComparisonSnapshot(item.improvedQuestion);
+                      const changedFields = getChangedComparisonFields(beforeSnapshot, afterSnapshot).map((f) => f.key);
+
+                      return (
+                        <div
+                          key={item.questionId || idx}
+                          className="rounded-xl border border-border bg-card p-4 space-y-3.5 shadow-xs"
+                        >
+                          {/* Item Top Bar */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <Checkbox
+                                id={`select-q-${item.questionId || idx}`}
+                                checked={!!selectedQuestions[item.questionId]}
+                                onCheckedChange={(checked) =>
+                                  setSelectedQuestions((prev) => ({
+                                    ...prev,
+                                    [item.questionId]: !!checked,
+                                  }))
+                                }
+                              />
+                              <label
+                                htmlFor={`select-q-${item.questionId || idx}`}
+                                className="font-bold text-sm cursor-pointer select-none text-foreground"
+                              >
+                                Câu hỏi đề xuất tinh chỉnh #{idx + 1}
+                              </label>
+                            </div>
+                            <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-600 bg-amber-50/50 dark:bg-amber-950/20">
+                              Đã tinh chỉnh qua Feedback Loop
+                            </Badge>
+                          </div>
+
+                          {/* Flaw Reason Alert */}
+                          <div className="text-xs p-3 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200 border border-amber-300/50 dark:border-amber-800/40 flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                            <div>
+                              <strong className="font-semibold">Phát hiện của AI Squad: </strong>
+                              {item.flawSummary}
+                            </div>
+                          </div>
+
+                          {/* Two Cards Comparison Grid */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                            <QuestionComparisonCard
+                              title="[GỐC] Câu hỏi ban đầu"
+                              snapshot={beforeSnapshot}
+                              changedFields={[]}
+                              isOptimized={false}
                             />
-                            <span className="font-semibold text-xs">Câu hỏi đề xuất tinh chỉnh #{idx + 1}</span>
-                          </div>
-                          <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 bg-amber-50/50">
-                            Đã tinh chỉnh qua Feedback Loop
-                          </Badge>
-                        </div>
-
-                        {/* Flaw Reason */}
-                        <div className="text-xs p-2 rounded-lg bg-amber-50/40 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200 border border-amber-200/50 flex items-start gap-1.5">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-                          <div>
-                            <strong>Phát hiện: </strong>
-                            {item.flawSummary}
-                          </div>
-                        </div>
-
-                        {/* Diff Box: Before vs After */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                          {/* Before */}
-                          <div className="p-2.5 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50/20 dark:bg-red-950/10 space-y-1">
-                            <div className="font-bold text-red-600 dark:text-red-400 text-[11px]">
-                              [GỐC] Câu hỏi ban đầu:
-                            </div>
-                            <div className="text-foreground leading-relaxed">{item.originalQuestion.content}</div>
+                            <QuestionComparisonCard
+                              title="[TỐI ƯU] Sau khi AI Squad tinh chỉnh"
+                              snapshot={afterSnapshot}
+                              changedFields={changedFields}
+                              isOptimized={true}
+                            />
                           </div>
 
-                          {/* After */}
-                          <div className="p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-1">
-                            <div className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px]">
-                              [TỐI ƯU] Sau khi AI Squad tinh chỉnh:
-                            </div>
-                            <div className="text-foreground leading-relaxed font-medium">
-                              {item.improvedQuestion.content}
+                          {/* Improvement Rationale */}
+                          <div className="text-xs p-3 rounded-lg bg-muted/40 border border-border/80 flex items-start gap-2 text-foreground">
+                            <Sparkles className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                            <div>
+                              <strong className="font-semibold text-primary">Lý do cải tiến: </strong>
+                              {item.improvementRationale}
                             </div>
                           </div>
                         </div>
-
-                        {/* Rationale */}
-                        <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                          <ChevronRight className="w-3 h-3 text-primary shrink-0" />
-                          <span>
-                            <strong>Lý do cải tiến: </strong>
-                            {item.improvementRationale}
-                          </span>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               )}
@@ -727,5 +800,159 @@ ${report.improvements
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Subcomponents for Question Comparison View
+function QuestionComparisonCard({
+  title,
+  snapshot,
+  changedFields,
+  isOptimized = false,
+}: {
+  title: string;
+  snapshot: QuestionComparisonSnapshot;
+  changedFields: ComparisonFieldKey[];
+  isOptimized?: boolean;
+}) {
+  const difficulty = getDifficultyLabel(snapshot.difficulty);
+  const changedSet = new Set(changedFields);
+  const isChanged = (field: ComparisonFieldKey) => changedSet.has(field);
+
+  return (
+    <Card
+      className={`border transition-all ${
+        isOptimized
+          ? "border-emerald-500/40 bg-emerald-50/10 dark:bg-emerald-950/10 shadow-xs"
+          : "border-border/80 bg-card"
+      }`}
+    >
+      <CardHeader className="p-3.5 pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-block h-2.5 w-2.5 rounded-full ${
+                isOptimized ? "bg-emerald-500 shadow-xs" : "bg-muted-foreground/60"
+              }`}
+            />
+            <CardTitle className="text-xs font-bold text-foreground">{title}</CardTitle>
+          </div>
+          {snapshot.type ? (
+            <Badge variant="outline" className="text-[10px] font-medium py-0 px-2 h-5">
+              {QUESTION_TYPE_LABELS[String(snapshot.type)] || snapshot.type}
+            </Badge>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className="p-3.5 pt-1 space-y-3">
+        {/* Nội dung câu hỏi */}
+        <ComparisonSection title="Nội dung câu hỏi" changed={isChanged("content")}>
+          <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground font-medium">
+            {snapshot.content || "Chưa có nội dung."}
+          </p>
+        </ComparisonSection>
+
+        {/* Phương án */}
+        <ComparisonSection title="Phương án" changed={isChanged("options") || isChanged("correctAnswer")}>
+          {snapshot.options.length ? (
+            <div className="space-y-1.5">
+              {snapshot.options.map((option) => (
+                <OptionPreviewRow
+                  key={option.id}
+                  option={option}
+                  isCorrect={snapshot.correctAnswerIds.includes(option.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">Không có phương án.</p>
+          )}
+        </ComparisonSection>
+
+        {/* Đáp án đúng */}
+        <ComparisonSection title="Đáp án đúng" changed={isChanged("correctAnswer")}>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-xs px-2.5 py-0.5"
+            >
+              ✓ {snapshot.correctAnswerIds.length ? snapshot.correctAnswerIds.join(", ") : "Chưa xác định"}
+            </Badge>
+          </div>
+        </ComparisonSection>
+
+        {/* Giải thích */}
+        <ComparisonSection title="Giải thích" changed={isChanged("explanation")}>
+          <p className="whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">
+            {snapshot.explanation || "Chưa có giải thích."}
+          </p>
+        </ComparisonSection>
+
+        {/* Độ khó & Điểm */}
+        <div className="grid grid-cols-2 gap-2">
+          <ComparisonSection title="Độ khó" changed={isChanged("difficulty")}>
+            <p className={`text-xs font-semibold ${difficulty.className}`}>
+              {snapshot.difficulty == null ? "Chưa gán" : `${snapshot.difficulty} · ${difficulty.text}`}
+            </p>
+          </ComparisonSection>
+          <ComparisonSection title="Điểm" changed={isChanged("points")}>
+            <p className="text-xs font-semibold text-foreground">
+              {snapshot.points == null ? "1 điểm" : `${snapshot.points} điểm`}
+            </p>
+          </ComparisonSection>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function OptionPreviewRow({ option, isCorrect }: { option: EditableOption; isCorrect: boolean }) {
+  return (
+    <div
+      className={`flex items-start gap-2.5 rounded-lg border p-2 text-xs transition-colors ${
+        isCorrect
+          ? "border-emerald-500/50 bg-emerald-50/60 dark:bg-emerald-950/30 text-foreground font-medium"
+          : "border-border/70 bg-muted/20 text-muted-foreground"
+      }`}
+    >
+      <span
+        className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[11px] font-bold ${
+          isCorrect
+            ? "border-emerald-600 bg-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-400"
+            : "border-border bg-background text-muted-foreground"
+        }`}
+      >
+        {isCorrect ? <CheckCircle2 className="h-3.5 w-3.5" /> : option.id}
+      </span>
+      <span className="leading-tight pt-0.5 text-xs">{option.text}</span>
+    </div>
+  );
+}
+
+function ComparisonSection({
+  title,
+  changed,
+  children,
+}: {
+  title: string;
+  changed: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`rounded-lg border p-2.5 transition-all ${
+        changed ? "border-primary/40 bg-primary/5 dark:bg-primary/10" : "border-border/60 bg-muted/15"
+      }`}
+    >
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+        {changed ? (
+          <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary text-[10px] font-bold py-0 h-4">
+            Đã thay đổi
+          </Badge>
+        ) : null}
+      </div>
+      {children}
+    </div>
   );
 }
