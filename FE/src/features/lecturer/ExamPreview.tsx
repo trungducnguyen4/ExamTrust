@@ -235,16 +235,7 @@ export default function ExamPreview() {
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       
-        {/* Autonomous Exam QA Squad Dialog (LangGraph) */}
-        {exam && (
-          <AutonomousAuditDialog
-            open={showAuditDialog}
-            onOpenChange={setShowAuditDialog}
-            examId={exam.id}
-            examTitle={exam.title}
-            onAuditApplied={loadExam}
-          />
-        )}
+
 
     </DashboardLayout>
     );
@@ -286,6 +277,15 @@ export default function ExamPreview() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAuditDialog(true)}
+              className="border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary font-medium gap-1.5 shadow-xs"
+            >
+              <BrainCircuit className="h-4 w-4 text-primary animate-pulse" />
+              Thẩm định AI Squad (LangGraph)
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -630,6 +630,17 @@ export default function ExamPreview() {
           </CardContent>
         </Card>
       </div>
+    
+        {/* Autonomous Exam QA Squad Dialog (LangGraph) */}
+        {exam && (
+          <AutonomousAuditDialog
+            open={showAuditDialog}
+            onOpenChange={setShowAuditDialog}
+            examId={exam.id}
+            examTitle={exam.title}
+            onAuditApplied={loadExam}
+          />
+        )}
     </DashboardLayout>
   );
 }
