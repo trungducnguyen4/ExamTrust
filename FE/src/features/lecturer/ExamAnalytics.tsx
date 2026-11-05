@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Loader2, ExternalLink, Sparkles, TrendingUp, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
+import { Loader2, ExternalLink, Sparkles, TrendingUp, TrendingDown, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -607,31 +607,114 @@ export default function ExamAnalytics() {
     const rawPassing = payload.exam?.passingScore ?? payload.passingScorePct ?? 50;
     const passingPct = rawPassing > 10 ? rawPassing : rawPassing * 10;
     const passingPoint = (passingPct / 10).toFixed(2);
+    const passingNum = Number(passingPoint);
+
+    const avgScore10 = Number(((payload.kpis.avgScorePct || 0) / 10).toFixed(2));
+    const passRate = payload.kpis.passRate || 0;
+    const completionRate = payload.kpis.completionRate || 0;
+
+    // 1. Semantic styling for Average Score (Thang điểm 10)
+    // < 5.0 (hoặc dưới điểm đạt): Kém / Cảnh báo Đỏ (Rose)
+    // 5.0 - 6.9: Trung bình / Cảnh báo Vàng (Amber)
+    // >= 7.0: Khá - Giỏi / Tích cực Xanh lá (Emerald)
+    let scoreStyle = {
+      icon: TrendingUp,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+    };
+    if (avgScore10 < 5.0 || avgScore10 < passingNum) {
+      scoreStyle = {
+        icon: TrendingDown,
+        iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
+        iconClassName: "text-rose-600 dark:text-rose-400",
+        className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+      };
+    } else if (avgScore10 < 7.0) {
+      scoreStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+      };
+    }
+
+    // 2. Semantic styling for Pass Rate
+    // >= 75%: Tốt / Đạt cao (Emerald)
+    // 50% - 74.9%: Trung bình (Amber)
+    // < 50%: Thấp / Báo động trượt môn (Rose)
+    let passStyle = {
+      icon: TrendingUp,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+    };
+    if (passRate < 50) {
+      passStyle = {
+        icon: TrendingDown,
+        iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
+        iconClassName: "text-rose-600 dark:text-rose-400",
+        className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+      };
+    } else if (passRate < 75) {
+      passStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+      };
+    }
+
+    // 3. Semantic styling for Completion Rate
+    // >= 90%: Rất cao / Hoàn thành xuất sắc (Emerald)
+    // 70% - 89.9%: Khá / Đang nộp đều (Sky)
+    // < 70%: Thấp / Cần đôn đốc (Amber)
+    let completionStyle = {
+      icon: CheckCircle2,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+    };
+    if (completionRate < 70) {
+      completionStyle = {
+        icon: AlertTriangle,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+      };
+    } else if (completionRate < 90) {
+      completionStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-sky-500/15 dark:bg-sky-950/40",
+        iconClassName: "text-sky-600 dark:text-sky-400",
+        className: "border-sky-200/60 bg-sky-50/35 dark:bg-sky-950/20 dark:border-sky-900/40",
+      };
+    }
 
     return [
       {
-        icon: TrendingUp,
-        value: (payload.kpis.avgScorePct / 10).toFixed(2) + "/10",
+        icon: scoreStyle.icon,
+        value: avgScore10.toFixed(2) + "/10",
         label: "Điểm trung bình",
-        iconWrapClassName: "bg-sky-500/10",
-        iconClassName: "text-sky-600",
-        className: "border-border/70 bg-sky-50/35",
+        iconWrapClassName: scoreStyle.iconWrapClassName,
+        iconClassName: scoreStyle.iconClassName,
+        className: scoreStyle.className,
       },
       {
-        icon: TrendingUp,
-        value: payload.kpis.passRate.toFixed(1) + "%",
+        icon: passStyle.icon,
+        value: passRate.toFixed(1) + "%",
         label: `Tỷ lệ đạt (≥ ${passingPoint}/10 · ${passingPct}%)`,
-        iconWrapClassName: "bg-emerald-500/10",
-        iconClassName: "text-emerald-600",
-        className: "border-border/70 bg-emerald-50/35",
+        iconWrapClassName: passStyle.iconWrapClassName,
+        iconClassName: passStyle.iconClassName,
+        className: passStyle.className,
       },
       {
-        icon: TrendingUp,
-        value: payload.kpis.completionRate.toFixed(1) + "%",
+        icon: completionStyle.icon,
+        value: completionRate.toFixed(1) + "%",
         label: "Hoàn thành",
-        iconWrapClassName: "bg-amber-500/10",
-        iconClassName: "text-amber-600",
-        className: "border-border/70 bg-amber-50/35",
+        iconWrapClassName: completionStyle.iconWrapClassName,
+        iconClassName: completionStyle.iconClassName,
+        className: completionStyle.className,
       },
     ];
   };
@@ -1508,16 +1591,16 @@ export default function ExamAnalytics() {
                     ) : (
                       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                         {/* Bar chart comparison */}
-                        <div className="rounded-xl border border-border/70 bg-card p-3 lg:col-span-6 flex flex-col justify-between">
+                        <div className="rounded-xl border border-border/70 bg-card p-4 lg:col-span-6 flex flex-col gap-2">
                           <div>
                             <p className="text-xs font-semibold text-foreground mb-1">
                               So sánh tỷ lệ sai theo chủ đề
                             </p>
-                            <p className="text-[11px] text-muted-foreground mb-2">
+                            <p className="text-[11px] text-muted-foreground">
                               Tỷ lệ trả lời sai (%) của sinh viên đối với các câu hỏi thuộc từng chủ đề.
                             </p>
                           </div>
-                          <div className="h-[210px] w-full">
+                          <div className="w-full flex-1 min-h-[230px]">
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={weakestTopicsChartData}
