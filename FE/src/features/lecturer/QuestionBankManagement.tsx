@@ -107,6 +107,7 @@ import {
 import type { Question, QuestionDraftSummary } from "./question-bank-utils";
 import { QuestionPreviewInfoCard as InfoCard, QuestionPreviewSection as Section } from "./components/QuestionPreviewSections";
 import { QuestionBankDonutStats } from "./components/QuestionBankDonutStats";
+import { CourseDifficultyDistribution } from "./components/CourseDifficultyDistribution";
 import {
   buildQuestionFilterDefinitions,
   courseFilterDefinitions,
@@ -1017,7 +1018,7 @@ export default function QuestionBankManagement() {
               return (
                 <>
                   <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="hidden border-b bg-muted/40 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid md:grid-cols-[minmax(240px,1.35fr)_120px_140px_minmax(220px,1fr)_24px] md:items-center md:gap-4">
+                    <div className="hidden border-b bg-muted/40 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid md:grid-cols-[minmax(240px,1.3fr)_170px_120px_minmax(200px,1fr)_24px] md:items-center md:gap-4">
                       <span>Khóa học</span>
                       <span>Câu hỏi</span>
                       <span>Độ khó TB</span>
@@ -1044,7 +1045,7 @@ export default function QuestionBankManagement() {
                         <button
                           type="button"
                           key={course.id}
-                          className="group grid w-full gap-4 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[minmax(240px,1.35fr)_120px_140px_minmax(220px,1fr)_24px] md:items-center"
+                          className="group grid w-full gap-4 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[minmax(240px,1.3fr)_170px_120px_minmax(200px,1fr)_24px] md:items-center"
                           onClick={() => setSelectedCourse(course.code)}
                           aria-label={`Mở ngân hàng câu hỏi của ${course.code}`}
                         >
@@ -1064,15 +1065,9 @@ export default function QuestionBankManagement() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between gap-3 text-sm md:block">
-                            <span className="text-muted-foreground md:hidden">
-                              Câu hỏi
-                            </span>
-                            <span className="font-semibold tabular-nums text-foreground">
-                              {courseQuestions.length}
-                            </span>
+                          <div className="w-full">
+                            <CourseDifficultyDistribution questions={courseQuestions} />
                           </div>
-
                           <div className="flex items-center justify-between gap-3 text-sm md:block">
                             <span className="text-muted-foreground md:hidden">
                               Độ khó TB
