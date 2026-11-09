@@ -939,6 +939,7 @@ export default function ExamPreview() {
             onOpenChange={setShowAuditDialog}
             examId={exam.id}
             examTitle={exam.title}
+            examQuestions={exam.examQuestions}
             onAuditApplied={loadExam}
           />
         )}
