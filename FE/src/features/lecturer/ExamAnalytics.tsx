@@ -24,6 +24,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Loader2, ExternalLink, Sparkles, TrendingUp, TrendingDown, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
   PieChart,
@@ -613,15 +614,39 @@ export default function ExamAnalytics() {
     const passRate = payload.kpis.passRate || 0;
     const completionRate = payload.kpis.completionRate || 0;
 
+    // Derived counts for richer statistics
+    const totalStudents = payload.kpis.completedSubmissions || payload.kpis.totalSubmissions || 0;
+    const passedCount = Math.round((passRate / 100) * totalStudents);
+    const failedCount = Math.max(0, totalStudents - passedCount);
+
+    const completedCount = payload.kpis.completedSubmissions || 0;
+    const enrolledTotal = payload.kpis.totalSubmissions || completedCount;
+    const remainingCount = Math.max(0, enrolledTotal - completedCount);
+
     // 1. Semantic styling for Average Score (Thang điểm 10)
-    // < 5.0 (hoặc dưới điểm đạt): Kém / Cảnh báo Đỏ (Rose)
-    // 5.0 - 6.9: Trung bình / Cảnh báo Vàng (Amber)
-    // >= 7.0: Khá - Giỏi / Tích cực Xanh lá (Emerald)
+    let scoreRating = "Khá";
+    if (avgScore10 >= 8.5) {
+      scoreRating = "Xuất sắc";
+    } else if (avgScore10 >= 7.0) {
+      scoreRating = "Khá";
+    } else if (avgScore10 >= 5.0 && avgScore10 >= passingNum) {
+      scoreRating = "Trung bình";
+    } else {
+      scoreRating = "Chưa đạt";
+    }
+
+    const scoreDiff = Number((avgScore10 - passingNum).toFixed(2));
+    const scoreDiffText = scoreDiff >= 0
+      ? `+${scoreDiff.toFixed(2)} so với ngưỡng đạt (${passingPoint})`
+      : `${scoreDiff.toFixed(2)} dưới ngưỡng đạt (${passingPoint})`;
+
     let scoreStyle = {
       icon: TrendingUp,
       iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
       iconClassName: "text-emerald-600 dark:text-emerald-400",
       className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
     };
     if (avgScore10 < 5.0 || avgScore10 < passingNum) {
       scoreStyle = {
@@ -629,6 +654,8 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
         iconClassName: "text-rose-600 dark:text-rose-400",
         className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+        badgeClassName: "border-rose-300 bg-rose-100/80 text-rose-800 dark:border-rose-800 dark:bg-rose-900/40 dark:text-rose-300",
+        progressColor: "bg-rose-500",
       };
     } else if (avgScore10 < 7.0) {
       scoreStyle = {
@@ -636,18 +663,19 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
         iconClassName: "text-amber-600 dark:text-amber-400",
         className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
       };
     }
 
     // 2. Semantic styling for Pass Rate
-    // >= 75%: Tốt / Đạt cao (Emerald)
-    // 50% - 74.9%: Trung bình (Amber)
-    // < 50%: Thấp / Báo động trượt môn (Rose)
     let passStyle = {
       icon: TrendingUp,
       iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
       iconClassName: "text-emerald-600 dark:text-emerald-400",
       className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
     };
     if (passRate < 50) {
       passStyle = {
@@ -655,6 +683,8 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
         iconClassName: "text-rose-600 dark:text-rose-400",
         className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+        badgeClassName: "border-rose-300 bg-rose-100/80 text-rose-800 dark:border-rose-800 dark:bg-rose-900/40 dark:text-rose-300",
+        progressColor: "bg-rose-500",
       };
     } else if (passRate < 75) {
       passStyle = {
@@ -662,18 +692,19 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
         iconClassName: "text-amber-600 dark:text-amber-400",
         className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
       };
     }
 
     // 3. Semantic styling for Completion Rate
-    // >= 90%: Rất cao / Hoàn thành xuất sắc (Emerald)
-    // 70% - 89.9%: Khá / Đang nộp đều (Sky)
-    // < 70%: Thấp / Cần đôn đốc (Amber)
     let completionStyle = {
       icon: CheckCircle2,
       iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
       iconClassName: "text-emerald-600 dark:text-emerald-400",
       className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
     };
     if (completionRate < 70) {
       completionStyle = {
@@ -681,6 +712,8 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
         iconClassName: "text-amber-600 dark:text-amber-400",
         className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
       };
     } else if (completionRate < 90) {
       completionStyle = {
@@ -688,6 +721,8 @@ export default function ExamAnalytics() {
         iconWrapClassName: "bg-sky-500/15 dark:bg-sky-950/40",
         iconClassName: "text-sky-600 dark:text-sky-400",
         className: "border-sky-200/60 bg-sky-50/35 dark:bg-sky-950/20 dark:border-sky-900/40",
+        badgeClassName: "border-sky-300 bg-sky-100/80 text-sky-800 dark:border-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+        progressColor: "bg-sky-500",
       };
     }
 
@@ -696,6 +731,14 @@ export default function ExamAnalytics() {
         icon: scoreStyle.icon,
         value: avgScore10.toFixed(2) + "/10",
         label: "Điểm trung bình",
+        badgeText: `Xếp loại: ${scoreRating}`,
+        badgeClassName: scoreStyle.badgeClassName,
+        subDetail: scoreDiffText,
+        progressValue: Math.min(100, Math.max(0, payload.kpis.avgScorePct || 0)),
+        progressColor: scoreStyle.progressColor,
+        progressBenchmark: passingPct,
+        progressFooterLeft: "Thang điểm 0 - 10",
+        progressFooterRight: `Vạch sàn: ${passingPoint}`,
         iconWrapClassName: scoreStyle.iconWrapClassName,
         iconClassName: scoreStyle.iconClassName,
         className: scoreStyle.className,
@@ -703,7 +746,16 @@ export default function ExamAnalytics() {
       {
         icon: passStyle.icon,
         value: passRate.toFixed(1) + "%",
-        label: `Tỷ lệ đạt (≥ ${passingPoint}/10 · ${passingPct}%)`,
+        label: "Tỷ lệ đạt chuẩn",
+        badgeText: `${passedCount} Đạt · ${failedCount} Trượt`,
+        badgeClassName: passStyle.badgeClassName,
+        subDetail: `Tiêu chí sàn: ≥ ${passingPoint}/10 (${passingPct}%)`,
+        progressValue: passRate,
+        progressColor: passStyle.progressColor,
+        progressSecondaryValue: Number((100 - passRate).toFixed(1)),
+        progressSecondaryColor: "bg-rose-500/80",
+        progressFooterLeft: `Đạt: ${passedCount} SV (${passRate.toFixed(1)}%)`,
+        progressFooterRight: `Trượt: ${failedCount} SV`,
         iconWrapClassName: passStyle.iconWrapClassName,
         iconClassName: passStyle.iconClassName,
         className: passStyle.className,
@@ -711,7 +763,14 @@ export default function ExamAnalytics() {
       {
         icon: completionStyle.icon,
         value: completionRate.toFixed(1) + "%",
-        label: "Hoàn thành",
+        label: "Tỷ lệ hoàn thành",
+        badgeText: `${completedCount}/${enrolledTotal} Lượt nộp`,
+        badgeClassName: completionStyle.badgeClassName,
+        subDetail: remainingCount === 0 ? "100% quân số đã hoàn tất nộp bài" : `Còn ${remainingCount} bài chưa nộp`,
+        progressValue: completionRate,
+        progressColor: completionStyle.progressColor,
+        progressFooterLeft: `Đã nộp: ${completedCount} bài thi`,
+        progressFooterRight: remainingCount === 0 ? "Đủ quân số" : `Chưa nộp: ${remainingCount}`,
         iconWrapClassName: completionStyle.iconWrapClassName,
         iconClassName: completionStyle.iconClassName,
         className: completionStyle.className,
@@ -1182,15 +1241,83 @@ export default function ExamAnalytics() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {getKpiCards(data).map((card) => (
-                  <AdminStatCard
+                  <Card
                     key={card.label}
-                    icon={card.icon}
-                    value={card.value}
-                    label={card.label}
-                    iconWrapClassName={card.iconWrapClassName}
-                    iconClassName={card.iconClassName}
-                    className={card.className}
-                  />
+                    className={cn(
+                      "rounded-xl shadow-sm border transition-all hover:shadow-md",
+                      card.className
+                    )}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      {/* Top Row: Icon + Value + Badge */}
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                              card.iconWrapClassName
+                            )}
+                          >
+                            <card.icon className={cn("h-4.5 w-4.5", card.iconClassName)} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-2xl font-bold tracking-tight text-foreground leading-none">
+                              {card.value}
+                            </p>
+                            <p className="text-xs font-medium text-muted-foreground mt-1 truncate">
+                              {card.label}
+                            </p>
+                          </div>
+                        </div>
+                        {card.badgeText && (
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-[11px] font-semibold shrink-0 px-2 py-0.5 whitespace-nowrap",
+                              card.badgeClassName
+                            )}
+                          >
+                            {card.badgeText}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Micro Visual Progress / Breakdown Bar */}
+                      <div className="space-y-1.5 pt-1.5 border-t border-border/40">
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span className="truncate">{card.subDetail}</span>
+                        </div>
+
+                        <div className="relative h-2 w-full rounded-full bg-muted/70 overflow-hidden flex">
+                          {card.progressBenchmark !== undefined && (
+                            <div
+                              className="absolute top-0 bottom-0 w-0.5 bg-foreground/40 z-10"
+                              style={{ left: `${card.progressBenchmark}%` }}
+                              title={`Vạch sàn: ${card.progressBenchmark}%`}
+                            />
+                          )}
+                          <div
+                            className={cn("h-full transition-all rounded-full", card.progressColor)}
+                            style={{ width: `${card.progressValue}%` }}
+                          />
+                          {card.progressSecondaryValue ? (
+                            <div
+                              className={cn(
+                                "h-full transition-all",
+                                card.progressSecondaryColor || "bg-rose-500"
+                              )}
+                              style={{ width: `${card.progressSecondaryValue}%` }}
+                            />
+                          ) : null}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium pt-0.5">
+                          <span>{card.progressFooterLeft}</span>
+                          <span>{card.progressFooterRight}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
 
