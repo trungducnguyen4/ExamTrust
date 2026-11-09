@@ -493,6 +493,21 @@ export default function QuestionBankManagement() {
     setDeleteTargetId(id);
   };
 
+  const handleViewQuestion = async (question: Question) => {
+    setPreviewQuestion(question);
+    setDetailLoading(true);
+    setDetailError(false);
+    try {
+      const detail = await api.getQuestionById(question.id);
+      setDetailQuestion(detail as Question);
+    } catch {
+      setDetailError(true);
+      setDetailQuestion(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleteTargetId) return;
     setDeleteLoading(true);
@@ -1423,7 +1438,7 @@ export default function QuestionBankManagement() {
                             </div>
                           </TableHead>
                           <TableHead className="w-24 text-center">Trọng số</TableHead>
-                          <TableHead className="w-32 text-center">Thao tác</TableHead>
+                          <TableHead className="w-36 text-center whitespace-nowrap">Thao tác</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1434,15 +1449,22 @@ export default function QuestionBankManagement() {
                               <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                                 {formatQuestionDate(question.updatedAt)}
                               </TableCell>
-                              <TableCell className="max-w-[360px] text-sm">
-                                <span className="flex items-center gap-1.5">
+                              <TableCell className="max-w-[420px] text-sm">
+                                <button
+                                  type="button"
+                                  onClick={() => void handleViewQuestion(question)}
+                                  className="group flex items-center gap-2 text-left w-full hover:text-primary transition-colors focus:outline-none"
+                                  title="Bấm để xem chi tiết câu hỏi"
+                                >
                                   {question.mediaType === "image" ? (
-                                    <Image className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-label="Câu hỏi có hình ảnh đính kèm" />
+                                    <Image className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" aria-label="Câu hỏi có hình ảnh đính kèm" />
                                   ) : question.mediaType === "audio" ? (
-                                    <Music className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-label="Câu hỏi có âm thanh đính kèm" />
+                                    <Music className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" aria-label="Câu hỏi có âm thanh đính kèm" />
                                   ) : null}
-                                  <span className="block truncate" title={question.content}>{question.content}</span>
-                                </span>
+                                  <span className="block truncate font-medium text-foreground group-hover:text-primary group-hover:underline transition-colors" title={question.content}>
+                                    {question.content}
+                                  </span>
+                                </button>
                               </TableCell>
                               <TableCell className="text-sm whitespace-nowrap">
                                 {questionTypeLabels[question.type] || question.type}
@@ -1468,54 +1490,33 @@ export default function QuestionBankManagement() {
                                 {question.points ?? 1}
                               </TableCell>
                               <TableCell className="text-center">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      className="gap-2 text-xs"
-                                      onClick={async () => {
-                                        setPreviewQuestion(question);
-                                        setDetailLoading(true);
-                                        setDetailError(false);
-                                        try {
-                                          const detail = await api.getQuestionById(question.id);
-                                          setDetailQuestion(detail as Question);
-                                        } catch {
-                                          setDetailError(true);
-                                          setDetailQuestion(null);
-                                        } finally {
-                                          setDetailLoading(false);
-                                        }
-                                      }}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                      Xem
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="gap-2 text-xs"
-                                      onClick={() => {
-                                        saveQuestionEditorNavList(filtered.map((item) => item.id));
-                                        router.push(
-                                          `${questionEditorPath}?id=${question.id}&courseCode=${selectedCourse}`,
-                                        );
-                                      }}
-                                    >
-                                      <Edit2 className="h-4 w-4" />
-                                      Sửa
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="gap-2 text-destructive text-xs"
-                                      onClick={() => handleDelete(question.id)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Xóa
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5"
+                                    title="Chỉnh sửa câu hỏi"
+                                    onClick={() => {
+                                      saveQuestionEditorNavList(filtered.map((item) => item.id));
+                                      router.push(
+                                        `${questionEditorPath}?id=${question.id}&courseCode=${selectedCourse}`,
+                                      );
+                                    }}
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                    <span>Sửa</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2.5 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                                    title="Xóa câu hỏi"
+                                    onClick={() => handleDelete(question.id)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <span>Xóa</span>
+                                  </Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           );
