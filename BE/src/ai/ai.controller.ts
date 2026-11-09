@@ -1,4 +1,4 @@
-import { Body, Controller, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -148,6 +148,26 @@ export class AiController {
     });
 
     return { jobId: job.id, status: job.status, examId, title: exam.title };
+  }
+
+
+  @Get('jobs/:id')
+  async getAiJobStatus(@Param('id') id: string) {
+    const job = await this.prisma.aIGenerationRecord.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        status: true,
+        output: true,
+        errorMessage: true,
+        completedAt: true,
+        createdAt: true,
+      },
+    });
+    if (!job) {
+      throw new NotFoundException('Không tìm thấy thông tin công việc AI');
+    }
+    return job;
   }
 
   @Post('exams/:examId/apply-audit-improvements')

@@ -39,6 +39,7 @@ class ApiClient {
   // Access token is kept in memory only (not localStorage) to reduce XSS exposure.
   private memoryToken: string | null = null;
   private refreshPromise: Promise<RefreshedSession | null> | null = null;
+  private inFlightGetRequests = new Map<string, Promise<any>>();
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -101,6 +102,25 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const { method = 'GET', body } = options;
+
+    // Tự động deduplicate các request GET cùng URL đang bay (in-flight) để triệt tiêu double-fetching
+    if (method === 'GET' && !body) {
+      const existing = this.inFlightGetRequests.get(endpoint);
+      if (existing) {
+        return existing as Promise<T>;
+      }
+      const p = this.executeRequest<T>(endpoint, options).finally(() => {
+        this.inFlightGetRequests.delete(endpoint);
+      });
+      this.inFlightGetRequests.set(endpoint, p);
+      return p;
+    }
+
+    return this.executeRequest<T>(endpoint, options);
+  }
+
+  private async executeRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { method = 'GET', body, headers = {} } = options;
     const startedAt = nowMs();
 
