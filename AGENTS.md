@@ -1,146 +1,69 @@
-## graphify
+# ExamTrust — AI Developer Harness & Guidelines
 
-This project has a graphify knowledge graph at .graphify/.
-
-Rules:
-- For codebase or architecture questions, when `.graphify/graph.json` exists, first run `graphify query "<question>"` (or `graphify path "<A>" "<B>"` / `graphify explain "<concept>"`); these return a scoped subgraph, usually much smaller than `GRAPH_REPORT.md` or raw grep output
-- If .graphify/wiki/index.md exists, navigate it instead of reading raw files
-- Skill `graphify` nằm ở `.agents/skills/graphify/SKILL.md`. Trong DeepSeek Harness, gọi qua tool `skill` với name `graphify` (hoặc gõ `/graphify`), còn `graphify ...` trong terminal là lệnh CLI thật
-- Trong Codex, trigger tường minh là `$graphify ...` (chỉ Codex mới có cú pháp này, không dùng trong DeepSeek Harness)
-- A successful TypeScript-backed graphify build should leave `.graphify/.graphify_runtime.json` with `runtime: typescript`
-- If .graphify/graph.json is missing but graphify-out/graph.json exists, run `graphify migrate-state --dry-run` first; if tracked legacy artifacts are reported, ask before using the recommended `git mv -f graphify-out .graphify` and commit message
-- If .graphify/needs_update exists or .graphify/branch.json has stale=true, warn before relying on semantic results and run the graphify skill with --update when appropriate
-- If the user asks to build, update, query, path, or explain the graph, use the installed `graphify` skill instead of ad-hoc file traversal
-- Before proposing or committing .graphify artifacts, run `graphify portable-check .graphify`; commit-safe graph artifacts must use repo-relative paths, and never commit .graphify/branch.json, .graphify/worktree.json, .graphify/needs_update, or .graphify/cache/. If a repo already tracks any of them, first add them to .gitignore, then propose `git rm --cached .graphify/branch.json .graphify/worktree.json .graphify/needs_update` and `git rm -r --cached .graphify/cache`
-- **Quyền hạn Git Automation:** AI Agent ĐƯỢC PHÉP chủ động tạo nhánh (branch), commit và push lên GitHub remote theo đúng quy chuẩn phân nhánh (Branching Model) mà KHÔNG CẦN hỏi lại người dùng để tối ưu tốc độ và tự động hóa quy trình.
-- Before deep graph traversal, prefer `graphify summary --graph .graphify/graph.json` for compact first-hop orientation
-- For review impact on changed files, use `graphify review-delta --graph .graphify/graph.json` instead of generic traversal
-- Read `.graphify/GRAPH_REPORT.md` only for broad architecture review or when `query` / `path` / `explain` do not surface enough context
-- After modifying code files in this session, run `npx graphify hook-rebuild` to keep the graph current
-
-## Verification Protocol — Proof of Change & Confidence Report
-Sau mỗi thay đổi, agent phải xuất báo cáo theo 4 trụ cột:
-1. **Tests**: Kiểm tra cú pháp, lint, test case thực tế (TypeScript `tsc`, Vitest/Jest).
-2. **Runtime**: Chạy API / hàm thực tế, xác minh DB data, HTTP status 200.
-3. **Visual**: BẮT BUỘC tạo bằng chứng trực quan:
-   - **BẮT BUỘC chụp từ Live Dev Server thật**: Phải chạy ứng dụng thật (pm run dev) có đầy đủ Layout Shell (Sidebar 240px, Header) để kiểm tra độ co giãn Flexbox/Grid thực tế. **TUYỆT ĐỐI CẤM tạo file mock preview HTML tĩnh (preview-*.html) để đối phó nộp PR!**
-   - **UI tĩnh**: Chụp ảnh màn hình (Screenshot).
-   - **Luồng người dùng (User Flow)**: BẮT BUỘC quay video hoặc tạo Animated GIF ghi lại trọn vẹn chuỗi thao tác thực tế (gõ phím, chọn tùy chọn, bật switch, modal/dialog hiện lên, trạng thái loading, và kết quả hiển thị ra sao).
-   - **Tối ưu hóa hiệu năng (Performance Optimization)**: BẮT BUỘC quay Video màn hình (Screen Recording / `.mp4` lưu tại `docs/videos/`) hoặc Animated GIF thời gian thực ghi lại trọn vẹn sự cải thiện: thao tác reload/F5 liên tục, độ phản hồi tức thì, loại bỏ độ trễ/giật lag, kèm số liệu so sánh thời gian thực (Network response time ms, số lượng database queries trước và sau).
-   - **BẮT BUỘC nhúng trực tiếp vào Pull Request (PR)**: Sử dụng cú pháp Markdown Image (`![Mô tả](https://raw.githubusercontent.com/.../docs/screenshots/...)`) kèm link dẫn tới Video minh chứng để reviewer mở PR là nhìn thấy ngay toàn bộ thao tác. Tuyệt đối KHÔNG ĐƯỢC chỉ ghi text đường dẫn file local!
-   - Chi tiết quy trình thực thi tại skill `verification-visual-proof` (`.agents/skills/verification-visual-proof/SKILL.md`).
-4. **Confidence**: Đánh giá độ tin cậy kèm những gì đã kiểm và chưa kiểm.
+> **Single Source of Truth (SSOT)** for all AI agents, pairing assistants, and automated engineering workflows (Antigravity, DeepSeek Harness, Claude Code, Codex, Cline).
 
 ---
 
-## Session Hygiene — Context & `/compact`
+## 1. Knowledge Graph Navigation (`.graphify/`)
 
-- Khi context đã dài, vừa xong một task/PR, chuẩn bị sang task lớn mới, hoặc agent bắt đầu quên ràng buộc cũ: agent phải **lưu handoff ra file** (`docs/runs/<YYYY-MM-DD>-<ticket>.md`), ghi rõ nhánh + PR + bước tiếp theo, rồi **đề nghị người dùng bấm `/compact`**.
-- Agent **KHÔNG tự gọi được `/compact`** (đây là lệnh UI, chỉ chạy khi agent rảnh). Không được nói "tôi đã compact" hay bịa số token.
-- Chi tiết ngưỡng auto-compact của DSH và cách xử lý khi IDE không có `/compact`: skill `context-hygiene` (`.agents/skills/context-hygiene/SKILL.md`).
+This repository maintains an active knowledge graph at `.graphify/graph.json`.
 
----
-
-## Git Flow, Bugfix & Pull Request (PR) Protocol
-
-Mọi quy trình phát triển tính năng, sửa lỗi (bugfix/hotfix) và mở Pull Request (PR) của AI Agent bắt buộc phải tuân thủ nghiêm ngặt mô hình phân nhánh và vòng đời phát hành dưới đây:
-
-### 1. Mô hình Phân nhánh (Branching Model)
-
-```
-[Feature/Bugfix Branches]       [develop]               [Release Branches]         [UAT/release]      [Production/master]
-       (EX-xxx)                 (DEV Env)                    (SemVer)                (UAT Env)            (PROD Env)
-          │                         │                           │                        │                     │
-      (A) ├────────────────────────>│ (A)                       │                        │                     │
-          │                         │                           │                        │                     │
-      (B) ├────────────────────────>│ (AB)                      │                        │                     │
-          │                         │                           │                        │                     │
-      (C) ├────────────────────────>│ (ABC) ───────────────────>│ (v1.0.0) ─────────────>│ (ABC) ─────────────>│ (master: v1.0.0)
-          │                         │                           │                        │                     │
-      (D) ├────────────────────────>│ (ABCD)                    │                        │                     │
-          │                         │                           │                        │                     │
-      (E) ├────────────────────────>│ (ABCDE)                   │                        │                     │
-          │                         │                           │                        │                     │
- [Critical Bugfix / Hotfix (F)]     │                           │                        │                     │
-      (F) ├────────────────────────────────────────────────────>│ (v1.0.1 - ABCF) ───────>│ (ABCF) ────────────>│ (master: v1.0.1)
-          │                         │                           │                        │                     │
-          └────────────────────────>│ (ABCDEF) ────────────────>│ (v1.1.0 - ABCDEF) ────>│ (ABCDEF) ──────────>│ (master: v1.1.0)
-          (Back-merge to develop)   │                           │                        │                     │
-```
-
-* **Feature / Bugfix Branches (`EX-xxx` hoặc `feature/EX-xxx`, `bugfix/EX-xxx`):**
-  - Tên nhánh BẮT BUỘC đặt theo mã Issue/Ticket trên Jira: ví dụ `EX-001`, `EX-002`,...
-  - Tách từ nhánh `develop` khi làm tính năng mới hoặc sửa lỗi thông thường.
-  - Phải vượt qua kiểm thử tự động, code review và QA trước khi được merge vào `develop`.
-
-* **Nhánh `develop` (DEV Environment):**
-  - Tích hợp liên tục cho môi trường phát triển nội bộ.
-  - Mỗi commit hoặc PR merge vào `develop` sẽ tự động trigger pipeline deploy lên **môi trường DEV**.
-
-* **Nhánh `Release Branches` (`release/vX.Y.Z` hoặc `v1.0.0`, `v1.0.1`, `v1.1.0`):**
-  - Được đặt tên theo chuẩn **Semantic Versioning (SemVer - semver.org)**: `vMAJOR.MINOR.PATCH`.
-  - Tách từ `develop` khi bộ tính năng đã sẵn sàng để phát hành.
-
-* **Quy trình Sửa lỗi Khẩn cấp (Critical Bug Fixes / Hotfix - Nhánh F trong sơ đồ):**
-  - Đối với lỗi nghiêm trọng ở production hoặc bản release (ví dụ: syntax error làm sập ứng dụng, crash server):
-    1. Tạo nhánh hotfix (ví dụ: `hotfix/EX-xxx` hoặc `fix/EX-xxx`).
-    2. Sửa lỗi trực tiếp và đưa vào bản release patch (ví dụ: `v1.0.1`) **mà không cần kéo theo toàn bộ các thay đổi chưa hoàn thiện trên `develop`**.
-    3. Đẩy qua `release` (UAT) $\rightarrow$ `master` (Production).
-    4. **BẮT BUỘC Back-merge về `develop`**: Ngay sau khi release, nhánh fix phải được merge ngược trở lại `develop` (`ABCDEF`) để tránh tình trạng mất bản vá (regression) trong các release kế tiếp.
-
-* **Nhánh `release` (UAT Environment):**
-  - Môi trường kiểm thử chấp nhận người dùng (UAT).
-  - Mọi merge vào nhánh `release` sẽ tự động trigger pipeline deploy lên **môi trường UAT**.
-
-* **Nhánh `master` / `main` (Production Environment):**
-  - Mã nguồn ổn định nhất đang chạy cho người dùng cuối.
-  - Mọi merge vào `master` sẽ tự động deploy lên **môi trường Production**.
-  - **Bắt buộc gắn Tag:** Mỗi lần merge vào `master` phải tạo Git Tag tương ứng định dạng `release/v1.x.x` (hoặc `v1.x.x`).
+### Rules & Workflow:
+- **Query-First**: For broad codebase, architecture, cross-module debugging, or tracing full FE ➔ BE ➔ DB flows, first run:
+  ```bash
+  graphify query "<task or question>"
+  # or: graphify path "<NodeA>" "<NodeB>"
+  # or: graphify explain "<concept>"
+  ```
+  This returns a compact, relevant subgraph (3–10 files) rather than reading massive files blindly.
+- **Source of Truth**: The knowledge graph is for navigation and orientation only. Source code files remain the ultimate source of truth.
+- **Do Not Dump Large Reports**: Do NOT read the entire `.graphify/GRAPH_REPORT.md` on every task. Use scoped `graphify query` instead.
+- **Post-Change Graph Rebuild**: After modifying code files in any working session, run:
+  ```bash
+  npx graphify hook-rebuild
+  ```
+- **Portability Check**: Before committing changes, run `graphify portable-check .graphify`. Never track local machine paths, `branch.json`, `worktree.json`, `needs_update`, or `cache/`.
 
 ---
 
-### 2. Quy chuẩn dành cho AI Agent khi Sửa lỗi (Bug Fixing Protocol)
+## 2. Modular Engineering Rules
 
-Khi tiếp nhận bất kỳ lỗi nào (như lỗi cú pháp, runtime crash, logic bug):
-1. **Phân tích Nguyên nhân Gốc (Root Cause Analysis):** Xác định chính xác file, dòng code và nguyên nhân gây lỗi trước khi chỉnh sửa.
-2. **Khoanh vùng Thay đổi (Minimal Touch):** Chỉ chỉnh sửa đúng phạm vi cần thiết để giải quyết lỗi, tuyệt đối không format hoặc sửa đổi mã nguồn không liên quan.
-3. **Thực thi Báo cáo 4 Trụ Cột:** Luôn kiểm tra lại cú pháp (`tsc`, `lint`), gọi thử API/màn hình thực tế, chụp ảnh/quay video xác minh, và đánh giá độ tin cậy.
-4. **Cập nhật Knowledge Graph:** Chạy `npx graphify hook-rebuild` sau khi sửa code để đồng bộ knowledge graph.
+All detailed engineering rules and invariants are modularized under `.agents/rules/`:
+
+| Rule Module | Scope & Purpose | Link |
+| :--- | :--- | :--- |
+| **Core Principles** | SSOT, standard language policy (EN for tech specs / VI for user UI), minimal touch | [`.agents/rules/core.md`](.agents/rules/core.md) |
+| **Git Flow & Boundaries** | Branching model, SemVer, PR protocol, safe autonomous Git boundaries | [`.agents/rules/git-workflow.md`](.agents/rules/git-workflow.md) |
+| **Risk-Based Verification** | 4-Tier verification protocol (Tier 1 Trivial ➔ Tier 4 Full Journey/Perf), visual proofs | [`.agents/rules/verification.md`](.agents/rules/verification.md) |
+| **Security & Invariants** | Hard-lock at tool/service logic layer, IDOR prevention, input guardrails, secret hygiene | [`.agents/rules/security.md`](.agents/rules/security.md) |
+| **Attack Squad** | Pre-launch multi-agent attack simulation across features, chaos, perf, and security | [`.agents/rules/attack-squad.md`](.agents/rules/attack-squad.md) |
 
 ---
 
-### 3. Quy chuẩn Soạn thảo Pull Request (PR Template)
+## 3. Risk-Based Verification Protocol Summary
 
-Mỗi khi tạo PR, AI Agent phải cung cấp đầy đủ thông tin theo mẫu chuẩn sau:
+Verification intensity is proportional to risk:
 
-```markdown
-### 📌 PR: [EX-xxx] <type>(<scope>): <Mô tả ngắn gọn mục đích>
+- **Tier 1 (Trivial / Docs / Typo)**: Syntax & type check (`tsc`, `lint`), clean `git diff`. Visual evidence optional.
+- **Tier 2 (Backend / Logic / DB / Security)**: Tier 1 + automated test suite pass 100% + live API runtime verification (HTTP status 200/201/400).
+- **Tier 3 (Static UI / Layout)**: Tier 2 + live Dev Server screenshot with full Layout Shell (Sidebar 240px, Header).
+- **Tier 4 (Complex User Flow / Latency)**: Tier 3 + Animated GIF or Screen Recording (`.mp4` in `docs/videos/`) embedded directly in GitHub PR description.
 
-#### 1. Loại thay đổi (PR Type)
-- [ ] Feature (Tính năng mới vào `develop`)
-- [ ] Bugfix (Sửa lỗi vào `develop`)
-- [ ] Critical Hotfix (Sửa lỗi khẩn cấp vào `release/vX.Y.Z` & Back-merge `develop`)
+---
 
-#### 2. Vấn đề & Nguyên nhân (Problem & Root Cause)
-- **Mã Ticket / Issue:** EX-xxx
-- **Mô tả hiện tượng:** [Mô tả chi tiết lỗi hoặc yêu cầu tính năng]
-- **Nguyên nhân gốc rễ (Root Cause):** [Giải thích kỹ thuật vì sao phát sinh lỗi]
+## 4. Skills Directory (`.agents/skills/`)
 
-#### 3. Giải pháp & Chi tiết thay đổi (Solution & Key Changes)
-- **Files thay đổi:**
-  - `path/to/file`: [Mô tả thay đổi]
-- **Tóm tắt giải pháp:** [Cách thức đã sửa hoặc triển khai]
+Specialized executable capabilities available to agents:
+- **`graphify`**: Codebase knowledge graph querying and maintenance.
+- **`context-hygiene`**: Context tracking, handoff generation, and `/compact` coordination.
+- **`sync-role-screens`**: Tracing and synchronizing UI/logic changes across Student, Lecturer, and Admin roles.
+- **`verification-visual-proof`**: Standards for live dev server captures and animated user flow recordings.
+- **`release-versioning`**: SemVer bumping, changelog updates, and release tag creation.
+- **`design-taste-frontend`**: Anti-slop frontend craftsmanship for landing and core flows.
+- **`redesign-existing-projects`**: UI upgrades preserving existing business logic.
 
-#### 4. Bằng chứng kiểm thử (Verification Protocol — 4 Trụ Cột)
-- [x] **Tests:** Cú pháp sạch, TypeScript / Jest pass 100%.
-- [x] **Runtime:** Đã gọi API / reload trang thành công với HTTP Status 200.
-- [x] **Visual:** BẮT BUỘC nhúng ảnh/GIF trực tiếp hiển thị trên GitHub PR:
-  ![Minh chứng User Flow](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.gif)
-  *(Hoặc ảnh chụp màn hình nếu là UI tĩnh: `![Minh chứng UI](https://raw.githubusercontent.com/trungducnguyen4/ExamTrust/<branch-name>/docs/screenshots/<file>.png)`)*
-- [x] **Confidence:** High (Đã kiểm tra luồng trực tiếp).
+---
 
-#### 5. Nhánh đích & Kế hoạch Merge (Target & Back-merge Plan)
-- **Source Branch:** `EX-xxx` (hoặc `hotfix/EX-xxx`)
-- **Target Branch:** `develop` (hoặc `release/vX.Y.Z`)
-- **Back-merge required:** [Có / Không - Nếu là hotfix thì bắt buộc merge ngược về `develop`]
-```
+## 5. Session Hygiene & Handoff
+- When a task or PR is completed, summarize changes into a run document: `docs/runs/<YYYY-MM-DD>-<ticket>.md`.
+- AI agents cannot autonomously invoke `/compact` (it is an IDE UI command). Prompt the user to trigger `/compact` when context grows large or between distinct tickets.

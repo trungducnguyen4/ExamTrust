@@ -284,8 +284,8 @@
     "hash": "c2db1adc2351dc8f2605860f585368d7"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/ai-jobs.service.ts": {
-    "mtime": 1794335292164.239,
-    "hash": "4caf32aa201e27524920cbe97ba1e2a2"
+    "mtime": 1794349724585.3445,
+    "hash": "3213537fa524655cc02fb8cda31eb2d3"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/ai-profile.ts": {
     "mtime": 1793867910977.541,
@@ -296,8 +296,8 @@
     "hash": "34d1aa435033af58155717994d8277fb"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/ai.controller.ts": {
-    "mtime": 1794335323523.6504,
-    "hash": "6561eaca0c75e63c475c9e3c4e292a73"
+    "mtime": 1794349724586.34,
+    "hash": "2f8692f2bd39c64af5c887fba1e3d6c3"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/ai.module.ts": {
     "mtime": 1794334956912.3928,
@@ -588,8 +588,8 @@
     "hash": "7b2f01c3aab98ef8047bdf3b88592386"
   },
   "D:/KLTN2/ExamTrust/BE/src/questions-v2/question-validation.ts": {
-    "mtime": 1794335337308.021,
-    "hash": "8e4e62429dd47fdf13fd31b6c534833f"
+    "mtime": 1794349724591.3413,
+    "hash": "215da7a0132cfe27dea0889a2b09b839"
   },
   "D:/KLTN2/ExamTrust/BE/src/questions-v2/questions-v2-contracts.module.ts": {
     "mtime": 1786500286279.7385,
@@ -604,8 +604,8 @@
     "hash": "5995a7b89054b29e1f1e44128faef9a9"
   },
   "D:/KLTN2/ExamTrust/BE/src/questions-v2/questions-v2.service.ts": {
-    "mtime": 1794335355009.6094,
-    "hash": "3f20aad0f96e20a3add9298e3cf88e12"
+    "mtime": 1794349724594.3428,
+    "hash": "6e3f0fdc36eb7750a1a44d0a24c5f280"
   },
   "D:/KLTN2/ExamTrust/BE/src/queue/processors/ai-generation.processor.spec.ts": {
     "mtime": 1790242822637.2344,
@@ -2056,8 +2056,8 @@
     "hash": "00afe2edcc29efc46d99b07a77831269"
   },
   "D:/KLTN2/ExamTrust/.graphify/GRAPH_REPORT.md": {
-    "mtime": 1794334956741.6074,
-    "hash": "efca226a4deea14c6723a2d45acb7278"
+    "mtime": 1794349736452.8247,
+    "hash": "f9a0c25938d4de186239bf50e1354b5d"
   },
   "D:/KLTN2/ExamTrust/.graphify/studio/index.html": {
     "mtime": 1786182231736.4763,
@@ -2072,8 +2072,8 @@
     "hash": "e5861f13e142f0cc35929a8d53a35567"
   },
   "D:/KLTN2/ExamTrust/AGENTS.md": {
-    "mtime": 1793867910967.04,
-    "hash": "5726cd7379be8ec55c7e552c68cac769"
+    "mtime": 1794349474992.271,
+    "hash": "c81cc6891f76d11078230a6d61fc8838"
   },
   "D:/KLTN2/ExamTrust/BE/var/proctoring-evidence/2026-08-09/12b6fc05-bc6d-4aa2-9e98-535b8cd7d183.jpg": {
     "mtime": 1786265280481.6494,
@@ -2420,8 +2420,8 @@
     "hash": "84f56769f0ffbe2cd05a099dfeebc61c"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/langgraph/exam-audit.service.ts": {
-    "mtime": 1794335258921.7317,
-    "hash": "edcd0e980c96c68804532ae17d4d5bcc"
+    "mtime": 1794349724589.3423,
+    "hash": "4d940a6a37b9942779117ad5d224108a"
   },
   "D:/KLTN2/ExamTrust/BE/src/ai/langgraph/exam-audit.state.ts": {
     "mtime": 1793867910990.0605,
@@ -2552,12 +2552,8 @@
     "hash": "9a6d07b58ccf781dc3cdce326afba722"
   },
   "D:/KLTN2/ExamTrust/.agents/rules/attack-squad.md": {
-    "mtime": 1794334954568.759,
-    "hash": "7375f745072ad250f7c58bf0c1de3a57"
-  },
-  "D:/KLTN2/ExamTrust/.agents/rules/verification-protocol.md": {
-    "mtime": 1793867910964.0464,
-    "hash": "858a8593386b670443aa7deab814ef51"
+    "mtime": 1794349461662.007,
+    "hash": "7cf7d01d35f31a1f1c7ad304fefd43ac"
   },
   "D:/KLTN2/ExamTrust/.agents/skills/context-hygiene/SKILL.md": {
     "mtime": 1793250526349.5342,
@@ -2886,5 +2882,25 @@
   "D:/KLTN2/ExamTrust/docs/screenshots/ex-054-pedagogical-question-generated.png": {
     "mtime": 1794334957076.8367,
     "hash": "f74700b147271a21225a5c963eee2e94"
+  },
+  "D:/KLTN2/ExamTrust/.agents/rules/core.md": {
+    "mtime": 1794349403154.6348,
+    "hash": "605c9367d875ac3c86e6cf3ae02255ab"
+  },
+  "D:/KLTN2/ExamTrust/.agents/rules/git-workflow.md": {
+    "mtime": 1794349415450.623,
+    "hash": "35de11b230dd370d2f5f872f9bda28b9"
+  },
+  "D:/KLTN2/ExamTrust/.agents/rules/security.md": {
+    "mtime": 1794349450025.797,
+    "hash": "02687b0d1e2cdf2590cdfb520219766e"
+  },
+  "D:/KLTN2/ExamTrust/.agents/rules/verification.md": {
+    "mtime": 1794349426790.2805,
+    "hash": "0fd8e105b80a84341ce6634608820645"
+  },
+  "D:/KLTN2/ExamTrust/docs/runs/2026-11-11-EX-056.md": {
+    "mtime": 1794349569029.8835,
+    "hash": "76e35e2c918fa27c8d6963b8d345a374"
   }
 }

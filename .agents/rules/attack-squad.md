@@ -1,18 +1,18 @@
 # Rule: Multi-Agent Pre-Launch Attack Squad
 
-## Core Philosophy
-Trước bất kỳ đợt launch, release hoặc kỳ thi thực tế nào trong **ExamTrust**, toàn bộ hệ thống (FE Next.js + BE Express + Prisma DB + Zalo Webhook) phải trải qua một đợt tổng tấn công mô phỏng bởi **Biệt đội 4 Tác nhân (Attack Squad)**.
+## 1. Core Philosophy
+Before any major release, production launch, or high-stakes examination event in **ExamTrust**, the full system stack (Next.js Frontend + NestJS Backend + Prisma / PostgreSQL Database + Redis / BullMQ) must undergo an automated simulation run by the **4-Agent Pre-Launch Attack Squad**.
 
 ---
 
-## 4 Attack Angles
+## 2. The 4 Attack Angles
 
 ```
 ┌────────────────────────────────────────────────────────┐
 │             PRE-LAUNCH ATTACK SQUAD                    │
 ├──────────────────────────┬─────────────────────────────┤
 │ 1. Features              │ 2. Bugs (Chaos & Edge)      │
-│    Run every user flow   │    Explore weird states     │
+│    Run every user flow   │    Explore abnormal states  │
 ├──────────────────────────┼─────────────────────────────┤
 │ 3. Performance           │ 4. Security                 │
 │    Profile slow paths    │    Probe inputs, permissions│
@@ -20,28 +20,29 @@ Trước bất kỳ đợt launch, release hoặc kỳ thi thực tế nào tron
 ```
 
 ### 1. 🧭 Feature Navigator
-- Chạy qua toàn bộ luồng người dùng của sinh viên và giảng viên:
-  - Sinh viên: Đăng nhập ➔ Vào phòng thi ➔ Làm bài & Nộp bài thi ➔ Xem điểm.
-  - Giảng viên/Admin: Tạo đề thi ➔ Giám sát gian lận ➔ Chấm bài ➔ Xuất bảng điểm.
+- Execute core end-to-end user journeys for both student and lecturer roles:
+  - **Student Flow**: Login ➔ Join Exam Room ➔ Take Exam & Answer Questions ➔ Submit ➔ View Results.
+  - **Lecturer / Admin Flow**: Create Exam & Questions ➔ Launch & Monitor Integrity Flags ➔ Review / Grade Submissions ➔ Export Gradebook.
 
 ### 2. 🐒 Chaos Monkey & Edge Hunter
-- Thử nghiệm các trạng thái bất thường trong kỳ thi:
-  - Nộp bài thi 2 lần liên tiếp (double submission race condition).
-  - Tải lên file bài thi dung lượng 0KB, file sai định dạng hoặc payload siêu dài.
-  - Chụp Screenshot ngay khi phát hiện màn hình vỡ giao diện hoặc lỗi ngoại lệ.
+- Probe race conditions and abnormal client behaviors:
+  - Rapid double-submission clicks (verifying idempotency key locks).
+  - Malformed payload submissions, zero-length files, or oversized inputs.
+  - Inspect UI boundary responsiveness under extreme window resize or empty data states.
 
 ### 3. ⚡ Performance Profiler
-- Đo độ trễ phản hồi API nộp bài và đồng bộ câu hỏi (Target: < 500ms).
-- Kiểm tra kích thước bundle Next.js tĩnh.
+- Measure critical path latency: submission sync, question retrieval (Target: < 500ms p95).
+- Verify database query efficiency (detecting and eliminating N+1 regressions).
+- Inspect Next.js bundle footprint and load times.
 
 ### 4. 🛡️ Security Auditor
-- **IDOR / Thi hộ**: Sinh viên A không được sửa bài thi hoặc xem kết quả bài thi của Sinh viên B qua việc thay đổi ID trên URL/API.
-- **SQL Injection / Prisma leak**: Kiểm tra an toàn truy vấn cơ sở dữ liệu.
-- **Secret Leaks**: Quét mã nguồn ngăn chặn rò rỉ token AWS, Zalo Webhook key, JWT Secret.
+- **IDOR & Exam Impersonation**: Student A cannot access or tamper with Student B's submission answers via URL or API ID tampering.
+- **Data Protection & Guardrails**: Validate domain boundary guardrails and input sanitization.
+- **Credential & Secret Protection**: Zero leaks of AWS keys, JWT secrets, or DB credentials.
 
 ---
 
-## 🚦 Gate Policy (Quy tắc Chặn Release)
-- 🔴 **BLOCK**: Lỗ hổng gian lận thi cử, lộ secret, crash luồng nộp bài.
-- 🟡 **WARNING**: Cảnh báo hiệu năng hoặc lỗi giao diện nhẹ.
-- 🟢 **PASS**: Hoàn thành toàn diện 4 góc tấn công an toàn.
+## 3. Release Gate Policy
+- 🔴 **BLOCK**: Integrity vulnerability, exam impersonation, secret leak, or exam submission crash.
+- 🟡 **WARNING**: Minor UI glitch or latency exceeding soft threshold without breaking flow.
+- 🟢 **PASS**: All 4 attack angles verified cleanly with zero regressions.
