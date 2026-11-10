@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { difficultyLabel } from "../question-bank-utils";
+import { FormattedQuestionText } from "@/components/common/FormattedQuestionText";
 
 export interface BatchGeneratedQuestion {
   id?: string;
@@ -179,7 +180,7 @@ export function QuestionBatchReviewDialog({
                 <CardContent className="p-4 sm:p-5 space-y-3">
                   {/* Question Stem */}
                   <div className="text-sm font-semibold text-foreground leading-relaxed whitespace-pre-wrap">
-                    {q.content}
+                    <FormattedQuestionText text={q.content} />
                   </div>
 
                   {/* Options if Multiple Choice / True False */}
@@ -205,7 +206,7 @@ export function QuestionBatchReviewDialog({
                             >
                               {key}
                             </span>
-                            <span className="flex-1 leading-tight pt-0.5">{text}</span>
+                            <span className="flex-1 leading-tight pt-0.5"><FormattedQuestionText text={text} /></span>
                             {isCorrect && (
                               <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
                             )}
@@ -221,7 +222,7 @@ export function QuestionBatchReviewDialog({
                       <span className="font-semibold text-foreground flex items-center gap-1.5">
                         💡 Giải thích:
                       </span>
-                      <p className="leading-relaxed">{q.explanation}</p>
+                      <div className="leading-relaxed"><FormattedQuestionText text={q.explanation} /></div>
                     </div>
                   )}
                 </CardContent>

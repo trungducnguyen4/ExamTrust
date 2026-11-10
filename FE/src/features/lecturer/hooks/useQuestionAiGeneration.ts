@@ -6,6 +6,7 @@ import type { CourseOption, QuestionOption } from "../question-editor-types";
 import type { ClarificationConfig } from "../components/QuestionClarificationDialog";
 import type { BatchGeneratedQuestion } from "../components/QuestionBatchReviewDialog";
 import { getUserAiConfig, UserAiConfig } from "@/lib/ai-key-storage";
+import type { GuardrailResult } from "@/components/ai/GuardrailAlertBanner";
 
 export type GeneratedQuestion = {
   content: string;
@@ -63,6 +64,7 @@ export function useQuestionAiGeneration(params: Params) {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiSimilarityWarning, setAiSimilarityWarning] = useState("");
+  const [guardrailResult, setGuardrailResult] = useState<GuardrailResult | null>(null);
 
   // Grill-me modal & state
   const [isGrillMeEnabled, setIsGrillMeEnabled] = useState(false);
@@ -248,6 +250,19 @@ export function useQuestionAiGeneration(params: Params) {
     setIsGenerating(false);
     setActiveJobId(null);
 
+    if (output?.guardrailBlocked) {
+      setGuardrailResult({
+        guardrailBlocked: true,
+        offendingKeywords: output.offendingKeywords || [],
+        detectedDomain: output.detectedDomain,
+        courseDomain: output.courseDomain,
+        reason: output.reason,
+        suggestion: output.suggestion,
+      });
+      toast.warning("Yêu cầu tạo câu hỏi bị từ chối do lệch phạm vi học phần.");
+      return;
+    }
+
     if (count > 1 || (Array.isArray(output?.questions) && output.questions.length > 0)) {
       // Batch mode
       const list: BatchGeneratedQuestion[] = (output?.questions || []).map((q: any) => ({
@@ -294,6 +309,7 @@ export function useQuestionAiGeneration(params: Params) {
     setIsGenerating(true);
     setAiError(null);
     setAiSimilarityWarning("");
+    setGuardrailResult(null);
 
     const backendType = typeMap[params.questionType] || "MULTIPLE_CHOICE";
     const selectedCourse = params.courses.find((course) => course.id === params.courseId);
@@ -479,6 +495,8 @@ export function useQuestionAiGeneration(params: Params) {
 
   return {
     aiPrompt,
+    guardrailResult,
+    clearGuardrailResult: () => setGuardrailResult(null),
     setAiPrompt,
     questionCount,
     setQuestionCount,
