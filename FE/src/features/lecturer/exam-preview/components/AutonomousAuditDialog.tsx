@@ -30,6 +30,21 @@ import {
   RotateCcw,
 } from "lucide-react";
 import api from "@/lib/api";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  QUESTION_TYPE_LABELS,
+  getDifficultyLabel,
+  buildComparisonSnapshot,
+  getChangedComparisonFields,
+  EditableOption,
+  QuestionComparisonSnapshot,
+  ComparisonFieldKey,
+} from "../../exam-analytics-model";
 
 export interface QuestionImprovementItem {
   questionId: string;
@@ -384,7 +399,7 @@ ${report.improvements
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl border-border shadow-2xl">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl border-border shadow-2xl">
         {/* Header */}
         <DialogHeader className="p-5 pb-4 bg-muted/30 border-b border-border/80">
           <div className="flex items-center justify-between">
@@ -761,5 +776,160 @@ ${report.improvements
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+
+// Subcomponents for Question Comparison View
+function QuestionComparisonCard({
+  title,
+  snapshot,
+  changedFields,
+  isOptimized = false,
+}: {
+  title: string;
+  snapshot: QuestionComparisonSnapshot;
+  changedFields: ComparisonFieldKey[];
+  isOptimized?: boolean;
+}) {
+  const difficulty = getDifficultyLabel(snapshot.difficulty);
+  const changedSet = new Set(changedFields);
+  const isChanged = (field: ComparisonFieldKey) => changedSet.has(field);
+
+  return (
+    <Card
+      className={`border transition-all ${
+        isOptimized
+          ? "border-emerald-500/40 bg-emerald-50/10 dark:bg-emerald-950/10 shadow-xs"
+          : "border-border/80 bg-card"
+      }`}
+    >
+      <CardHeader className="p-3.5 pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-block h-2.5 w-2.5 rounded-full ${
+                isOptimized ? "bg-emerald-500 shadow-xs" : "bg-muted-foreground/60"
+              }`}
+            />
+            <CardTitle className="text-xs font-bold text-foreground">{title}</CardTitle>
+          </div>
+          {snapshot.type ? (
+            <Badge variant="outline" className="text-[10px] font-medium py-0 px-2 h-5">
+              {QUESTION_TYPE_LABELS[String(snapshot.type)] || snapshot.type}
+            </Badge>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className="p-3.5 pt-1 space-y-3">
+        {/* Nội dung câu hỏi */}
+        <ComparisonSection title="Nội dung câu hỏi" changed={isChanged("content")}>
+          <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground font-medium">
+            {snapshot.content || "Chưa có nội dung."}
+          </p>
+        </ComparisonSection>
+
+        {/* Phương án */}
+        <ComparisonSection title="Phương án" changed={isChanged("options") || isChanged("correctAnswer")}>
+          {snapshot.options.length ? (
+            <div className="space-y-1.5">
+              {snapshot.options.map((option) => (
+                <OptionPreviewRow
+                  key={option.id}
+                  option={option}
+                  isCorrect={snapshot.correctAnswerIds.includes(option.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">Không có phương án.</p>
+          )}
+        </ComparisonSection>
+
+        {/* Đáp án đúng */}
+        <ComparisonSection title="Đáp án đúng" changed={isChanged("correctAnswer")}>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-xs px-2.5 py-0.5"
+            >
+              ✓ {snapshot.correctAnswerIds.length ? snapshot.correctAnswerIds.join(", ") : "Chưa xác định"}
+            </Badge>
+          </div>
+        </ComparisonSection>
+
+        {/* Giải thích */}
+        <ComparisonSection title="Giải thích" changed={isChanged("explanation")}>
+          <p className="whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">
+            {snapshot.explanation || "Chưa có giải thích."}
+          </p>
+        </ComparisonSection>
+
+        {/* Độ khó & Điểm */}
+        <div className="grid grid-cols-2 gap-2">
+          <ComparisonSection title="Độ khó" changed={isChanged("difficulty")}>
+            <p className={`text-xs font-semibold ${difficulty.className}`}>
+              {snapshot.difficulty == null ? "Chưa gán" : `${snapshot.difficulty} · ${difficulty.text}`}
+            </p>
+          </ComparisonSection>
+          <ComparisonSection title="Điểm" changed={isChanged("points")}>
+            <p className="text-xs font-semibold text-foreground">
+              {snapshot.points == null ? "1 điểm" : `${snapshot.points} điểm`}
+            </p>
+          </ComparisonSection>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function OptionPreviewRow({ option, isCorrect }: { option: EditableOption; isCorrect: boolean }) {
+  return (
+    <div
+      className={`flex items-start gap-2.5 rounded-lg border p-2 text-xs transition-colors ${
+        isCorrect
+          ? "border-emerald-500/50 bg-emerald-50/60 dark:bg-emerald-950/30 text-foreground font-medium"
+          : "border-border/70 bg-muted/20 text-muted-foreground"
+      }`}
+    >
+      <span
+        className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[11px] font-bold ${
+          isCorrect
+            ? "border-emerald-600 bg-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-400"
+            : "border-border bg-background text-muted-foreground"
+        }`}
+      >
+        {isCorrect ? <CheckCircle2 className="h-3.5 w-3.5" /> : option.id}
+      </span>
+      <span className="leading-tight pt-0.5 text-xs">{option.text}</span>
+    </div>
+  );
+}
+
+function ComparisonSection({
+  title,
+  changed,
+  children,
+}: {
+  title: string;
+  changed: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`rounded-lg border p-2.5 transition-all ${
+        changed ? "border-primary/40 bg-primary/5 dark:bg-primary/10" : "border-border/60 bg-muted/15"
+      }`}
+    >
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+        {changed ? (
+          <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary text-[10px] font-bold py-0 h-4">
+            Đã thay đổi
+          </Badge>
+        ) : null}
+      </div>
+      {children}
+    </div>
   );
 }
