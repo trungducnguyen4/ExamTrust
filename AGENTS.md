@@ -54,6 +54,7 @@ Verification intensity is proportional to risk:
 ## 4. Skills Directory (`.agents/skills/`)
 
 Specialized executable capabilities available to agents:
+- **`diagnostics`**: Scientific root-cause diagnosis protocol executed in isolated read-only context.
 - **`graphify`**: Codebase knowledge graph querying and maintenance.
 - **`context-hygiene`**: Context tracking, handoff generation, and `/compact` coordination.
 - **`sync-role-screens`**: Tracing and synchronizing UI/logic changes across Student, Lecturer, and Admin roles.
@@ -64,6 +65,41 @@ Specialized executable capabilities available to agents:
 
 ---
 
-## 5. Session Hygiene & Handoff
+## 5. Isolated Subagent Architecture & Diagnostics Protocol
+
+To eliminate context pollution (large stack traces, exploratory logs, multiple hypothesis traces):
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   MAIN AGENT                           │
+│   Maintains user intent, architecture, & scope         │
+└──────────────────────────┬─────────────────────────────┘
+                           │ 1. Delegate issue
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│             ISOLATED DIAGNOSTICS SUBAGENT              │
+│   - Fresh context window (Read-Only)                   │
+│   - Executes .agents/skills/diagnostics/SKILL.md       │
+│   - Inspects AST/Graphify, logs, error reproduction    │
+│   - Proves root cause & rules out alternatives         │
+└──────────────────────────┬─────────────────────────────┘
+                           │ 2. Returns DIAGNOSTIC REPORT only
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                   MAIN AGENT                           │
+│   - Evaluates confirmed root cause & evidence          │
+│   - Implements minimal-touch code fix                  │
+│   - Executes Risk-Based Verification                   │
+└────────────────────────────────────────────────────────┘
+```
+
+### Harness Implementations:
+- **Claude Code**: Uses `context: fork` configured in `.claude/agents/diagnostics.md`.
+- **Antigravity / DeepSeek Harness**: Uses `invoke_subagent` with the `research` or dedicated read-only subagent.
+- **Codex**: Delegates to read-only sub-session with the `diagnostics` prompt.
+
+---
+
+## 6. Session Hygiene & Handoff
 - When a task or PR is completed, summarize changes into a run document: `docs/runs/<YYYY-MM-DD>-<ticket>.md`.
 - AI agents cannot autonomously invoke `/compact` (it is an IDE UI command). Prompt the user to trigger `/compact` when context grows large or between distinct tickets.
