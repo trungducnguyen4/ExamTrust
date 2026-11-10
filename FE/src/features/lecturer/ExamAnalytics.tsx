@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -189,7 +189,7 @@ export default function ExamAnalytics() {
     return result;
   }, [examOptions, selectedAcademicYear, selectedTerm, selectedAttemptFilter, examSearchQuery]);
 
-  // Sync selected exam when filters change
+  // Sync selected exam when filters change (synchronizing attemptScope to eliminate redundant double-fetch)
   useEffect(() => {
     if (!filteredExams.length) {
       setSelectedExamId("");
@@ -199,11 +199,18 @@ export default function ExamAnalytics() {
     const requestedStillValid =
       requestedExamId && filteredExams.some((ex) => ex.id === requestedExamId);
     if (requestedStillValid && selectedExamId !== requestedExamId) {
+      const target = filteredExams.find((ex) => ex.id === requestedExamId);
+      const targetStrategy = target?.gradingStrategy ?? target?.settings?.gradingStrategy;
+      setSelectedAttemptScope(getScopeForGradingStrategy(targetStrategy));
       setSelectedExamId(requestedExamId);
       return;
     }
     if (!stillValid) {
-      setSelectedExamId(pickDefaultAnalyticsExamId(filteredExams));
+      const defaultId = pickDefaultAnalyticsExamId(filteredExams);
+      const target = filteredExams.find((ex) => ex.id === defaultId);
+      const targetStrategy = target?.gradingStrategy ?? target?.settings?.gradingStrategy;
+      setSelectedAttemptScope(getScopeForGradingStrategy(targetStrategy));
+      setSelectedExamId(defaultId);
     }
   }, [filteredExams, requestedExamId, selectedExamId]);
 
@@ -215,7 +222,10 @@ export default function ExamAnalytics() {
       setExamOptions(items);
       if (items.length > 0) {
         const requestedExam = items.find((item) => item.id === requestedExamId);
-        setSelectedExamId(requestedExam?.id || pickDefaultAnalyticsExamId(items));
+        const chosen = requestedExam || items.find((item) => item.id === pickDefaultAnalyticsExamId(items)) || items[0];
+        const strategy = chosen?.gradingStrategy ?? chosen?.settings?.gradingStrategy;
+        setSelectedAttemptScope(getScopeForGradingStrategy(strategy));
+        setSelectedExamId(chosen?.id || "");
       }
     } catch (error) {
       console.error("Failed to load exams for analytics:", error);
@@ -228,8 +238,11 @@ export default function ExamAnalytics() {
     loadExams();
   }, [requestedExamId]);
 
-  const loadIntelligence = async () => {
-    if (!selectedExamId) return;
+  const loadIntelligence = useCallback(async () => {
+    if (!selectedExamId) {
+      setData(null);
+      return;
+    }
     try {
       setLoadingIntelligence(true);
       const payload = await api.getExamIntelligence(selectedExamId, { attemptScope: selectedAttemptScope });
@@ -247,21 +260,13 @@ export default function ExamAnalytics() {
     } finally {
       setLoadingIntelligence(false);
     }
-  };
-
-  // Whenever selectedExamId changes, auto-select default attemptScope from exam's gradingStrategy
-  useEffect(() => {
-    if (!selectedExamId) return;
-    const current = examOptions.find((ex) => ex.id === selectedExamId);
-    const currentStrategy = current?.gradingStrategy ?? current?.settings?.gradingStrategy;
-    setSelectedAttemptScope(getScopeForGradingStrategy(currentStrategy));
-  }, [selectedExamId, examOptions]);
+  }, [selectedExamId, selectedAttemptScope]);
 
   // Load intelligence when exam or attemptScope changes
   useEffect(() => {
     if (!selectedExamId) return;
-    loadIntelligence();
-  }, [selectedExamId, selectedAttemptScope]);
+    void loadIntelligence();
+  }, [selectedExamId, selectedAttemptScope, loadIntelligence]);
 
   useEffect(() => {
     const activeEntries = Object.entries(aiImprovements).filter(([, item]) =>
@@ -961,8 +966,10 @@ export default function ExamAnalytics() {
                 <Select
                   value={selectedExamId}
                   onValueChange={(val) => {
+                    const current = examOptions.find((ex) => ex.id === val);
+                    const currentStrategy = current?.gradingStrategy ?? current?.settings?.gradingStrategy;
+                    setSelectedAttemptScope(getScopeForGradingStrategy(currentStrategy));
                     setSelectedExamId(val);
-                    setSelectedAttemptScope("all");
                   }}
                   disabled={loadingIntelligence || filteredExams.length === 0}
                 >
