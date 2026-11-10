@@ -92,4 +92,33 @@ export class AiJobsService {
 
     return record;
   }
+
+  async createBlockedJob(params: CreateAiJobParams & { blockedOutput: Record<string, any> }) {
+    const { provider, model } = this.aiService.getProviderStatus();
+    const section = this.normalizeSection(params.section);
+
+    const record = await this.prisma.aIGenerationRecord.create({
+      data: {
+        draftId: params.draftId ?? null,
+        questionVersionId: params.questionVersionId ?? null,
+        examId: params.examId ?? null,
+        submissionId: params.submissionId ?? null,
+        section,
+        status: 'SUCCEEDED',
+        reviewStatus: 'REJECTED',
+        provider,
+        model,
+        output: params.blockedOutput,
+        completedAt: new Date(),
+        prompt: {
+          task: params.task,
+          payload: params.payload,
+          requestedBy: params.requestedBy ?? null,
+          context: params.payload?.context ?? {},
+        },
+      },
+    });
+
+    return record;
+  }
 }

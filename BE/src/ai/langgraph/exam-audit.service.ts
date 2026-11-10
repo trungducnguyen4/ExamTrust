@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiTelemetryService } from '../telemetry.service';
 import { createExamAuditGraph } from './exam-audit.graph';
@@ -119,35 +119,87 @@ export class ExamAuditService {
       improvedOptions?: any;
       improvedExplanation?: string;
     }>;
-    userId: string;
+    userId?: string;
+    userRole?: string;
   }) {
-    const { examId, improvements, userId } = params;
+    const { examId, improvements, userId, userRole } = params;
+
+    if (!Array.isArray(improvements) || improvements.length === 0) {
+      throw new BadRequestException('Danh sách câu hỏi cải tiến không được để trống');
+    }
 
     const exam = await this.prisma.exam.findUnique({
       where: { id: examId },
-      select: { id: true, title: true },
+      select: {
+        id: true,
+        title: true,
+        creatorId: true,
+        courseId: true,
+        course: {
+          select: {
+            lecturerId: true,
+          },
+        },
+        examQuestions: {
+          select: {
+            questionId: true,
+          },
+        },
+      },
     });
 
     if (!exam) {
       throw new NotFoundException(`Không tìm thấy bài thi với ID: ${examId}`);
     }
 
-    const updatedQuestions: string[] = [];
+    // 1. RBAC & IDOR check directly at the tool logic layer
+    const role = String(userRole || '').toUpperCase();
+    const isOwner = exam.creatorId === userId;
+    const isCourseLecturer = exam.course?.lecturerId === userId;
+    const isAdmin = role === 'ADMIN';
 
-    for (const item of improvements) {
-      const updated = await this.prisma.question.update({
-        where: { id: item.questionId },
-        data: {
-          content: item.improvedContent,
-          options: item.improvedOptions ? item.improvedOptions : undefined,
-          explanation: item.improvedExplanation,
-        },
-      });
-      updatedQuestions.push(updated.id);
+    if (userId && !isAdmin && !isOwner && !isCourseLecturer) {
+      throw new ForbiddenException('Bạn không có quyền chỉnh sửa câu hỏi của bài thi này');
     }
 
+    // 2. Strict Invariant: Every improved question must actually belong to this exam!
+    const validQuestionIds = new Set(exam.examQuestions.map((eq) => eq.questionId));
+    for (const item of improvements) {
+      if (!item.questionId || !validQuestionIds.has(item.questionId)) {
+        throw new BadRequestException(
+          `Câu hỏi với ID "${item.questionId}" không thuộc bài thi "${exam.title}" (ID: ${examId})`,
+        );
+      }
+
+      const content = String(item.improvedContent || '').trim();
+      if (!content) {
+        throw new BadRequestException(`Nội dung câu hỏi "${item.questionId}" không được để trống`);
+      }
+      if (content.length > 10000) {
+        throw new BadRequestException(`Nội dung câu hỏi "${item.questionId}" vượt quá giới hạn 10000 ký tự`);
+      }
+    }
+
+    // 3. Atomic execution inside a Prisma transaction
+    const updatedQuestions = await this.prisma.$transaction(async (tx) => {
+      const results: string[] = [];
+      for (const item of improvements) {
+        const updated = await tx.question.update({
+          where: { id: item.questionId },
+          data: {
+            content: item.improvedContent.trim(),
+            options: item.improvedOptions ? item.improvedOptions : undefined,
+            explanation: item.improvedExplanation?.trim(),
+          },
+          select: { id: true },
+        });
+        results.push(updated.id);
+      }
+      return results;
+    });
+
     this.logger.log(
-      `[LangGraph] Người dùng ${userId} đã áp dụng cải tiến cho ${updatedQuestions.length} câu hỏi của bài thi "${exam.title}"`,
+      `[LangGraph] Người dùng ${userId || 'SYSTEM'} đã áp dụng cải tiến an toàn cho ${updatedQuestions.length} câu hỏi của bài thi "${exam.title}"`,
     );
 
     return {

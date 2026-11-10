@@ -105,3 +105,27 @@ export function assertLineContent(options: unknown): void {
     );
   }
 }
+
+/**
+ * Validate that question content is present, non-empty, and options are structurally sound.
+ */
+export function assertQuestionPresenceAndOptions(type: string, content: unknown, options: unknown): void {
+  const text = typeof content === 'string' ? content.trim() : '';
+  if (!text) {
+    throw new BadRequestException('Nội dung câu hỏi không được để trống.');
+  }
+
+  const normalizedType = String(type || '').toUpperCase();
+  if (normalizedType === 'MULTIPLE_CHOICE') {
+    if (!options || typeof options !== 'object') {
+      throw new BadRequestException('Câu hỏi trắc nghiệm phải có danh sách phương án lựa chọn.');
+    }
+    const optionEntries = Array.isArray(options)
+      ? options.filter((v) => Boolean(String(v?.text ?? v ?? '').trim()))
+      : Object.values(options).filter((v) => Boolean(String(v ?? '').trim()));
+
+    if (optionEntries.length < 2) {
+      throw new BadRequestException('Câu hỏi trắc nghiệm phải có ít nhất 2 phương án lựa chọn.');
+    }
+  }
+}

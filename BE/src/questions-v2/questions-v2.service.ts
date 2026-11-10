@@ -29,6 +29,7 @@ import {
   assertOptionsLength,
   assertExplanationLength,
   assertLineContent,
+  assertQuestionPresenceAndOptions,
 } from './question-validation';
 import {
   ApproveQuestionAiImprovementDto,
@@ -358,6 +359,8 @@ export class QuestionsService {
 
     await this.assertTopicBelongsToCourse(topicId, questionData.courseId);
 
+    // Validate presence and structural integrity directly at tool/service layer
+    assertQuestionPresenceAndOptions(questionData.type, questionData.content, questionData.options);
     // Validate content lengths
     assertQuestionContentLength(questionData.content);
     assertOptionsLength(questionData.options);
@@ -673,6 +676,13 @@ export class QuestionsService {
 
     await this.assertTopicBelongsToCourse(topicId, effectiveCourseId);
 
+    // Validate presence and structural integrity directly at tool/service layer
+    if (dto.content !== undefined || dto.options !== undefined) {
+      const effectiveType = dto.type ?? question.type;
+      const effectiveContent = dto.content !== undefined ? dto.content : question.content;
+      const effectiveOptions = dto.options !== undefined ? dto.options : question.options;
+      assertQuestionPresenceAndOptions(effectiveType, effectiveContent, effectiveOptions);
+    }
     // Validate content lengths (only when provided in the update)
     if (dto.content !== undefined) assertQuestionContentLength(dto.content);
     if (dto.options !== undefined) assertOptionsLength(dto.options);
