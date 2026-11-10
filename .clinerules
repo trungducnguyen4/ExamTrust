@@ -1,85 +1,25 @@
-# Graphify Knowledge Graph — Query-First Workflow
+# Cline Configuration — ExamTrust
 
-This project has a **Graphify knowledge graph** at `.graphify/graph.json` (shared with Codex).
+> This file acts as a Cline adapter for ExamTrust. All authoritative engineering standards, branching models, and verification protocols are defined in `AGENTS.md` and `.agents/rules/`.
 
-## When to Query Graphify First
+## 1. Authoritative Rules Reference
+Always follow the core rules defined at:
+- **Root Guidelines**: [AGENTS.md](AGENTS.md)
+- **Core Principles**: [.agents/rules/core.md](.agents/rules/core.md)
+- **Git Flow & Boundaries**: [.agents/rules/git-workflow.md](.agents/rules/git-workflow.md)
+- **Risk-Based Verification**: [.agents/rules/verification.md](.agents/rules/verification.md)
+- **Security & Tool Logic Hard-Lock**: [.agents/rules/security.md](.agents/rules/security.md)
 
-Before broad repository searches, architecture analysis, cross-module debugging, or tracing FE/BE/database flows, **query the Graphify knowledge graph first**.
-
-**Trigger tasks (always query first):**
-- "Trace the full flow of X"
-- "Check FE + BE + Prisma"
-- "Find root cause (unknown location)"
-- "Fix across multiple modules"
-- "Evaluate architecture"
-- "Find all places related to X"
-- "Check feature at scale"
-
-**Direct-read tasks (skip graph):**
-- Known single-file edits
-- Trivial fixes in a known location
-
-## Query-First Workflow
-
+## 2. Knowledge Graph Query-First Workflow
+Before broad repository searches or multi-file edits, query the Graphify knowledge graph first:
+```bash
+graphify query "<task description>"
 ```
-STEP 1: graphify query "<specific task>"
-STEP 2: If deeper relations needed: graphify path A B / graphify explain "<node>"
-STEP 3: Select the minimal set of files to read
-STEP 4: Read actual source files (source of truth)
-STEP 5: Edit + test
+- Use Graphify for navigation only. Source code remains the source of truth.
+- After modifying code files, keep the graph synchronized with:
+```bash
+npx graphify hook-rebuild
 ```
 
-## Important Rules
-
-- Graphify is for **navigation only** — source code is the source of truth
-- Do NOT read the entire `GRAPH_REPORT.md` for every task
-- Do NOT recursively scan the whole repository unless Graphify cannot locate the relevant subsystem
-- If `graphify query` returns sufficient scope, do NOT continue with broad searches
-- Target: 3–10 relevant files per task after graph query
-
-
-## Graph Update
-
-When source code changes significantly:
-```
-graphify update
-```
-
-This updates the SAME graph at `.graphify/graph.json` — shared with Codex. Do NOT rebuild independently.
-
----
-
-# Verification Protocol — Proof of Change & Confidence Report
-
-Mọi thay đổi code hoặc bugfix bắt buộc phải xuất báo cáo theo **4 Trụ Cột**:
-1. **🧪 Tests**: Syntax check / unit tests có bằng chứng cụ thể.
-2. **⚡ Runtime**: Kiểm tra API thực tế + xác minh DB (Prisma/DB).
-3. **👁️ Visual**:
-   - **Chỉnh sửa UI/Component**: BẮT BUỘC chụp **Screenshot** đính kèm.
-   - **Chỉnh sửa User Flow / Quy trình**: BẮT BUỘC quay **Video màn hình / GIF**.
-4. **🎯 Confidence**: Đánh giá High/Medium/Low, nêu rõ những gì ĐÃ kiểm và CHƯA kiểm.
-
----
-
-# Git Flow, Bugfix & Pull Request (PR) Protocol
-
-Mọi quy trình phát triển tính năng, sửa lỗi (bugfix/hotfix) và mở Pull Request (PR) bắt buộc tuân thủ quy trình Git Flow:
-
-1. **Phân nhánh (Branching):**
-   - Feature/Bugfix Branches: Đặt tên theo Jira issue `EX-xxx` (ví dụ: `feature/EX-001`, `bugfix/EX-002`). Tách từ `develop`.
-   - `develop`: Tự động deploy môi trường DEV. Mọi PR vào `develop` phải pass tests, code review và QA.
-   - `Release Branches`: Đặt tên theo SemVer `release/vX.Y.Z` (ví dụ `v1.0.0`, `v1.0.1`).
-   - `UAT / release`: Tự động deploy môi trường UAT.
-   - `Production / master`: Tự động deploy môi trường Production. Bắt buộc gắn tag định dạng `release/v1.x.x`.
-
-2. **Sửa lỗi Khẩn cấp (Critical Hotfix - Nhánh F):**
-   - Lỗi khẩn cấp (như syntax error làm sập trang) được tách nhánh fix trực tiếp để release patch mà không cần chờ toàn bộ `develop`.
-   - **Bắt buộc Back-merge về `develop`** ngay sau khi release để tránh mất bản vá.
-
-3. **Mẫu Soạn thảo PR Template:**
-   - Tiêu đề: `[EX-xxx] <type>(<scope>): <Mô tả ngắn>`
-   - Thân PR: Nêu rõ Problem, Root Cause, Solution/Files changed, Bằng chứng kiểm thử theo 4 Trụ Cột, Target Branch & Back-merge plan.
-
-4. **Quyền hạn Tự động hóa Git (Git Automation Permission):**
-   - AI Agent ĐƯỢC PHÉP chủ động tạo nhánh, commit và push lên GitHub remote theo đúng quy chuẩn mà KHÔNG CẦN hỏi lại người dùng để đảm bảo tính tự động hóa và tốc độ xử lý.
-
+## 3. Risk-Based Verification Protocol
+Provide evidence according to the change tier (Tier 1 Trivial ➔ Tier 4 Complex Flow). For UI changes, capture real screenshots with full Layout Shell. For User Flows or Performance improvements, include animated GIFs or screen recordings.
