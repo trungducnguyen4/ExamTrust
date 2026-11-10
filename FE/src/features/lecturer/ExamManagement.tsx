@@ -51,6 +51,8 @@ import {
   Plus,
   FileText,
   Clock,
+  Calendar,
+  Users,
   CalendarClock,
   Eye,
   Edit2,
@@ -611,7 +613,7 @@ export default function ExamManagement() {
 
   const ITEMS_PER_PAGE = 5;
   const totalPages = Math.max(1, Math.ceil(filteredExams.length / ITEMS_PER_PAGE));
-  const EXAM_ROW_HEIGHT = 60;
+  const EXAM_ROW_HEIGHT = 116;
   const EXAM_TABLE_HEADER_HEIGHT = 48;
   const EXAM_TABLE_MIN_HEIGHT =
     ITEMS_PER_PAGE * EXAM_ROW_HEIGHT + EXAM_TABLE_HEADER_HEIGHT;
@@ -789,12 +791,22 @@ export default function ExamManagement() {
               >
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[18rem]">Bài kiểm tra &amp; khóa học</TableHead>
-                      <TableHead className="min-w-[15rem]">Thời gian làm bài</TableHead>
-                      <TableHead className="text-center">Lượt làm</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
+                    <TableRow className="border-b hover:bg-transparent">
+                      <TableHead className="w-[48%] min-w-[18rem] px-5 py-3.5 text-xs font-semibold text-muted-foreground text-left">
+                        Bài kiểm tra &amp; khóa học
+                      </TableHead>
+                      <TableHead className="w-[26%] min-w-[14rem] px-4 py-3.5 text-xs font-semibold text-muted-foreground text-left">
+                        Thời gian làm bài
+                      </TableHead>
+                      <TableHead className="w-[11%] min-w-[5.5rem] px-3 py-3.5 text-xs font-semibold text-muted-foreground text-center">
+                        Lượt làm
+                      </TableHead>
+                      <TableHead className="w-[11%] min-w-[7.5rem] px-4 py-3.5 text-xs font-semibold text-muted-foreground text-left">
+                        Trạng thái
+                      </TableHead>
+                      <TableHead className="w-[4%] min-w-[3.5rem] px-4 py-3.5 text-xs font-semibold text-muted-foreground text-right">
+                        Thao tác
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -810,104 +822,125 @@ export default function ExamManagement() {
                       const isPastEnd = Boolean(exam.endTime) && new Date(exam.endTime as string).getTime() < Date.now();
                       const resultsPublished = Boolean(exam.resultsPublishedAt);
                       return (
-                        <TableRow key={exam.id} className="hover:bg-muted/50">
-                          <TableCell className="min-w-[18rem]">
-                            <div className="min-w-0">
-                              <div className="truncate font-medium text-foreground">
+                        <TableRow key={exam.id} className="hover:bg-muted/40 transition-colors">
+                          <TableCell className="w-[48%] min-w-[18rem] px-5 py-4 align-middle whitespace-normal">
+                            <div className="min-w-0 space-y-1.5">
+                              <div
+                                className="truncate text-[16px] font-semibold text-foreground leading-snug tracking-tight hover:text-primary transition-colors cursor-pointer"
+                                onClick={() => router.push(`/lecturer/exam/${exam.id}/preview`)}
+                                title={exam.title}
+                              >
                                 {exam.title}
                               </div>
-                              <div className="mt-1 flex min-w-0 items-center gap-1.5 text-sm">
-                                <span className="truncate font-medium text-foreground">
+                              <div className="flex min-w-0 items-center gap-1.5 text-[13.5px] text-muted-foreground">
+                                <span className="truncate font-normal" title={exam.course.name}>
                                   {exam.course.name}
                                 </span>
-                                <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                                <span className="shrink-0 text-muted-foreground/40">·</span>
+                                <span className="shrink-0 font-mono text-xs text-muted-foreground/80">
                                   {exam.course.code}
                                 </span>
                               </div>
-                              <div className="mt-1 text-xs text-muted-foreground">
-                                {formatExamMetadata(exam)}
+                              <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11.5px] text-muted-foreground">
+                                {exam.duration ? (
+                                  <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-normal text-muted-foreground border border-border/40">
+                                    <Clock className="h-3 w-3 text-muted-foreground/70" />
+                                    <span>{formatDurationVi(exam.duration)}</span>
+                                  </span>
+                                ) : null}
+                                {exam._count?.examQuestions !== undefined && (
+                                  <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-normal text-muted-foreground border border-border/40">
+                                    <FileText className="h-3 w-3 text-muted-foreground/70" />
+                                    <span>{exam._count.examQuestions} câu hỏi</span>
+                                  </span>
+                                )}
+                                {exam._count?.submissions !== undefined && exam._count.submissions > 0 && (
+                                  <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-normal text-muted-foreground border border-border/40">
+                                    <Users className="h-3 w-3 text-muted-foreground/70" />
+                                    <span>{exam._count.submissions} lượt nộp</span>
+                                  </span>
+                                )}
+                                <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-normal text-muted-foreground/90 border border-border/40">
+                                  <Calendar className="h-3 w-3 text-muted-foreground/70" />
+                                  <span>
+                                    {new Date(exam.updatedAt).getTime() - new Date(exam.createdAt).getTime() > 1000
+                                      ? `Cập nhật lúc ${formatDateTimeVi(exam.updatedAt)}`
+                                      : `Tạo lúc ${formatDateTimeVi(exam.createdAt)}`}
+                                  </span>
+                                </span>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="min-w-[15rem]">
+                          <TableCell className="w-[26%] min-w-[14rem] px-4 py-4 align-middle whitespace-normal">
                             <div className="space-y-1.5 text-xs">
-                              {exam.startTime ? (
-                                <div className="flex items-start gap-1.5">
-                                  <span className="shrink-0 font-medium text-foreground">
-                                    Bắt đầu
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    {getScheduleLabel(exam.startTime)}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="flex items-start gap-1.5">
-                                  <span className="shrink-0 font-medium text-foreground">
-                                    Bắt đầu
-                                  </span>
-                                  <span className="text-muted-foreground">Chưa lên lịch</span>
-                                </div>
-                              )}
-                              {exam.endTime ? (
-                                <div className="flex items-start gap-1.5 border-t border-border/60 pt-1.5">
-                                  <span className="shrink-0 font-medium text-foreground">
-                                    Kết thúc
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    {getScheduleLabel(exam.endTime)}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="flex items-start gap-1.5 border-t border-border/60 pt-1.5">
-                                  <span className="shrink-0 font-medium text-foreground">
-                                    Kết thúc
-                                  </span>
-                                  <span className="text-muted-foreground">Chưa lên lịch</span>
-                                </div>
-                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="w-14 shrink-0 text-[11px] font-medium text-muted-foreground/80">
+                                  Bắt đầu
+                                </span>
+                                <span className="text-[12.5px] font-medium text-foreground tracking-tight">
+                                  {getScheduleLabel(exam.startTime)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-14 shrink-0 text-[11px] font-medium text-muted-foreground/80">
+                                  Kết thúc
+                                </span>
+                                <span className="text-[12.5px] font-medium text-foreground tracking-tight">
+                                  {getScheduleLabel(exam.endTime)}
+                                </span>
+                              </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="w-[11%] min-w-[5.5rem] px-3 py-4 text-center align-middle">
                             {canViewResults ? (
                               <button
                                 type="button"
-                                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                                className="inline-flex items-center justify-center min-w-[2.25rem] px-2.5 py-1 rounded-md text-[13px] font-semibold text-primary hover:bg-primary/10 transition-colors"
                                 onClick={() => router.push(`/lecturer/exam/${exam.id}/results`)}
+                                title="Xem kết quả bài thi"
                               >
                                 {exam._count?.submissions}
                               </button>
                             ) : (
-                              <span className="text-sm text-muted-foreground">0</span>
+                              <span className="inline-flex items-center justify-center min-w-[2.25rem] px-2.5 py-1 text-[13px] font-medium text-muted-foreground">
+                                0
+                              </span>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="w-[11%] min-w-[7.5rem] px-4 py-4 text-left align-middle">
                             {exam.status === "ARCHIVED" ? (
                               <StatusBadge
                                 status={exam.status}
                                 domain="exam"
-                                className="text-xs"
+                                className="rounded-full px-2.5 py-0.5 text-[11.5px] font-medium shadow-none border"
                               />
                             ) : resultsPublished ? (
-                              <StatusBadge tone="success" className="text-xs">
+                              <StatusBadge
+                                tone="success"
+                                className="rounded-full px-2.5 py-0.5 text-[11.5px] font-medium shadow-none border"
+                              >
                                 Đã công bố kết quả
                               </StatusBadge>
                             ) : isPastEnd ? (
-                              <StatusBadge tone="danger" className="text-xs">
+                              <StatusBadge
+                                tone="danger"
+                                className="rounded-full px-2.5 py-0.5 text-[11.5px] font-medium shadow-none border"
+                              >
                                 Đã hết hạn
                               </StatusBadge>
                             ) : (
                               <StatusBadge
                                 status={exam.status}
                                 domain="exam"
-                                className="text-xs"
+                                className="rounded-full px-2.5 py-0.5 text-[11.5px] font-medium shadow-none border"
                               />
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                          <TableCell className="w-[4%] min-w-[3.5rem] px-4 py-4 text-right align-middle">
+                            <div className="flex items-center justify-end">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>

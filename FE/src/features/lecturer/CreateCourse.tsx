@@ -2103,20 +2103,13 @@ export default function CreateCourse() {
                         }
                       }}
                     >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm ${getCourseGradientClass((page - 1) * ITEMS_PER_PAGE + index)}`}
-                        >
-                          {course.code.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold text-foreground">
-                            {course.name}
-                          </p>
-                          <p className="truncate text-sm text-muted-foreground">
-                            {course.code}
-                          </p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-foreground">
+                          {course.name}
+                        </p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          {course.code}
+                        </p>
                       </div>
 
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3 md:contents">

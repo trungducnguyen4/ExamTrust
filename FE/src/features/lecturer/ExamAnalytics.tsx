@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -23,7 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Loader2, ExternalLink, Sparkles, TrendingUp, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
+import { Loader2, ExternalLink, Sparkles, TrendingUp, TrendingDown, AlertTriangle, BarChart3, CheckCircle2, Filter, RefreshCw, X, XCircle, RotateCcw, Users, Layers, Lock, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
   PieChart,
@@ -188,7 +189,7 @@ export default function ExamAnalytics() {
     return result;
   }, [examOptions, selectedAcademicYear, selectedTerm, selectedAttemptFilter, examSearchQuery]);
 
-  // Sync selected exam when filters change
+  // Sync selected exam when filters change (synchronizing attemptScope to eliminate redundant double-fetch)
   useEffect(() => {
     if (!filteredExams.length) {
       setSelectedExamId("");
@@ -198,11 +199,18 @@ export default function ExamAnalytics() {
     const requestedStillValid =
       requestedExamId && filteredExams.some((ex) => ex.id === requestedExamId);
     if (requestedStillValid && selectedExamId !== requestedExamId) {
+      const target = filteredExams.find((ex) => ex.id === requestedExamId);
+      const targetStrategy = target?.gradingStrategy ?? target?.settings?.gradingStrategy;
+      setSelectedAttemptScope(getScopeForGradingStrategy(targetStrategy));
       setSelectedExamId(requestedExamId);
       return;
     }
     if (!stillValid) {
-      setSelectedExamId(pickDefaultAnalyticsExamId(filteredExams));
+      const defaultId = pickDefaultAnalyticsExamId(filteredExams);
+      const target = filteredExams.find((ex) => ex.id === defaultId);
+      const targetStrategy = target?.gradingStrategy ?? target?.settings?.gradingStrategy;
+      setSelectedAttemptScope(getScopeForGradingStrategy(targetStrategy));
+      setSelectedExamId(defaultId);
     }
   }, [filteredExams, requestedExamId, selectedExamId]);
 
@@ -214,7 +222,10 @@ export default function ExamAnalytics() {
       setExamOptions(items);
       if (items.length > 0) {
         const requestedExam = items.find((item) => item.id === requestedExamId);
-        setSelectedExamId(requestedExam?.id || pickDefaultAnalyticsExamId(items));
+        const chosen = requestedExam || items.find((item) => item.id === pickDefaultAnalyticsExamId(items)) || items[0];
+        const strategy = chosen?.gradingStrategy ?? chosen?.settings?.gradingStrategy;
+        setSelectedAttemptScope(getScopeForGradingStrategy(strategy));
+        setSelectedExamId(chosen?.id || "");
       }
     } catch (error) {
       console.error("Failed to load exams for analytics:", error);
@@ -227,8 +238,11 @@ export default function ExamAnalytics() {
     loadExams();
   }, [requestedExamId]);
 
-  const loadIntelligence = async () => {
-    if (!selectedExamId) return;
+  const loadIntelligence = useCallback(async () => {
+    if (!selectedExamId) {
+      setData(null);
+      return;
+    }
     try {
       setLoadingIntelligence(true);
       const payload = await api.getExamIntelligence(selectedExamId, { attemptScope: selectedAttemptScope });
@@ -246,21 +260,13 @@ export default function ExamAnalytics() {
     } finally {
       setLoadingIntelligence(false);
     }
-  };
-
-  // Whenever selectedExamId changes, auto-select default attemptScope from exam's gradingStrategy
-  useEffect(() => {
-    if (!selectedExamId) return;
-    const current = examOptions.find((ex) => ex.id === selectedExamId);
-    const currentStrategy = current?.gradingStrategy ?? current?.settings?.gradingStrategy;
-    setSelectedAttemptScope(getScopeForGradingStrategy(currentStrategy));
-  }, [selectedExamId, examOptions]);
+  }, [selectedExamId, selectedAttemptScope]);
 
   // Load intelligence when exam or attemptScope changes
   useEffect(() => {
     if (!selectedExamId) return;
-    loadIntelligence();
-  }, [selectedExamId, selectedAttemptScope]);
+    void loadIntelligence();
+  }, [selectedExamId, selectedAttemptScope, loadIntelligence]);
 
   useEffect(() => {
     const activeEntries = Object.entries(aiImprovements).filter(([, item]) =>
@@ -607,31 +613,172 @@ export default function ExamAnalytics() {
     const rawPassing = payload.exam?.passingScore ?? payload.passingScorePct ?? 50;
     const passingPct = rawPassing > 10 ? rawPassing : rawPassing * 10;
     const passingPoint = (passingPct / 10).toFixed(2);
+    const passingNum = Number(passingPoint);
+
+    const avgScore10 = Number(((payload.kpis.avgScorePct || 0) / 10).toFixed(2));
+    const passRate = payload.kpis.passRate || 0;
+    const completionRate = payload.kpis.completionRate || 0;
+
+    // Derived counts for richer statistics
+    const totalStudents = payload.kpis.completedSubmissions || payload.kpis.totalSubmissions || 0;
+    const passedCount = Math.round((passRate / 100) * totalStudents);
+    const failedCount = Math.max(0, totalStudents - passedCount);
+
+    const completedCount = payload.kpis.completedSubmissions || 0;
+    const enrolledTotal = payload.kpis.totalSubmissions || completedCount;
+    const remainingCount = Math.max(0, enrolledTotal - completedCount);
+
+    // 1. Semantic styling for Average Score (Thang điểm 10)
+    let scoreRating = "Khá";
+    if (avgScore10 >= 8.5) {
+      scoreRating = "Xuất sắc";
+    } else if (avgScore10 >= 7.0) {
+      scoreRating = "Khá";
+    } else if (avgScore10 >= 5.0 && avgScore10 >= passingNum) {
+      scoreRating = "Trung bình";
+    } else {
+      scoreRating = "Chưa đạt";
+    }
+
+    const scoreDiff = Number((avgScore10 - passingNum).toFixed(2));
+    const scoreDiffText = scoreDiff >= 0
+      ? `+${scoreDiff.toFixed(2)} so với ngưỡng đạt (${passingPoint})`
+      : `${scoreDiff.toFixed(2)} dưới ngưỡng đạt (${passingPoint})`;
+
+    let scoreStyle = {
+      icon: TrendingUp,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
+    };
+    if (avgScore10 < 5.0 || avgScore10 < passingNum) {
+      scoreStyle = {
+        icon: TrendingDown,
+        iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
+        iconClassName: "text-rose-600 dark:text-rose-400",
+        className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+        badgeClassName: "border-rose-300 bg-rose-100/80 text-rose-800 dark:border-rose-800 dark:bg-rose-900/40 dark:text-rose-300",
+        progressColor: "bg-rose-500",
+      };
+    } else if (avgScore10 < 7.0) {
+      scoreStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
+      };
+    }
+
+    // 2. Semantic styling for Pass Rate
+    let passStyle = {
+      icon: TrendingUp,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
+    };
+    if (passRate < 50) {
+      passStyle = {
+        icon: TrendingDown,
+        iconWrapClassName: "bg-rose-500/15 dark:bg-rose-950/40",
+        iconClassName: "text-rose-600 dark:text-rose-400",
+        className: "border-rose-200/60 bg-rose-50/35 dark:bg-rose-950/20 dark:border-rose-900/40",
+        badgeClassName: "border-rose-300 bg-rose-100/80 text-rose-800 dark:border-rose-800 dark:bg-rose-900/40 dark:text-rose-300",
+        progressColor: "bg-rose-500",
+      };
+    } else if (passRate < 75) {
+      passStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
+      };
+    }
+
+    // 3. Semantic styling for Completion Rate
+    let completionStyle = {
+      icon: CheckCircle2,
+      iconWrapClassName: "bg-emerald-500/15 dark:bg-emerald-950/40",
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      className: "border-emerald-200/60 bg-emerald-50/35 dark:bg-emerald-950/20 dark:border-emerald-900/40",
+      badgeClassName: "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      progressColor: "bg-emerald-500",
+    };
+    if (completionRate < 70) {
+      completionStyle = {
+        icon: AlertTriangle,
+        iconWrapClassName: "bg-amber-500/15 dark:bg-amber-950/40",
+        iconClassName: "text-amber-600 dark:text-amber-400",
+        className: "border-amber-200/60 bg-amber-50/35 dark:bg-amber-950/20 dark:border-amber-900/40",
+        badgeClassName: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+        progressColor: "bg-amber-500",
+      };
+    } else if (completionRate < 90) {
+      completionStyle = {
+        icon: TrendingUp,
+        iconWrapClassName: "bg-sky-500/15 dark:bg-sky-950/40",
+        iconClassName: "text-sky-600 dark:text-sky-400",
+        className: "border-sky-200/60 bg-sky-50/35 dark:bg-sky-950/20 dark:border-sky-900/40",
+        badgeClassName: "border-sky-300 bg-sky-100/80 text-sky-800 dark:border-sky-800 dark:bg-sky-900/40 dark:text-sky-300",
+        progressColor: "bg-sky-500",
+      };
+    }
 
     return [
       {
-        icon: TrendingUp,
-        value: (payload.kpis.avgScorePct / 10).toFixed(2) + "/10",
+        icon: scoreStyle.icon,
+        value: avgScore10.toFixed(2) + "/10",
         label: "Điểm trung bình",
-        iconWrapClassName: "bg-sky-500/10",
-        iconClassName: "text-sky-600",
-        className: "border-border/70 bg-sky-50/35",
+        badgeText: `Xếp loại: ${scoreRating}`,
+        badgeClassName: scoreStyle.badgeClassName,
+        subDetail: scoreDiffText,
+        progressValue: Math.min(100, Math.max(0, payload.kpis.avgScorePct || 0)),
+        progressColor: scoreStyle.progressColor,
+        progressBenchmark: passingPct,
+        progressFooterLeft: "Thang điểm 0 - 10",
+        progressFooterRight: `Vạch sàn: ${passingPoint}`,
+        iconWrapClassName: scoreStyle.iconWrapClassName,
+        iconClassName: scoreStyle.iconClassName,
+        className: scoreStyle.className,
       },
       {
-        icon: TrendingUp,
-        value: payload.kpis.passRate.toFixed(1) + "%",
-        label: `Tỷ lệ đạt (≥ ${passingPoint}/10 · ${passingPct}%)`,
-        iconWrapClassName: "bg-emerald-500/10",
-        iconClassName: "text-emerald-600",
-        className: "border-border/70 bg-emerald-50/35",
+        icon: passStyle.icon,
+        value: passRate.toFixed(1) + "%",
+        label: "Tỷ lệ đạt chuẩn",
+        badgeText: `${passedCount} Đạt · ${failedCount} Trượt`,
+        badgeClassName: passStyle.badgeClassName,
+        subDetail: `Tiêu chí sàn: ≥ ${passingPoint}/10 (${passingPct}%)`,
+        progressValue: passRate,
+        progressColor: passStyle.progressColor,
+        progressSecondaryValue: Number((100 - passRate).toFixed(1)),
+        progressSecondaryColor: "bg-rose-500/80",
+        progressFooterLeft: `Đạt: ${passedCount} SV (${passRate.toFixed(1)}%)`,
+        progressFooterRight: `Trượt: ${failedCount} SV`,
+        iconWrapClassName: passStyle.iconWrapClassName,
+        iconClassName: passStyle.iconClassName,
+        className: passStyle.className,
       },
       {
-        icon: TrendingUp,
-        value: payload.kpis.completionRate.toFixed(1) + "%",
-        label: "Hoàn thành",
-        iconWrapClassName: "bg-amber-500/10",
-        iconClassName: "text-amber-600",
-        className: "border-border/70 bg-amber-50/35",
+        icon: completionStyle.icon,
+        value: completionRate.toFixed(1) + "%",
+        label: "Tỷ lệ hoàn thành",
+        badgeText: `${completedCount}/${enrolledTotal} Lượt nộp`,
+        badgeClassName: completionStyle.badgeClassName,
+        subDetail: remainingCount === 0 ? "100% quân số đã hoàn tất nộp bài" : `Còn ${remainingCount} bài chưa nộp`,
+        progressValue: completionRate,
+        progressColor: completionStyle.progressColor,
+        progressFooterLeft: `Đã nộp: ${completedCount} bài thi`,
+        progressFooterRight: remainingCount === 0 ? "Đủ quân số" : `Chưa nộp: ${remainingCount}`,
+        iconWrapClassName: completionStyle.iconWrapClassName,
+        iconClassName: completionStyle.iconClassName,
+        className: completionStyle.className,
       },
     ];
   };
@@ -819,8 +966,10 @@ export default function ExamAnalytics() {
                 <Select
                   value={selectedExamId}
                   onValueChange={(val) => {
+                    const current = examOptions.find((ex) => ex.id === val);
+                    const currentStrategy = current?.gradingStrategy ?? current?.settings?.gradingStrategy;
+                    setSelectedAttemptScope(getScopeForGradingStrategy(currentStrategy));
                     setSelectedExamId(val);
-                    setSelectedAttemptScope("all");
                   }}
                   disabled={loadingIntelligence || filteredExams.length === 0}
                 >
@@ -1099,15 +1248,83 @@ export default function ExamAnalytics() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {getKpiCards(data).map((card) => (
-                  <AdminStatCard
+                  <Card
                     key={card.label}
-                    icon={card.icon}
-                    value={card.value}
-                    label={card.label}
-                    iconWrapClassName={card.iconWrapClassName}
-                    iconClassName={card.iconClassName}
-                    className={card.className}
-                  />
+                    className={cn(
+                      "rounded-xl shadow-sm border transition-all hover:shadow-md",
+                      card.className
+                    )}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      {/* Top Row: Icon + Value + Badge */}
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                              card.iconWrapClassName
+                            )}
+                          >
+                            <card.icon className={cn("h-4.5 w-4.5", card.iconClassName)} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-2xl font-bold tracking-tight text-foreground leading-none">
+                              {card.value}
+                            </p>
+                            <p className="text-xs font-medium text-muted-foreground mt-1 truncate">
+                              {card.label}
+                            </p>
+                          </div>
+                        </div>
+                        {card.badgeText && (
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-[11px] font-semibold shrink-0 px-2 py-0.5 whitespace-nowrap",
+                              card.badgeClassName
+                            )}
+                          >
+                            {card.badgeText}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Micro Visual Progress / Breakdown Bar */}
+                      <div className="space-y-1.5 pt-1.5 border-t border-border/40">
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span className="truncate">{card.subDetail}</span>
+                        </div>
+
+                        <div className="relative h-2 w-full rounded-full bg-muted/70 overflow-hidden flex">
+                          {card.progressBenchmark !== undefined && (
+                            <div
+                              className="absolute top-0 bottom-0 w-0.5 bg-foreground/40 z-10"
+                              style={{ left: `${card.progressBenchmark}%` }}
+                              title={`Vạch sàn: ${card.progressBenchmark}%`}
+                            />
+                          )}
+                          <div
+                            className={cn("h-full transition-all rounded-full", card.progressColor)}
+                            style={{ width: `${card.progressValue}%` }}
+                          />
+                          {card.progressSecondaryValue ? (
+                            <div
+                              className={cn(
+                                "h-full transition-all",
+                                card.progressSecondaryColor || "bg-rose-500"
+                              )}
+                              style={{ width: `${card.progressSecondaryValue}%` }}
+                            />
+                          ) : null}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium pt-0.5">
+                          <span>{card.progressFooterLeft}</span>
+                          <span>{card.progressFooterRight}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
 
@@ -1506,18 +1723,23 @@ export default function ExamAnalytics() {
                     {data.weakestTopics.length === 0 ? (
                       <p className="rounded-md border border-border/70 p-4 text-sm text-muted-foreground">Chưa có chủ đề yếu nổi bật.</p>
                     ) : (
-                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 items-start">
                         {/* Bar chart comparison */}
-                        <div className="rounded-xl border border-border/70 bg-card p-3 lg:col-span-6 flex flex-col justify-between">
+                        <div className="rounded-xl border border-border/70 bg-card p-4 lg:col-span-6 flex flex-col gap-2">
                           <div>
                             <p className="text-xs font-semibold text-foreground mb-1">
                               So sánh tỷ lệ sai theo chủ đề
                             </p>
-                            <p className="text-[11px] text-muted-foreground mb-2">
+                            <p className="text-[11px] text-muted-foreground">
                               Tỷ lệ trả lời sai (%) của sinh viên đối với các câu hỏi thuộc từng chủ đề.
                             </p>
                           </div>
-                          <div className="h-[210px] w-full">
+                          <div
+                            className="w-full"
+                            style={{
+                              height: Math.max(90, Math.min(260, weakestTopicsChartData.length * 44 + 46)),
+                            }}
+                          >
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={weakestTopicsChartData}
@@ -1536,6 +1758,7 @@ export default function ExamAnalytics() {
                                   tickFormatter={(v) => v.length > 13 ? `${v.slice(0, 12)}…` : v}
                                 />
                                 <Tooltip
+                                  cursor={{ fill: "rgba(0, 0, 0, 0.04)" }}
                                   contentStyle={{
                                     borderRadius: 10,
                                     border: "1px solid hsl(var(--border))",
@@ -1551,7 +1774,7 @@ export default function ExamAnalytics() {
                                   name="Tỷ lệ sai"
                                   fill="#f43f5e"
                                   radius={[0, 6, 6, 0]}
-                                  maxBarSize={24}
+                                  barSize={weakestTopicsChartData.length === 1 ? 22 : Math.min(24, Math.max(14, Math.floor(100 / weakestTopicsChartData.length)))}
                                 />
                               </BarChart>
                             </ResponsiveContainer>
@@ -1631,16 +1854,100 @@ export default function ExamAnalytics() {
                             </div>
 
                             {item.possibleKeyError ? (
-                              <div className="mt-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-                                <p className="font-medium">
-                                  {item.possibleKeyError.mostPickedOptionRate.toFixed(0)}% sinh viên chọn đáp án{" "}
-                                  <span className="font-semibold">{item.possibleKeyError.mostPickedOptionLetter}</span>
-                                  , cao hơn hẳn đáp án hệ thống đang chấm đúng là{" "}
-                                  <span className="font-semibold">{item.possibleKeyError.correctOptionLetter}</span>{" "}
-                                  (chỉ {item.possibleKeyError.correctOptionRate.toFixed(0)}%).
-                                </p>
-                                <p className="mt-1 text-xs text-red-700">
-                                  Đây là dấu hiệu thống kê điển hình của việc nhập sai đáp án đúng khi tạo câu hỏi (trên {item.possibleKeyError.sampleSize} lượt trả lời) — không phải câu hỏi khó. Nên kiểm tra lại đáp án trước khi công bố điểm.
+                              <div className="mt-2.5 rounded-lg border border-rose-200/90 bg-rose-50/50 p-3 dark:border-rose-900/50 dark:bg-rose-950/20">
+                                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-800 dark:text-rose-300">
+                                    <AlertTriangle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                                    <span>Nghi ngờ nhầm Key đáp án (Item-Key Anomaly)</span>
+                                  </div>
+                                  <span className="text-[11px] font-medium text-rose-600/90 dark:text-rose-400">
+                                    Cỡ mẫu: {item.possibleKeyError.sampleSize} lượt nộp
+                                  </span>
+                                </div>
+
+                                {/* Micro-format Comparison Chart */}
+                                <div className="space-y-2 rounded-md border border-rose-200/70 bg-background/90 p-2.5 backdrop-blur-sm dark:border-rose-900/40 dark:bg-card/70">
+                                  {/* Segmented Distribution Bar */}
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+                                      <span>Tỷ lệ phân bố lựa chọn</span>
+                                      <span>100% câu trả lời</span>
+                                    </div>
+                                    <div className="h-2.5 w-full flex rounded-full overflow-hidden bg-muted/60 p-0.5 gap-0.5 border border-border/40">
+                                      <div
+                                        className="h-full rounded-sm bg-rose-500 transition-all"
+                                        style={{ width: `${Math.max(4, item.possibleKeyError.mostPickedOptionRate)}%` }}
+                                        title={`Đáp án ${item.possibleKeyError.mostPickedOptionLetter} (sinh viên chọn): ${item.possibleKeyError.mostPickedOptionRate.toFixed(1)}%`}
+                                      />
+                                      <div
+                                        className="h-full rounded-sm bg-emerald-500 transition-all"
+                                        style={{ width: `${Math.max(4, item.possibleKeyError.correctOptionRate)}%` }}
+                                        title={`Đáp án ${item.possibleKeyError.correctOptionLetter} (hệ thống chấm): ${item.possibleKeyError.correctOptionRate.toFixed(1)}%`}
+                                      />
+                                      {Math.max(0, 100 - item.possibleKeyError.mostPickedOptionRate - item.possibleKeyError.correctOptionRate) > 1 && (
+                                        <div
+                                          className="h-full rounded-sm bg-slate-300 dark:bg-slate-700 transition-all"
+                                          style={{ width: `${Math.max(0, 100 - item.possibleKeyError.mostPickedOptionRate - item.possibleKeyError.correctOptionRate)}%` }}
+                                          title={`Phương án khác: ${(100 - item.possibleKeyError.mostPickedOptionRate - item.possibleKeyError.correctOptionRate).toFixed(1)}%`}
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Micro Comparative Horizontal Tracks */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                                    {/* Most picked by students */}
+                                    <div className="rounded border border-rose-200/90 bg-rose-50/70 p-2 dark:border-rose-900/60 dark:bg-rose-950/40">
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="flex items-center gap-1.5 font-semibold text-rose-700 dark:text-rose-300">
+                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded bg-rose-600 text-white font-bold text-[10px]">
+                                            {item.possibleKeyError.mostPickedOptionLetter}
+                                          </span>
+                                          <span>Sinh viên chọn áp đảo</span>
+                                        </span>
+                                        <span className="font-bold text-rose-700 dark:text-rose-300 text-xs">
+                                          {item.possibleKeyError.mostPickedOptionRate.toFixed(0)}%
+                                        </span>
+                                      </div>
+                                      <div className="mt-1.5 h-1.5 w-full rounded-full bg-rose-200/60 dark:bg-rose-900/50 overflow-hidden">
+                                        <div
+                                          className="h-full rounded-full bg-rose-600 transition-all"
+                                          style={{ width: `${item.possibleKeyError.mostPickedOptionRate}%` }}
+                                        />
+                                      </div>
+                                      <p className="mt-1 text-[11px] text-rose-600/90 dark:text-rose-400">
+                                        {Math.round((item.possibleKeyError.sampleSize * item.possibleKeyError.mostPickedOptionRate) / 100)}/{item.possibleKeyError.sampleSize} lượt nộp
+                                      </p>
+                                    </div>
+
+                                    {/* System correct option */}
+                                    <div className="rounded border border-border bg-muted/40 p-2 dark:bg-muted/20">
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                                          <span className="inline-flex h-4 w-4 items-center justify-center rounded bg-emerald-600 text-white font-bold text-[10px]">
+                                            {item.possibleKeyError.correctOptionLetter}
+                                          </span>
+                                          <span>Đáp án hệ thống chấm</span>
+                                        </span>
+                                        <span className="font-bold text-muted-foreground text-xs">
+                                          {item.possibleKeyError.correctOptionRate.toFixed(0)}%
+                                        </span>
+                                      </div>
+                                      <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                                        <div
+                                          className="h-full rounded-full bg-emerald-500 transition-all"
+                                          style={{ width: `${item.possibleKeyError.correctOptionRate}%` }}
+                                        />
+                                      </div>
+                                      <p className="mt-1 text-[11px] text-muted-foreground">
+                                        {Math.round((item.possibleKeyError.sampleSize * item.possibleKeyError.correctOptionRate) / 100)}/{item.possibleKeyError.sampleSize} lượt nộp
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <p className="mt-2 text-xs leading-relaxed text-rose-800/90 dark:text-rose-300/90">
+                                  {item.possibleKeyError.mostPickedOptionRate.toFixed(0)}% sinh viên chọn đáp án <strong>{item.possibleKeyError.mostPickedOptionLetter}</strong>, cao hơn hẳn đáp án hệ thống đang chấm đúng là <strong>{item.possibleKeyError.correctOptionLetter}</strong> ({item.possibleKeyError.correctOptionRate.toFixed(0)}%). Đây là dấu hiệu thống kê điển hình của việc nhập sai đáp án khi tạo câu hỏi. Nên kiểm tra lại trước khi công bố điểm.
                                 </p>
                               </div>
                             ) : null}

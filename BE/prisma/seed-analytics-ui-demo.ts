@@ -651,7 +651,7 @@ export async function main() {
   console.log(`  - Cặp trùng mẫu: index [${[...COLLUDE_INDICES].join(', ')}] trên các câu ${[...COLLUSION_QUESTION_INDICES].join(', ')}`);
 }
 
-if (process.argv[1] && process.argv[1].includes('seed-analytics-ui-demo.ts')) {
+if (process.argv.some((arg) => arg.includes('seed-analytics-ui-demo.ts'))) {
   main()
     .catch((error) => {
       console.error(error);

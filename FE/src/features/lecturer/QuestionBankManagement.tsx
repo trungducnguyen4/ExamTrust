@@ -107,6 +107,7 @@ import {
 import type { Question, QuestionDraftSummary } from "./question-bank-utils";
 import { QuestionPreviewInfoCard as InfoCard, QuestionPreviewSection as Section } from "./components/QuestionPreviewSections";
 import { QuestionBankDonutStats } from "./components/QuestionBankDonutStats";
+import { CourseDifficultyDistribution } from "./components/CourseDifficultyDistribution";
 import {
   buildQuestionFilterDefinitions,
   courseFilterDefinitions,
@@ -317,7 +318,8 @@ export default function QuestionBankManagement() {
     ? "/admin"
     : "/lecturer";
   const questionEditorPath = `${basePath}/question-editor`;
-  const { questions, setQuestions, courses, loading, refetch } = useQuestionBankData();
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const { questions, setQuestions, courses, loading, refetch } = useQuestionBankData(selectedCourse);
   const [courseSearchInput, setCourseSearchInput] = useState("");
   const [appliedCourseSearch, setAppliedCourseSearch] = useState("");
   const [questionSearchInput, setQuestionSearchInput] = useState("");
@@ -336,7 +338,6 @@ export default function QuestionBankManagement() {
   const [detailQuestion, setDetailQuestion] = useState<Question | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [courseTopics, setCourseTopics] = useState<{ id: string; name: string }[]>([]);
   const [questionDraft, setQuestionDraft] =
     useState<QuestionDraftSummary | null>(null);
@@ -490,6 +491,21 @@ export default function QuestionBankManagement() {
 
   const handleDelete = async (id: string) => {
     setDeleteTargetId(id);
+  };
+
+  const handleViewQuestion = async (question: Question) => {
+    setPreviewQuestion(question);
+    setDetailLoading(true);
+    setDetailError(false);
+    try {
+      const detail = await api.getQuestionById(question.id);
+      setDetailQuestion(detail as Question);
+    } catch {
+      setDetailError(true);
+      setDetailQuestion(null);
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const confirmDelete = async () => {
@@ -781,10 +797,11 @@ export default function QuestionBankManagement() {
     if (!searchMatched) return false;
 
     const courseQuestions = questions.filter((q) => q.course?.code === course.code);
+    const questionCount = course._count?.questions ?? courseQuestions.length;
 
-    if (questionState === "hasQuestions" && courseQuestions.length === 0)
+    if (questionState === "hasQuestions" && questionCount === 0)
       return false;
-    if (questionState === "noQuestions" && courseQuestions.length > 0)
+    if (questionState === "noQuestions" && questionCount > 0)
       return false;
 
     if (!difficultyValue || difficultyValue === "all") return true;
@@ -1017,7 +1034,7 @@ export default function QuestionBankManagement() {
               return (
                 <>
                   <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="hidden border-b bg-muted/40 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid md:grid-cols-[minmax(240px,1.35fr)_120px_140px_minmax(220px,1fr)_24px] md:items-center md:gap-4">
+                    <div className="hidden border-b bg-muted/40 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid md:grid-cols-[minmax(240px,1.3fr)_170px_120px_minmax(200px,1fr)_24px] md:items-center md:gap-4">
                       <span>Khóa học</span>
                       <span>Câu hỏi</span>
                       <span>Độ khó TB</span>
@@ -1044,41 +1061,33 @@ export default function QuestionBankManagement() {
                         <button
                           type="button"
                           key={course.id}
-                          className="group grid w-full gap-4 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[minmax(240px,1.35fr)_120px_140px_minmax(220px,1fr)_24px] md:items-center"
+                          className="group grid w-full gap-4 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[minmax(240px,1.3fr)_170px_120px_minmax(200px,1fr)_24px] md:items-center"
                           onClick={() => setSelectedCourse(course.code)}
                           aria-label={`Mở ngân hàng câu hỏi của ${course.code}`}
                         >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div
-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm ${getGradientClass((coursePage - 1) * COURSES_PER_PAGE + index)}`}
-                            >
-                              {course.code.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate font-semibold text-foreground">
-                                {course.name}
-                              </p>
-                              <p className="truncate text-sm text-muted-foreground">
-                                {course.code}
-                              </p>
-                            </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-foreground">
+                              {course.name}
+                            </p>
+                            <p className="truncate text-sm text-muted-foreground">
+                              {course.code}
+                            </p>
                           </div>
 
-                          <div className="flex items-center justify-between gap-3 text-sm md:block">
-                            <span className="text-muted-foreground md:hidden">
-                              Câu hỏi
-                            </span>
-                            <span className="font-semibold tabular-nums text-foreground">
-                              {courseQuestions.length}
-                            </span>
+                          <div className="w-full">
+                            <CourseDifficultyDistribution
+                              questions={courseQuestions.length > 0 ? courseQuestions : undefined}
+                              total={course._count?.questions ?? courseQuestions.length}
+                            />
                           </div>
-
                           <div className="flex items-center justify-between gap-3 text-sm md:block">
                             <span className="text-muted-foreground md:hidden">
                               Độ khó TB
                             </span>
                             <span className={`font-medium ${diffInfo.color}`}>
-                              {courseQuestions.length > 0 ? diffInfo.text : "—"}
+                              {courseQuestions.length > 0
+                                ? diffInfo.text
+                                : (course._count?.questions ? "Đang cập nhật" : "—")}
                             </span>
                           </div>
 
@@ -1428,7 +1437,7 @@ export default function QuestionBankManagement() {
                             </div>
                           </TableHead>
                           <TableHead className="w-24 text-center">Trọng số</TableHead>
-                          <TableHead className="w-32 text-center">Thao tác</TableHead>
+                          <TableHead className="w-36 text-center whitespace-nowrap">Thao tác</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1439,15 +1448,22 @@ export default function QuestionBankManagement() {
                               <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                                 {formatQuestionDate(question.updatedAt)}
                               </TableCell>
-                              <TableCell className="max-w-[360px] text-sm">
-                                <span className="flex items-center gap-1.5">
+                              <TableCell className="max-w-[420px] text-sm">
+                                <button
+                                  type="button"
+                                  onClick={() => void handleViewQuestion(question)}
+                                  className="group flex items-center gap-2 text-left w-full hover:text-primary transition-colors focus:outline-none"
+                                  title="Bấm để xem chi tiết câu hỏi"
+                                >
                                   {question.mediaType === "image" ? (
-                                    <Image className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-label="Câu hỏi có hình ảnh đính kèm" />
+                                    <Image className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" aria-label="Câu hỏi có hình ảnh đính kèm" />
                                   ) : question.mediaType === "audio" ? (
-                                    <Music className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-label="Câu hỏi có âm thanh đính kèm" />
+                                    <Music className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" aria-label="Câu hỏi có âm thanh đính kèm" />
                                   ) : null}
-                                  <span className="block truncate" title={question.content}>{question.content}</span>
-                                </span>
+                                  <span className="block truncate font-medium text-foreground group-hover:text-primary group-hover:underline transition-colors" title={question.content}>
+                                    {question.content}
+                                  </span>
+                                </button>
                               </TableCell>
                               <TableCell className="text-sm whitespace-nowrap">
                                 {questionTypeLabels[question.type] || question.type}
@@ -1473,54 +1489,33 @@ export default function QuestionBankManagement() {
                                 {question.points ?? 1}
                               </TableCell>
                               <TableCell className="text-center">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      className="gap-2 text-xs"
-                                      onClick={async () => {
-                                        setPreviewQuestion(question);
-                                        setDetailLoading(true);
-                                        setDetailError(false);
-                                        try {
-                                          const detail = await api.getQuestionById(question.id);
-                                          setDetailQuestion(detail as Question);
-                                        } catch {
-                                          setDetailError(true);
-                                          setDetailQuestion(null);
-                                        } finally {
-                                          setDetailLoading(false);
-                                        }
-                                      }}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                      Xem
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="gap-2 text-xs"
-                                      onClick={() => {
-                                        saveQuestionEditorNavList(filtered.map((item) => item.id));
-                                        router.push(
-                                          `${questionEditorPath}?id=${question.id}&courseCode=${selectedCourse}`,
-                                        );
-                                      }}
-                                    >
-                                      <Edit2 className="h-4 w-4" />
-                                      Sửa
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="gap-2 text-destructive text-xs"
-                                      onClick={() => handleDelete(question.id)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Xóa
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5"
+                                    title="Chỉnh sửa câu hỏi"
+                                    onClick={() => {
+                                      saveQuestionEditorNavList(filtered.map((item) => item.id));
+                                      router.push(
+                                        `${questionEditorPath}?id=${question.id}&courseCode=${selectedCourse}`,
+                                      );
+                                    }}
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                    <span>Sửa</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 px-2.5 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                                    title="Xóa câu hỏi"
+                                    onClick={() => handleDelete(question.id)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <span>Xóa</span>
+                                  </Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           );
