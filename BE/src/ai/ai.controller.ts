@@ -7,6 +7,7 @@ import { GenerateQuestionDto, GenerateExamQuestionsDto, SuggestSimilarTopicsDto 
 import { VerifyApiKeyDto } from './dto/verify-api-key.dto';
 import { AiJobsService } from './ai-jobs.service';
 import { AiService } from './ai.service';
+import { TopicGuardrailsService } from './topic-guardrails.service';
 import { ExamAuditService } from './langgraph/exam-audit.service';
 import { AISection } from '../questions-v2/dto/question-draft.dto';
 import { AccessPolicyService } from '../common/services/access-policy.service';
@@ -24,6 +25,7 @@ export class AiController {
     private readonly accessPolicy: AccessPolicyService,
     private readonly prisma: PrismaService,
     private readonly examAuditService: ExamAuditService,
+    private readonly topicGuardrails: TopicGuardrailsService,
   ) {}
 
   private async assertCourseContext(data: { courseId?: string; context?: Record<string, any> }, user: any) {
@@ -36,6 +38,44 @@ export class AiController {
   @Post('generate-question')
   async generateQuestion(@Body() dto: GenerateQuestionDto, @Request() req) {
     await this.assertCourseContext(dto, req.user);
+
+    // Fast-fail topic guardrail check directly at tool/controller logic layer
+    const guardrailCheck = this.topicGuardrails.validateTopicScope({
+      prompt: dto.prompt,
+      courseName: dto.courseName,
+      courseCode: dto.context?.courseCode,
+      courseDescription: dto.context?.courseDescription,
+      topicName: dto.context?.topicName,
+    });
+
+    if (!guardrailCheck.allowed) {
+      const blockedRecord = await this.aiJobsService.createBlockedJob({
+        task: 'single-question',
+        section: AISection.CONTENT,
+        payload: {
+          prompt: dto.prompt,
+          questionType: dto.questionType,
+          difficulty: dto.difficulty,
+          language: dto.language,
+          courseName: dto.courseName,
+          useCase: dto.useCase,
+          context: dto.context || {},
+        },
+        requestedBy: req.user.id,
+        blockedOutput: {
+          guardrailBlocked: true,
+          offendingKeywords: guardrailCheck.offendingKeywords,
+          detectedDomain: guardrailCheck.detectedDomain,
+          courseDomain: guardrailCheck.courseDomain,
+          reason: guardrailCheck.reason,
+          suggestion: guardrailCheck.suggestion,
+          content: `[BỊ TỪ CHỐI DO LỆCH PHẠM VI HỌC PHẦN]: ${guardrailCheck.reason}`,
+          explanation: guardrailCheck.suggestion,
+        },
+      });
+
+      return { jobId: blockedRecord.id, status: blockedRecord.status };
+    }
 
     const job = await this.aiJobsService.createJob({
       task: 'single-question',
@@ -58,6 +98,45 @@ export class AiController {
   @Post('generate-exam-questions')
   async generateExamQuestions(@Body() dto: GenerateExamQuestionsDto, @Request() req) {
     await this.assertCourseContext(dto, req.user);
+
+    // Fast-fail topic guardrail check directly at tool/controller logic layer
+    const guardrailCheck = this.topicGuardrails.validateTopicScope({
+      prompt: dto.prompt,
+      courseName: dto.courseName,
+      courseCode: dto.context?.courseCode,
+      courseDescription: dto.context?.courseDescription,
+      topicName: dto.context?.topicName,
+    });
+
+    if (!guardrailCheck.allowed) {
+      const blockedRecord = await this.aiJobsService.createBlockedJob({
+        task: 'exam-questions',
+        section: AISection.CONTENT,
+        payload: {
+          prompt: dto.prompt,
+          questionCount: dto.questionCount,
+          difficulty: dto.difficulty,
+          questionType: dto.questionType,
+          language: dto.language,
+          courseName: dto.courseName,
+          useCase: dto.useCase,
+          context: dto.context || {},
+        },
+        requestedBy: req.user.id,
+        blockedOutput: {
+          guardrailBlocked: true,
+          offendingKeywords: guardrailCheck.offendingKeywords,
+          detectedDomain: guardrailCheck.detectedDomain,
+          courseDomain: guardrailCheck.courseDomain,
+          reason: guardrailCheck.reason,
+          suggestion: guardrailCheck.suggestion,
+          content: `[BỊ TỪ CHỐI DO LỆCH PHẠM VI HỌC PHẦN]: ${guardrailCheck.reason}`,
+          explanation: guardrailCheck.suggestion,
+        },
+      });
+
+      return { jobId: blockedRecord.id, status: blockedRecord.status };
+    }
 
     const job = await this.aiJobsService.createJob({
       task: 'exam-questions',
@@ -189,6 +268,7 @@ export class AiController {
       examId,
       improvements: body.improvements || [],
       userId: req.user.id,
+      userRole: req.user.role,
     });
   }
 
