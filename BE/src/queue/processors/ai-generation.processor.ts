@@ -474,7 +474,7 @@ export class AIGenerationProcessor {
           data: {
             status: 'SUCCEEDED',
             output: {
-              questions,
+              ...(Array.isArray(questions) ? { questions } : questions),
               telemetry,
             },
             completedAt: new Date(),

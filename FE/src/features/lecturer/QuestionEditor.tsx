@@ -44,6 +44,7 @@ import {
 import { ApiKeyConfigDialog } from "@/components/ai/ApiKeyConfigDialog";
 import { QuestionClarificationDialog } from "./components/QuestionClarificationDialog";
 import { QuestionBatchReviewDialog } from "./components/QuestionBatchReviewDialog";
+import { GuardrailAlertBanner } from "@/components/ai/GuardrailAlertBanner";
 import { toast } from "sonner";
 import { BackToDashboardButton } from "@/components/common/BackToDashboardButton";
 import {
@@ -816,6 +817,14 @@ export default function QuestionEditor() {
                         <p className="text-[10px] text-red-600 font-medium px-1">
                           ❌ {ai.aiError}
                         </p>
+                      )}
+                      {ai.guardrailResult && (
+                        <GuardrailAlertBanner
+                          guardrailResult={ai.guardrailResult}
+                          courseName={courses.find((c) => c.id === course)?.name || course}
+                          onDismiss={ai.clearGuardrailResult}
+                          className="mt-3"
+                        />
                       )}
                     </CardContent>
                   </Card>

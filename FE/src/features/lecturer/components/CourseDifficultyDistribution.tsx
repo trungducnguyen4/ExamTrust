@@ -39,6 +39,8 @@ export function CourseDifficultyDistribution({
         else hard++;
       }
       count = questions.length;
+    } else if (total !== undefined && total !== null) {
+      count = total;
     } else if (questions && questions.length === 0) {
       count = 0;
       easy = 0;

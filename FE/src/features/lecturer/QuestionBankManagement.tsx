@@ -318,7 +318,8 @@ export default function QuestionBankManagement() {
     ? "/admin"
     : "/lecturer";
   const questionEditorPath = `${basePath}/question-editor`;
-  const { questions, setQuestions, courses, loading, refetch } = useQuestionBankData();
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const { questions, setQuestions, courses, loading, refetch } = useQuestionBankData(selectedCourse);
   const [courseSearchInput, setCourseSearchInput] = useState("");
   const [appliedCourseSearch, setAppliedCourseSearch] = useState("");
   const [questionSearchInput, setQuestionSearchInput] = useState("");
@@ -337,7 +338,6 @@ export default function QuestionBankManagement() {
   const [detailQuestion, setDetailQuestion] = useState<Question | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [courseTopics, setCourseTopics] = useState<{ id: string; name: string }[]>([]);
   const [questionDraft, setQuestionDraft] =
     useState<QuestionDraftSummary | null>(null);
@@ -797,10 +797,11 @@ export default function QuestionBankManagement() {
     if (!searchMatched) return false;
 
     const courseQuestions = questions.filter((q) => q.course?.code === course.code);
+    const questionCount = course._count?.questions ?? courseQuestions.length;
 
-    if (questionState === "hasQuestions" && courseQuestions.length === 0)
+    if (questionState === "hasQuestions" && questionCount === 0)
       return false;
-    if (questionState === "noQuestions" && courseQuestions.length > 0)
+    if (questionState === "noQuestions" && questionCount > 0)
       return false;
 
     if (!difficultyValue || difficultyValue === "all") return true;
@@ -1064,31 +1065,29 @@ export default function QuestionBankManagement() {
                           onClick={() => setSelectedCourse(course.code)}
                           aria-label={`Mở ngân hàng câu hỏi của ${course.code}`}
                         >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div
-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm ${getGradientClass((coursePage - 1) * COURSES_PER_PAGE + index)}`}
-                            >
-                              {course.code.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate font-semibold text-foreground">
-                                {course.name}
-                              </p>
-                              <p className="truncate text-sm text-muted-foreground">
-                                {course.code}
-                              </p>
-                            </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-foreground">
+                              {course.name}
+                            </p>
+                            <p className="truncate text-sm text-muted-foreground">
+                              {course.code}
+                            </p>
                           </div>
 
                           <div className="w-full">
-                            <CourseDifficultyDistribution questions={courseQuestions} />
+                            <CourseDifficultyDistribution
+                              questions={courseQuestions.length > 0 ? courseQuestions : undefined}
+                              total={course._count?.questions ?? courseQuestions.length}
+                            />
                           </div>
                           <div className="flex items-center justify-between gap-3 text-sm md:block">
                             <span className="text-muted-foreground md:hidden">
                               Độ khó TB
                             </span>
                             <span className={`font-medium ${diffInfo.color}`}>
-                              {courseQuestions.length > 0 ? diffInfo.text : "—"}
+                              {courseQuestions.length > 0
+                                ? diffInfo.text
+                                : (course._count?.questions ? "Đang cập nhật" : "—")}
                             </span>
                           </div>
 

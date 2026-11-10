@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { GuardrailAlertBanner, type GuardrailResult } from "@/components/ai/GuardrailAlertBanner";
+import { FormattedQuestionText } from "@/components/common/FormattedQuestionText";
 import { Progress } from "@/components/ui/progress";
 import api, { unwrapPaginatedData } from "@/lib/api";
 import {
@@ -234,6 +236,7 @@ export default function CreateExam() {
   const [manualAiPrompt, setManualAiPrompt] = useState("");
   const [isManualAiGenerating, setIsManualAiGenerating] = useState(false);
   const [manualAiSimilarityWarning, setManualAiSimilarityWarning] = useState("");
+  const [manualGuardrailResult, setManualGuardrailResult] = useState<GuardrailResult | null>(null);
   const [courseComboboxOpen, setCourseComboboxOpen] = useState(false);
   const [courseSearch, setCourseSearch] = useState("");
   const skipNextCourseFocusRef = useRef(false);
@@ -849,6 +852,7 @@ export default function CreateExam() {
     if (!manualAiPrompt.trim()) return;
     setIsManualAiGenerating(true);
     setManualAiSimilarityWarning("");
+    setManualGuardrailResult(null);
     try {
       // Uses the same single-question generator (and prompt, which has proper
       // MATCHING/ORDERING/FILL_IN_BLANK instructions) as /lecturer/question-editor,
@@ -882,6 +886,18 @@ export default function CreateExam() {
           source: "create_exam_manual_ai",
         },
       });
+      if (generated?.guardrailBlocked) {
+        setManualGuardrailResult({
+          guardrailBlocked: true,
+          offendingKeywords: generated.offendingKeywords || [],
+          detectedDomain: generated.detectedDomain,
+          courseDomain: generated.courseDomain,
+          reason: generated.reason,
+          suggestion: generated.suggestion,
+        });
+        toast.warning("Yêu cầu tạo câu hỏi bị từ chối do lệch phạm vi học phần.");
+        return;
+      }
       if (!generated?.content) throw new Error("AI không trả về câu hỏi.");
 
       // Mirrors the near-duplicate guard in /lecturer/question-editor
@@ -2072,6 +2088,14 @@ export default function CreateExam() {
                               {manualAiSimilarityWarning && (
                                 <p className="text-xs text-red-600 font-medium">{manualAiSimilarityWarning}</p>
                               )}
+                              {manualGuardrailResult && (
+                                <GuardrailAlertBanner
+                                  guardrailResult={manualGuardrailResult}
+                                  courseName={courses.find((course) => course.id === form.course)?.name}
+                                  onDismiss={() => setManualGuardrailResult(null)}
+                                  className="mt-2"
+                                />
+                              )}
                             </CardContent>
                           </Card>
 
@@ -2290,7 +2314,7 @@ export default function CreateExam() {
                               {aiGeneratedQuestions.map((question, index) => (
                                 <div key={`${question.content}-${index}`} className="flex items-start justify-between gap-3 rounded-lg border p-3">
                                   <div>
-                                    <p className="text-sm font-medium">Q{index + 1}. {question.content}</p>
+                                    <div className="text-sm font-medium">Q{index + 1}. <FormattedQuestionText text={question.content} /></div>
                                     <p className="text-xs text-muted-foreground">{question.type}</p>
                                   </div>
                                   <Button type="button" variant="ghost" size="sm" onClick={() => setAiGeneratedQuestions((questions) => questions.filter((_, itemIndex) => itemIndex !== index))}>
