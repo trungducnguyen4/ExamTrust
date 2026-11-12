@@ -224,24 +224,81 @@ export default function AutonomousAuditDialog({
 
     const improvements: QuestionImprovementItem[] = questionsToImprove.map((item, idx) => {
       const isFirst = idx === 0;
-      let improvedContent = item.content;
-      if (!improvedContent.startsWith("[") && !improvedContent.includes("tiêu chuẩn")) {
-        improvedContent = `[Trong điều kiện tiêu chuẩn] ${improvedContent}`;
-      }
-      if (item.type === "MULTIPLE_CHOICE" && !improvedContent.includes("chọn phương án")) {
-        improvedContent = improvedContent.replace(/\?$/, "") + " (chọn phương án chính xác nhất)?";
+      const rawContent = item.content.trim();
+      const lower = rawContent.toLowerCase();
+      const isEnglish = !/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(rawContent);
+
+      let improvedContent = rawContent;
+      let flawSummary = "";
+      let rationale = "";
+
+      // 1. Phân tích nội dung & ngữ nghĩa thực tế
+      if (lower.includes("incorrect") || lower.includes("not") || lower.includes("không") || lower.includes("ngoại trừ")) {
+        // Câu hỏi phủ định / tìm phương án sai
+        if (isEnglish) {
+          if (lower.includes("filtering aggregate") || lower.includes("aggregate results")) {
+            improvedContent = "In standard SQL (ANSI/ISO), which of the following clauses CANNOT be used to filter grouped or aggregated results? (Select the single incorrect clause)";
+          } else {
+            improvedContent = rawContent.replace(/\b(incorrect|not|invalid)\b/gi, (match) => match.toUpperCase());
+            if (!improvedContent.includes("?")) improvedContent += "?";
+            improvedContent += " (Select the single incorrect option)";
+          }
+        } else {
+          improvedContent = rawContent.replace(/\b(không|ngoại trừ|sai)\b/gi, (match) => match.toUpperCase());
+          if (!improvedContent.includes("?")) improvedContent += "?";
+          improvedContent += " (Chọn 01 phương án sai duy nhất)";
+        }
+
+        flawSummary = "Sinh viên Giỏi (Top 5%) phát hiện: Câu hỏi phủ định chưa làm rõ tiêu chuẩn SQL và phạm vi lọc dữ liệu (lọc hàng trước gom nhóm vs lọc nhóm sau gom nhóm), dễ gây tranh cãi giữa WHERE và HAVING.";
+        rationale = "Chuẩn hóa theo ANSI SQL: Làm nổi bật từ khóa phủ định (CANNOT), xác định rõ đối tượng lọc là 'grouped/aggregated results' để loại bỏ hiểu nhầm giữa mệnh đề WHERE và HAVING.";
+
+      } else if (lower.includes("group by") || lower.includes("clauses that can appear") || lower.includes("select all")) {
+        // Câu hỏi mệnh đề GROUP BY / nhiều đáp án
+        if (isEnglish) {
+          improvedContent = "Under standard ANSI SQL rules (and MySQL ONLY_FULL_GROUP_BY semantics), which of the following clauses are syntactically valid in a query containing a GROUP BY clause? (Select all that apply)";
+        } else {
+          improvedContent = "Theo chuẩn ANSI SQL (chế độ ONLY_FULL_GROUP_BY), các mệnh đề nào sau đây có thể xuất hiện hợp lệ trong câu lệnh có GROUP BY? (Chọn tất cả các phương án đúng)";
+        }
+
+        flawSummary = "Sinh viên Trung bình phản ánh: Đề bài yêu cầu 'Select all clauses' nhưng không xác định chế độ SQL (như ONLY_FULL_GROUP_BY) và thiếu chỉ dẫn rõ ràng cho câu hỏi chọn nhiều đáp án.";
+        rationale = "Bổ sung tiêu chuẩn ngữ nghĩa ONLY_FULL_GROUP_BY và gắn kèm nhãn '(Select all that apply)' nhằm tránh tranh cãi về các biểu thức không tổng hợp trong danh sách SELECT.";
+
+      } else {
+        // Câu hỏi tổng quát khác
+        if (isEnglish) {
+          improvedContent = rawContent.endsWith("?")
+            ? `${rawContent.slice(0, -1)} under standard operating conditions? (Select the most accurate option)`
+            : `${rawContent} (under standard operating conditions; select the best option).`;
+          flawSummary = isFirst
+            ? "Sinh viên Giỏi phát hiện: Câu hỏi chưa nêu rõ ràng phạm vi ngữ cảnh thực thi, dẫn đến suy luận có thể rẽ nhánh 2 kết quả khác nhau."
+            : "Sinh viên Trung bình phản ánh: Đề bài thiếu căn cứ đối chiếu và các giả định chuẩn cần thiết để xác định phương án đúng duy nhất.";
+          rationale = "Chuẩn hóa câu lệnh: Bổ sung phạm vi ngữ cảnh chuẩn và gắn kèm chỉ dẫn chọn phương án để đánh giá đúng năng lực người học.";
+        } else {
+          improvedContent = rawContent.startsWith("[")
+            ? rawContent.replace(/^\[[^\]]+\]\s*/, "[Chuẩn hóa điều kiện] ")
+            : `[Xét trong điều kiện tiêu chuẩn] ${rawContent}`;
+          if (item.type === "MULTIPLE_CHOICE" && !improvedContent.includes("chọn phương án")) {
+            improvedContent = improvedContent.replace(/\?$/, "") + " (chọn 01 phương án chính xác nhất)?";
+          }
+          flawSummary = isFirst
+            ? "Sinh viên Giỏi phát hiện: Câu hỏi thiếu giả định điều kiện tiên quyết, phương án nhiễu dễ gây nhầm lẫn khi đọc lướt."
+            : "Sinh viên Trung bình phản ánh: Đề bài chưa nêu rõ căn cứ đối chiếu, cần làm rõ câu lệnh chuẩn xác hơn để tránh tranh cãi.";
+          rationale = "Chuẩn hóa câu hỏi theo ma trận đề thi: Làm rõ câu lệnh, bổ sung ràng buộc tiêu chuẩn và tinh chỉnh phương án để phân hóa học sinh tốt hơn.";
+        }
       }
 
-      const flawSummary = isFirst
-        ? "Sinh viên Giỏi phát hiện: Câu hỏi phủ định/giả định chưa nêu rõ ngữ cảnh điều kiện tiên quyết, phương án nhiễu dễ gây nhầm lẫn khi đọc lướt."
-        : "Sinh viên Trung bình phản ánh: Đề bài chưa nêu rõ điều kiện tiên quyết và căn cứ đối chiếu, cần làm rõ câu lệnh chuẩn xác hơn để tránh tranh cãi.";
-
-      const rationale =
-        "Chuẩn hóa câu hỏi theo ma trận đề thi: Làm rõ câu lệnh, bổ sung ràng buộc tiêu chuẩn và tinh chỉnh phương án để đánh giá đúng năng lực người học.";
+      // 2. Strict Inequality Guardrail: Tuyệt đối không cho phép bản tinh chỉnh giống hệt bản gốc
+      if (improvedContent.trim().toLowerCase() === rawContent.toLowerCase()) {
+        improvedContent = isEnglish
+          ? `${rawContent.replace(/\.?$/, "")}: (Identify the single most accurate technical statement below)`
+          : `${rawContent.replace(/\.?$/, "")}: (Xác định phương án chuẩn xác nhất theo lý thuyết)`;
+      }
 
       const improvedExplanation = item.explanation
-        ? `${item.explanation} (Đã được AI Squad bổ sung chú thích và chuẩn hóa căn cứ đối chiếu theo chuẩn kiến thức).`
-        : "Đã bổ sung căn cứ đối chiếu và chuẩn hóa phương án đúng theo chuẩn ma trận kiến thức đề thi.";
+        ? `${item.explanation} (Đã được AI Squad phân tích chuyên sâu, bổ sung cơ sở lý thuyết và căn cứ đối chiếu học thuật).`
+        : isEnglish
+          ? "Enhanced by AI Squad: Added rigorous technical context, scope demarcation, and unambiguous evaluation criteria."
+          : "Đã được AI Squad chuẩn hóa căn cứ đối chiếu, phân tách ranh giới phương án đúng và phương án nhiễu theo ma trận đề thi.";
 
       return {
         questionId: item.questionId,

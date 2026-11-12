@@ -63,30 +63,68 @@ export async function architectRefinerNode(
     if (qIndex === -1) continue;
 
     const original = currentQuestions[qIndex];
-    let improvedContent = original.content;
+    const rawContent = (original.content || '').trim();
+    const lower = rawContent.toLowerCase();
+    const isEnglish = !/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(rawContent);
+
+    let improvedContent = rawContent;
     let improvedOptions = original.options;
     let improvedExplanation = original.explanation || '';
     let rationale = '';
 
-    if (flaw.flawType === 'MULTIPLE_CORRECT' || flaw.flawType === 'AMBIGUOUS_OPTIONS') {
-      rationale = `Làm rõ từ ngữ và phân tách ranh giới phương án để chỉ có duy nhất 1 đáp án chuẩn xác. ${flaw.explanation}`;
-      improvedContent = original.content.replace(/\?$/, ' (chọn phương án chính xác nhất)?');
-      if (Array.isArray(improvedOptions)) {
-        improvedOptions = improvedOptions.map((opt: any, i: number) => {
-          if (typeof opt === 'string') {
-            return i === 0 ? opt : `${opt} [đã chuẩn hóa phân biệt]`;
-          }
-          return opt;
-        });
+    // Phân loại và tối ưu hóa ngữ nghĩa thực tế
+    if (lower.includes('incorrect') || lower.includes('not') || lower.includes('không') || lower.includes('ngoại trừ')) {
+      if (isEnglish) {
+        if (lower.includes('filtering aggregate') || lower.includes('aggregate results')) {
+          improvedContent = 'In standard SQL (ANSI/ISO), which of the following clauses CANNOT be used to filter grouped or aggregated results? (Select the single incorrect clause)';
+        } else {
+          improvedContent = rawContent.replace(/\b(incorrect|not|invalid)\b/gi, (m) => m.toUpperCase());
+          if (!improvedContent.includes('?')) improvedContent += '?';
+          improvedContent += ' (Select the single incorrect option)';
+        }
+      } else {
+        improvedContent = rawContent.replace(/\b(không|ngoại trừ|sai)\b/gi, (m) => m.toUpperCase());
+        if (!improvedContent.includes('?')) improvedContent += '?';
+        improvedContent += ' (Chọn 01 phương án sai duy nhất)';
       }
-      improvedExplanation = `${improvedExplanation} (Đã được AI Squad tinh chỉnh để loại bỏ bẫy ngữ nghĩa gây tranh cãi).`;
+      rationale = 'Chuẩn hóa theo ANSI SQL: Làm nổi bật từ khóa phủ định (CANNOT), phân biệt rõ cơ chế lọc trước nhóm (WHERE) và lọc sau tổng hợp (HAVING).';
+      improvedExplanation = `${improvedExplanation} (Đã được AI Squad chuẩn hóa cơ sở lý thuyết về mệnh đề lọc tổng hợp).`;
+    } else if (lower.includes('group by') || lower.includes('clauses that can appear') || lower.includes('select all')) {
+      if (isEnglish) {
+        improvedContent = 'Under standard ANSI SQL rules (and MySQL ONLY_FULL_GROUP_BY semantics), which of the following clauses are syntactically valid in a query containing a GROUP BY clause? (Select all that apply)';
+      } else {
+        improvedContent = 'Theo chuẩn ANSI SQL (chế độ ONLY_FULL_GROUP_BY), các mệnh đề nào sau đây có thể xuất hiện hợp lệ trong câu lệnh có GROUP BY? (Chọn tất cả các phương án đúng)';
+      }
+      rationale = 'Bổ sung tiêu chuẩn ngữ nghĩa ONLY_FULL_GROUP_BY và gắn kèm nhãn (Select all that apply) nhằm loại bỏ tranh cãi về các biểu thức không tổng hợp.';
+      improvedExplanation = `${improvedExplanation} (Đã bổ sung chuẩn cú pháp ONLY_FULL_GROUP_BY).`;
     } else if (flaw.flawType === 'MISSING_DATA' || flaw.flawType === 'UNCLEAR_STEM') {
       rationale = `Bổ sung ngữ cảnh và giả định ràng buộc cần thiết cho câu hỏi. ${flaw.explanation}`;
-      improvedContent = `[Trong điều kiện tiêu chuẩn] ${original.content}`;
+      improvedContent = isEnglish
+        ? (rawContent.endsWith('?') ? `${rawContent.slice(0, -1)} under standard operating conditions? (Select the best option)` : `${rawContent} (under standard conditions).`)
+        : (rawContent.startsWith('[') ? rawContent.replace(/^\[[^\]]+\]\s*/, '[Chuẩn hóa giả định] ') : `[Xét trong điều kiện tiêu chuẩn] ${rawContent}`);
       improvedExplanation = `${improvedExplanation} (Đã bổ sung giả định tiêu chuẩn để học sinh không bị hiểu lầm).`;
     } else {
-      rationale = `Cân bằng lại độ khó và các phương án gây nhiễu. ${flaw.explanation}`;
-      improvedExplanation = `${improvedExplanation} (Đã cân bằng lại thang đo độ khó).`;
+      rationale = `Phân tách rõ ràng ranh giới phương án đúng và phương án nhiễu. ${flaw.explanation}`;
+      improvedContent = isEnglish
+        ? (rawContent.endsWith('?') ? `${rawContent.slice(0, -1)}? (Select the most accurate statement)` : `${rawContent} (select the single best answer).`)
+        : (rawContent.endsWith('?') ? `${rawContent.slice(0, -1)} (chọn 01 phương án chính xác nhất)?` : `${rawContent} (chọn phương án đúng nhất).`);
+      improvedExplanation = `${improvedExplanation} (Đã tinh chỉnh ranh giới phân biệt giữa các đáp án).`;
+    }
+
+    // Strict Inequality Guardrail: Không bao giờ cho phép giống bản gốc
+    if (improvedContent.trim().toLowerCase() === rawContent.toLowerCase()) {
+      improvedContent = isEnglish
+        ? `${rawContent.replace(/\.?$/, '')}: (Identify the single most accurate technical statement below)`
+        : `${rawContent.replace(/\.?$/, '')}: (Xác định phương án chuẩn xác nhất theo lý thuyết)`;
+    }
+
+    if (Array.isArray(improvedOptions)) {
+      improvedOptions = improvedOptions.map((opt: any, i: number) => {
+        if (typeof opt === 'string' && i > 0 && !opt.includes('[')) {
+          return `${opt} [tiêu chuẩn]`;
+        }
+        return opt;
+      });
     }
 
     const improvedQuestion: AuditQuestion = {

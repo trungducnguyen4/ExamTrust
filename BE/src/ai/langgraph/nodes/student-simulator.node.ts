@@ -12,7 +12,7 @@ export async function studentSimulatorNode(
     questions.forEach((q, idx) => {
       const lower = q.content.toLowerCase();
       // Bẫy 1: Câu hỏi phủ định hoặc có từ "không", "ngoại trừ" dễ gây tranh cãi nếu options mập mờ
-      if ((lower.includes('không') || lower.includes('ngoại trừ') || lower.includes('not')) && idx % 3 === 0) {
+      if ((lower.includes('không') || lower.includes('ngoại trừ') || lower.includes('not') || lower.includes('incorrect')) && idx % 2 === 0) {
         flaws.push({
           questionId: q.questionId,
           flawType: 'AMBIGUOUS_OPTIONS',
