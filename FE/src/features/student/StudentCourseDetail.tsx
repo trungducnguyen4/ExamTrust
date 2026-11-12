@@ -253,7 +253,7 @@ export default function StudentCourseDetail() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <div className="space-y-3">
           <BackToDashboardButton to="/student" className="-ml-2" />
 

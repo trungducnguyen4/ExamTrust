@@ -169,7 +169,7 @@ export default function StudentExamDetail() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-5xl space-y-6 rounded-2xl bg-[linear-gradient(180deg,hsl(200_40%_97%)_0%,hsl(0_0%_100%)_48%)] p-4 sm:p-5 lg:p-6">
+      <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <BackToDashboardButton to="/student/exams" label="Quay lại bài thi của tôi" className="-ml-2" />
           <Button variant="outline" size="sm" onClick={loadExamDetail} disabled={loading} className="gap-2">

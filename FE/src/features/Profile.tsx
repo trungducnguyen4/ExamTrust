@@ -285,7 +285,7 @@ export default function Profile() {
 
   return (
     <DashboardLayout>
-      <div className="w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <BackToDashboardButton to={dashboardPath} className="mb-4 -ml-2" />
 
         <h1 className="text-2xl font-semibold text-foreground mb-1">Hồ sơ cá nhân</h1>

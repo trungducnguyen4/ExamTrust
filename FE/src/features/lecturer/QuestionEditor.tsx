@@ -527,7 +527,7 @@ export default function QuestionEditor() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto px-3 sm:px-0">
+      <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         {/* <BackToDashboardButton to={basePath} className="mb-2 -ml-2" /> */}
 
         <div className="mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2">
