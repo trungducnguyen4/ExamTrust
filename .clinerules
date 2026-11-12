@@ -21,5 +21,10 @@ graphify query "<task description>"
 npx graphify hook-rebuild
 ```
 
-## 3. Risk-Based Verification Protocol
+## 3. Isolated Diagnostics Protocol
+When investigating complex errors, failing tests, or runtime crashes:
+- Follow the scientific debugging methodology in [`.agents/skills/diagnostics/SKILL.md`](.agents/skills/diagnostics/SKILL.md).
+- Keep investigation strictly read-only and structured into the 9-part `DIAGNOSTIC REPORT`.
+
+## 4. Risk-Based Verification Protocol
 Provide evidence according to the change tier (Tier 1 Trivial ➔ Tier 4 Complex Flow). For UI changes, capture real screenshots with full Layout Shell. For User Flows or Performance improvements, include animated GIFs or screen recordings.

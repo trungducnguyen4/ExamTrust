@@ -122,6 +122,7 @@
       "BE/src/ai/eval/golden-dataset.ts",
       "BE/src/ai/langgraph/exam-audit.graph.spec.ts",
       "BE/src/ai/langgraph/exam-audit.graph.ts",
+      "BE/src/ai/langgraph/exam-audit.service.spec.ts",
       "BE/src/ai/langgraph/exam-audit.service.ts",
       "BE/src/ai/langgraph/exam-audit.state.ts",
       "BE/src/ai/langgraph/nodes/architect.node.ts",
@@ -203,6 +204,7 @@
       "BE/src/questions-v2/dto/question-v2-query.dto.ts",
       "BE/src/questions-v2/question-drafts.controller.ts",
       "BE/src/questions-v2/question-metadata.controller.ts",
+      "BE/src/questions-v2/question-validation.spec.ts",
       "BE/src/questions-v2/question-validation.ts",
       "BE/src/questions-v2/questions-v2-contracts.module.ts",
       "BE/src/questions-v2/questions-v2.ai-improvement.spec.ts",
@@ -658,6 +660,7 @@
       "docs/runs/2026-11-09-EX-052.md",
       "docs/runs/2026-11-10-EX-053.md",
       "docs/runs/2026-11-10-EX-054.md",
+      "docs/runs/2026-11-11-EX-055.md",
       "docs/runs/2026-11-11-EX-056.md",
       "docs/tai-lieu-on-tap-phong-van.html",
       "docs/webcam-proctoring-upgrade-plan.md",
@@ -666,7 +669,6 @@
     ],
     "paper": [],
     "image": [
-      "1mb-jpg-example-file.jpg",
       "BE/var/proctoring-evidence/2026-08-03/055d2da4-c963-457b-b0a5-3ef5616e3b93.jpg",
       "BE/var/proctoring-evidence/2026-08-03/92880383-b77c-47b2-a078-2533f7e09696.jpg",
       "BE/var/proctoring-evidence/2026-08-03/f06297da-1338-4294-a8f9-9a840d9d545d.jpg",
@@ -726,27 +728,27 @@
       "docs/screenshots/ex-054-guardrail-and-typography-flow.gif",
       "docs/screenshots/ex-054-guardrail-blocked.png",
       "docs/screenshots/ex-054-pedagogical-question-generated.png",
+      "docs/screenshots/ex-055-backend-tool-guardrails-lock.png",
       "docs/screenshots/verification_student_page.png",
       "examtrust-3a-crest-flat (1).svg",
       "examtrust-3a-crest-flat.svg"
     ],
     "video": [
-      "1mb.mp3",
       "docs/videos/ex-041-dashboard-perf-proof.mp4",
       "docs/videos/ex-042-api-key-flow.mp4"
     ]
   },
-  "total_files": 726,
-  "total_words": 1143179,
+  "total_files": 728,
+  "total_words": 1131463,
   "needs_graph": true,
-  "warning": "Large corpus: 726 files · ~1,143,179 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
+  "warning": "Large corpus: 728 files · ~1,131,463 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
   "skipped_sensitive": [
     "FE/src/features/ResetPassword.tsx"
   ],
   "graphifyignore_patterns": 67,
   "git": {
     "source_owner": "git",
-    "source_hash": "c292eae756c0bccc0c304799be6796d07cf16e18",
+    "source_hash": "93b750e17c83e0f81587fc7e2faac14074fd1d1b",
     "branches": [
       "bugfix/EX-033-metadata-base-env",
       "bugfix/EX-038-optimize-dashboard-queries",
@@ -774,6 +776,7 @@
       "feature/EX-054-typography-and-topic-guardrails",
       "feature/EX-055-backend-tool-guardrails-lock",
       "feature/EX-056-standardize-agent-harness-and-rules",
+      "feature/EX-057-isolated-diagnostics-skill-and-subagent",
       "hotfix/EX-029-filter-panel-syntax",
       "main"
     ],
@@ -786,13 +789,13 @@
     "source": "default-auto",
     "root": ".",
     "git_root": ".",
-    "head": "c292eae756c0bccc0c304799be6796d07cf16e18",
-    "candidate_count": 792,
-    "included_count": 726,
-    "excluded_untracked_count": 0,
-    "excluded_ignored_count": 111401,
+    "head": "93b750e17c83e0f81587fc7e2faac14074fd1d1b",
+    "candidate_count": 796,
+    "included_count": 728,
+    "excluded_untracked_count": 2,
+    "excluded_ignored_count": 111406,
     "excluded_sensitive_count": 1,
-    "missing_committed_count": 0,
+    "missing_committed_count": 2,
     "warnings": [],
     "recommendation": "Use --scope all or graphify.yaml inputs.corpus for a knowledge-base folder."
   }
