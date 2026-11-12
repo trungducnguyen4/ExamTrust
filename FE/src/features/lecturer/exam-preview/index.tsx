@@ -70,6 +70,8 @@ import AutonomousAuditDialog from "./components/AutonomousAuditDialog";
 type ExamQuestion = {
   id: string;
   orderIndex: number;
+  weight?: number;
+  assignedScore?: number;
   question: {
     id: string;
     type: string;
@@ -274,9 +276,29 @@ export default function ExamPreview() {
   const questions = useMemo(() => exam?.examQuestions || [], [exam]);
   const totalQuestions = questions.length;
 
-  const totalPoints = useMemo(() => {
-    return questions.reduce((acc, eq) => acc + (eq.question?.points ?? 1), 0);
-  }, [questions]);
+  // Tính điểm chuẩn xác theo thang 10 có trọng số (Khắc phục lỗi nối chuỗi 011111111111111)
+  const { totalScaleScore, questionScores } = useMemo(() => {
+    if (questions.length === 0) return { totalScaleScore: 10, questionScores: [] };
+
+    // Parse số điểm thô / trọng số của từng câu thành Number an toàn
+    const rawWeights = questions.map((eq) => {
+      const raw = Number(eq.weight ?? eq.assignedScore ?? eq.question?.points ?? 1);
+      return Number.isFinite(raw) && raw > 0 ? raw : 1;
+    });
+
+    const sumWeights = rawWeights.reduce((sum, w) => sum + w, 0);
+    const targetScale = Number((exam as any)?.totalPoints) > 0 ? Number((exam as any).totalPoints) : 10;
+
+    const scores = rawWeights.map((w) => {
+      const scaled = (w / sumWeights) * targetScale;
+      return Number(scaled.toFixed(2));
+    });
+
+    return {
+      totalScaleScore: targetScale,
+      questionScores: scores,
+    };
+  }, [questions, exam]);
 
   const difficultyStats = useMemo(() => {
     let easy = 0;
@@ -412,7 +434,7 @@ export default function ExamPreview() {
               {diffInfo.label}
             </Badge>
             <Badge variant="outline" className="text-xs font-mono font-medium text-muted-foreground">
-              {eq.question?.points ?? 1} điểm
+              {questionScores[index] ?? (10 / (totalQuestions || 1)).toFixed(2)} điểm
             </Badge>
           </div>
 
@@ -739,7 +761,7 @@ export default function ExamPreview() {
               </span>
               <span className="text-muted-foreground/40">•</span>
               <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                <Award className="h-4 w-4 text-muted-foreground" /> {totalPoints} điểm
+                <Award className="h-4 w-4 text-muted-foreground" /> Thang {totalScaleScore} điểm
               </span>
               {timeline.start && (
                 <>

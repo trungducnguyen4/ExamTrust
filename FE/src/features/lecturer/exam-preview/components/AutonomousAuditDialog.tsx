@@ -237,7 +237,7 @@ export default function AutonomousAuditDialog({
         // Câu hỏi phủ định / tìm phương án sai
         if (isEnglish) {
           if (lower.includes("filtering aggregate") || lower.includes("aggregate results")) {
-            improvedContent = "In standard SQL (ANSI/ISO), which of the following clauses CANNOT be used to filter grouped or aggregated results? (Select the single incorrect clause)";
+            improvedContent = "Which of the following clauses CANNOT be used to filter aggregate results in SQL? (Select the incorrect clause)";
           } else {
             improvedContent = rawContent.replace(/\b(incorrect|not|invalid)\b/gi, (match) => match.toUpperCase());
             if (!improvedContent.includes("?")) improvedContent += "?";
@@ -250,18 +250,18 @@ export default function AutonomousAuditDialog({
         }
 
         flawSummary = "Sinh viên Giỏi (Top 5%) phát hiện: Câu hỏi phủ định chưa làm rõ tiêu chuẩn SQL và phạm vi lọc dữ liệu (lọc hàng trước gom nhóm vs lọc nhóm sau gom nhóm), dễ gây tranh cãi giữa WHERE và HAVING.";
-        rationale = "Chuẩn hóa theo ANSI SQL: Làm nổi bật từ khóa phủ định (CANNOT), xác định rõ đối tượng lọc là 'grouped/aggregated results' để loại bỏ hiểu nhầm giữa mệnh đề WHERE và HAVING.";
+        rationale = "Làm nổi bật từ khóa phủ định (CANNOT), phân biệt rõ cơ chế lọc hàng trước nhóm (WHERE) và lọc nhóm sau tổng hợp (HAVING).";
 
       } else if (lower.includes("group by") || lower.includes("clauses that can appear") || lower.includes("select all")) {
         // Câu hỏi mệnh đề GROUP BY / nhiều đáp án
         if (isEnglish) {
-          improvedContent = "Under standard ANSI SQL rules (and MySQL ONLY_FULL_GROUP_BY semantics), which of the following clauses are syntactically valid in a query containing a GROUP BY clause? (Select all that apply)";
+          improvedContent = "Which clauses can appear in a SQL query that uses GROUP BY? (Select all that apply)";
         } else {
           improvedContent = "Theo chuẩn ANSI SQL (chế độ ONLY_FULL_GROUP_BY), các mệnh đề nào sau đây có thể xuất hiện hợp lệ trong câu lệnh có GROUP BY? (Chọn tất cả các phương án đúng)";
         }
 
         flawSummary = "Sinh viên Trung bình phản ánh: Đề bài yêu cầu 'Select all clauses' nhưng không xác định chế độ SQL (như ONLY_FULL_GROUP_BY) và thiếu chỉ dẫn rõ ràng cho câu hỏi chọn nhiều đáp án.";
-        rationale = "Bổ sung tiêu chuẩn ngữ nghĩa ONLY_FULL_GROUP_BY và gắn kèm nhãn '(Select all that apply)' nhằm tránh tranh cãi về các biểu thức không tổng hợp trong danh sách SELECT.";
+        rationale = "Làm rõ câu lệnh và gắn kèm nhãn chỉ dẫn '(Select all that apply)' để người học nhận biết câu hỏi chọn nhiều đáp án đúng.";
 
       } else {
         // Câu hỏi tổng quát khác
@@ -734,24 +734,82 @@ ${report.improvements
                           </div>
                         </div>
 
-                        {/* Diff Box: Before vs After */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                        {/* Diff Box: Before vs After with Full Options Display */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                           {/* Before */}
-                          <div className="p-2.5 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50/20 dark:bg-red-950/10 space-y-1">
-                            <div className="font-bold text-red-600 dark:text-red-400 text-[11px]">
-                              [GỐC] Câu hỏi ban đầu:
+                          <div className="p-3 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50/20 dark:bg-red-950/10 space-y-2">
+                            <div className="font-bold text-red-600 dark:text-red-400 text-[11px] flex items-center justify-between">
+                              <span>[GỐC] Câu hỏi ban đầu:</span>
+                              <Badge variant="outline" className="text-[10px] text-red-600 border-red-300">Nguyên bản</Badge>
                             </div>
-                            <div className="text-foreground leading-relaxed">{item.originalQuestion.content}</div>
+                            <div className="text-foreground leading-relaxed font-medium">{item.originalQuestion.content}</div>
+                            
+                            {/* Render Original Options */}
+                            {item.originalQuestion.options && (
+                              <div className="pt-2 border-t border-red-200/60 dark:border-red-900/40 space-y-1">
+                                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Phương án lựa chọn:</div>
+                                <div className="space-y-1">
+                                  {Array.isArray(item.originalQuestion.options) ? (
+                                    item.originalQuestion.options.map((opt: any, oIdx: number) => {
+                                      const label = typeof opt === 'string' ? opt : (opt.text || opt.content || JSON.stringify(opt));
+                                      const key = typeof opt === 'object' && opt.key ? opt.key : String.fromCharCode(65 + oIdx);
+                                      return (
+                                        <div key={oIdx} className="flex items-start gap-1.5 p-1 rounded bg-background/60 border border-border/50 text-[11px]">
+                                          <span className="font-mono font-bold text-muted-foreground">{key}.</span>
+                                          <span className="flex-1">{label}</span>
+                                        </div>
+                                      );
+                                    })
+                                  ) : (
+                                    Object.entries(item.originalQuestion.options).map(([k, val], oIdx) => (
+                                      <div key={oIdx} className="flex items-start gap-1.5 p-1 rounded bg-background/60 border border-border/50 text-[11px]">
+                                        <span className="font-mono font-bold text-muted-foreground">{k}.</span>
+                                        <span className="flex-1">{String(val)}</span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* After */}
-                          <div className="p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-1">
-                            <div className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px]">
-                              [TỐI ƯU] Sau khi AI Squad tinh chỉnh:
+                          <div className="p-3 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-2">
+                            <div className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] flex items-center justify-between">
+                              <span>[TỐI ƯU] Sau khi AI Squad tinh chỉnh:</span>
+                              <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-300">Đã chuẩn hóa</Badge>
                             </div>
-                            <div className="text-foreground leading-relaxed font-medium">
-                              {item.improvedQuestion.content}
-                            </div>
+                            <div className="text-foreground leading-relaxed font-medium">{item.improvedQuestion.content}</div>
+
+                            {/* Render Improved Options */}
+                            {item.improvedQuestion.options && (
+                              <div className="pt-2 border-t border-emerald-200/60 dark:border-emerald-900/40 space-y-1">
+                                <div className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Phương án sau chuẩn hóa:</div>
+                                <div className="space-y-1">
+                                  {Array.isArray(item.improvedQuestion.options) ? (
+                                    item.improvedQuestion.options.map((opt: any, oIdx: number) => {
+                                      const label = typeof opt === 'string' ? opt : (opt.text || opt.content || JSON.stringify(opt));
+                                      const key = typeof opt === 'object' && opt.key ? opt.key : String.fromCharCode(65 + oIdx);
+                                      const isCorrect = typeof opt === 'object' && opt.isCorrect;
+                                      return (
+                                        <div key={oIdx} className={`flex items-start gap-1.5 p-1 rounded text-[11px] border ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 text-emerald-900 dark:text-emerald-200 font-medium' : 'bg-background/80 border-border/60'}`}>
+                                          <span className="font-mono font-bold text-emerald-600">{key}.</span>
+                                          <span className="flex-1">{label}</span>
+                                          {isCorrect && <Badge className="text-[9px] py-0 px-1 bg-emerald-600 text-white">Đáp án</Badge>}
+                                        </div>
+                                      );
+                                    })
+                                  ) : (
+                                    Object.entries(item.improvedQuestion.options).map(([k, val], oIdx) => (
+                                      <div key={oIdx} className="flex items-start gap-1.5 p-1 rounded bg-background/80 border border-border/60 text-[11px]">
+                                        <span className="font-mono font-bold text-emerald-600">{k}.</span>
+                                        <span className="flex-1">{String(val)}</span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
 
