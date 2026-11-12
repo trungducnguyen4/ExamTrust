@@ -41,7 +41,7 @@ export default function ExamQR() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-center min-h-[70vh]">
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-[1280px]">
           {/* <BackToDashboardButton to="/lecturer" className="mb-4 -ml-2" /> */}
           <Card className="w-full">
             <CardContent className="p-8 text-center">

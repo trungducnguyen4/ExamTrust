@@ -104,7 +104,7 @@ export default function FeedbackDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <BackToDashboardButton to="/student" className="mb-4 -ml-2" />
 
         {/* Header */}
