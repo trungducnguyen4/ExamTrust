@@ -24,6 +24,8 @@ export interface DataPaginationProps {
   syncUrl?: boolean;
   /** URL search param key (default: "page") */
   urlParamKey?: string;
+  /** Whether the pagination bar sticks to the bottom of the viewport/container (default: true) */
+  sticky?: boolean;
 }
 
 /**
@@ -45,6 +47,7 @@ export function DataPagination({
   className,
   syncUrl = true,
   urlParamKey = "page",
+  sticky = true,
 }: DataPaginationProps) {
   const effectiveTotalPages = Math.max(1, totalPages);
   const searchParams = useSearchParams();
@@ -123,7 +126,8 @@ export function DataPagination({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition-all",
+        sticky && "sticky bottom-0 z-20 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/85 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]",
         className,
       )}
     >
