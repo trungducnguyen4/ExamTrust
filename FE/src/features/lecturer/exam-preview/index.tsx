@@ -70,6 +70,8 @@ import AutonomousAuditDialog from "./components/AutonomousAuditDialog";
 type ExamQuestion = {
   id: string;
   orderIndex: number;
+  weight?: number;
+  assignedScore?: number;
   question: {
     id: string;
     type: string;
@@ -280,7 +282,7 @@ export default function ExamPreview() {
 
     // Parse số điểm thô / trọng số của từng câu thành Number an toàn
     const rawWeights = questions.map((eq) => {
-      const raw = Number(eq.weight ?? (eq as any).assignedScore ?? eq.question?.points ?? 1);
+      const raw = Number(eq.weight ?? eq.assignedScore ?? eq.question?.points ?? 1);
       return Number.isFinite(raw) && raw > 0 ? raw : 1;
     });
 
@@ -432,7 +434,7 @@ export default function ExamPreview() {
               {diffInfo.label}
             </Badge>
             <Badge variant="outline" className="text-xs font-mono font-medium text-muted-foreground">
-              {questionScores[idx] ?? (10 / (totalQuestions || 1)).toFixed(2)} điểm
+              {questionScores[index] ?? (10 / (totalQuestions || 1)).toFixed(2)} điểm
             </Badge>
           </div>
 
