@@ -1677,12 +1677,13 @@ async triggerAutonomousExamAudit(examId: string, maxIterations = 2) {
       improvedOptions?: any;
       improvedExplanation?: string;
     }>,
+    saveMode?: 'EXAM' | 'QUESTION_BANK',
   ) {
-    return this.request<{ success: boolean; appliedCount: number; questionIds: string[] }>(
+    return this.request<{ success: boolean; appliedCount: number; questionIds: string[]; savedToBank?: boolean; message?: string }>(
       `/ai/exams/${examId}/apply-audit-improvements`,
       {
         method: 'POST',
-        body: { improvements },
+        body: { improvements, saveMode },
       },
     );
   }

@@ -62,7 +62,14 @@ import {
   Layers,
   Sparkles,
   Eye,
+  Lock,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import api from "@/lib/api";
 import { FormattedText } from "@/components/ui/formatted-text";
 import AutonomousAuditDialog from "./components/AutonomousAuditDialog";
@@ -335,6 +342,7 @@ export default function ExamPreview() {
     if (!exam?.startTime) {
       return {
         isScheduled: false,
+        isInProgress: false,
         isEnded: false,
         start: null as Date | null,
         end: null as Date | null,
@@ -349,9 +357,19 @@ export default function ExamPreview() {
       start,
       end,
       isScheduled: now < start.getTime(),
+      isInProgress: now >= start.getTime() && now <= end.getTime(),
       isEnded: now > end.getTime(),
     };
   }, [exam]);
+
+  const isExamLocked = useMemo(() => {
+    if (!exam) return false;
+    const hasSubmissions =
+      ((exam as any)._count?.submissions || 0) > 0 ||
+      ((exam as any).submissions?.length || 0) > 0;
+    const notDraft = exam.status !== "DRAFT";
+    return timeline.isEnded || timeline.isInProgress || notDraft || hasSubmissions;
+  }, [exam, timeline]);
 
   const handleSelectQuestion = (index: number) => {
     setCurrentIndex(index);
@@ -438,18 +456,40 @@ export default function ExamPreview() {
             </Badge>
           </div>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={timeline.isEnded}
-            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-            asChild
-          >
-            <Link href={`${basePath}/question-editor?id=${eq.question.id}`}>
-              <PencilLine className="h-3.5 w-3.5" />
-              Sửa câu hỏi
-            </Link>
-          </Button>
+          {isExamLocked ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0} className="inline-block cursor-not-allowed">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled
+                      className="h-8 gap-1.5 text-xs text-muted-foreground/60 cursor-not-allowed pointer-events-none"
+                    >
+                      <Lock className="h-3.5 w-3.5 text-amber-600" />
+                      Sửa câu hỏi
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  Không thể sửa khi đề thi đang diễn ra hoặc đã kết thúc. Vui lòng dùng tính năng Điều chỉnh điểm hậu kiểm nếu có câu hỏi lỗi.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              asChild
+            >
+              <Link href={`${basePath}/question-editor?id=${eq.question.id}`}>
+                <PencilLine className="h-3.5 w-3.5" />
+                Sửa câu hỏi
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Question content & media */}
@@ -989,6 +1029,7 @@ export default function ExamPreview() {
             examId={exam.id}
             examTitle={exam.title}
             examQuestions={exam.examQuestions}
+            isExamLocked={isExamLocked}
             onAuditApplied={() => loadExam(true)}
           />
         )}

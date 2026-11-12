@@ -252,7 +252,16 @@ export class AiController {
   @Post('exams/:examId/apply-audit-improvements')
   async applyAuditImprovements(
     @Param('examId') examId: string,
-    @Body() body: { improvements: Array<{ questionId: string; improvedContent: string; improvedOptions?: any; improvedExplanation?: string }> },
+    @Body()
+    body: {
+      improvements: Array<{
+        questionId: string;
+        improvedContent: string;
+        improvedOptions?: any;
+        improvedExplanation?: string;
+      }>;
+      saveMode?: 'EXAM' | 'QUESTION_BANK';
+    },
     @Request() req,
   ) {
     const exam = await this.prisma.exam.findUnique({
@@ -269,6 +278,7 @@ export class AiController {
       improvements: body.improvements || [],
       userId: req.user.id,
       userRole: req.user.role,
+      saveMode: body.saveMode,
     });
   }
 
