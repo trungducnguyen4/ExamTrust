@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ExamAuditService } from './exam-audit.service';
 
 describe('ExamAuditService - applyAuditImprovements Tool Security Lock', () => {
@@ -13,6 +13,7 @@ describe('ExamAuditService - applyAuditImprovements Tool Security Lock', () => {
       },
       question: {
         update: jest.fn(),
+        create: jest.fn(),
       },
       $transaction: jest.fn(async (cb) => cb(mockPrisma)),
     };
@@ -82,13 +83,94 @@ describe('ExamAuditService - applyAuditImprovements Tool Security Lock', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
-  it('applies improvements inside transaction when exam owner and questions match', async () => {
+  it('throws ConflictException when exam is locked (ONGOING/COMPLETED/has submissions) in EXAM saveMode', async () => {
     mockPrisma.exam.findUnique.mockResolvedValue({
       id: 'exam-1',
       title: 'Exam 1',
       creatorId: 'instructor-1',
       course: { lecturerId: 'instructor-1' },
-      examQuestions: [{ questionId: 'q-1' }],
+      status: 'ONGOING',
+      _count: { submissions: 5 },
+      examQuestions: [{ questionId: 'q-1', question: { id: 'q-1', content: 'Old question' } }],
+    });
+
+    await expect(
+      service.applyAuditImprovements({
+        examId: 'exam-1',
+        improvements: [{ questionId: 'q-1', improvedContent: 'Trying to mutate live exam question' }],
+        userId: 'instructor-1',
+        userRole: 'LECTURER',
+        saveMode: 'EXAM',
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+
+  it('saves to Question Bank when saveMode is QUESTION_BANK even if exam is locked', async () => {
+    mockPrisma.exam.findUnique.mockResolvedValue({
+      id: 'exam-1',
+      title: 'Exam 1',
+      creatorId: 'instructor-1',
+      courseId: 'course-123',
+      course: { lecturerId: 'instructor-1' },
+      status: 'COMPLETED',
+      _count: { submissions: 25 },
+      examQuestions: [
+        {
+          questionId: 'q-1',
+          question: {
+            id: 'q-1',
+            type: 'MULTIPLE_CHOICE',
+            difficulty: 2,
+            points: 1,
+            options: ['A', 'B', 'C', 'D'],
+            correctAnswer: 'B',
+            explanation: 'Original explanation',
+          },
+        },
+      ],
+    });
+
+    mockPrisma.question.create.mockResolvedValue({ id: 'new-q-bank-1' });
+
+    const result = await service.applyAuditImprovements({
+      examId: 'exam-1',
+      improvements: [
+        {
+          questionId: 'q-1',
+          improvedContent: 'In standard ANSI SQL, which clause filters aggregated rows?',
+          improvedExplanation: 'HAVING filters aggregated rows after GROUP BY.',
+        },
+      ],
+      userId: 'instructor-1',
+      userRole: 'LECTURER',
+      saveMode: 'QUESTION_BANK',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.savedToBank).toBe(true);
+    expect(result.appliedCount).toBe(1);
+    expect(result.questionIds).toEqual(['new-q-bank-1']);
+    expect(mockPrisma.question.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          content: '[AI Tinh chỉnh] In standard ANSI SQL, which clause filters aggregated rows?',
+          courseId: 'course-123',
+          status: 'PUBLISHED',
+          isReusable: true,
+        }),
+      }),
+    );
+  });
+
+  it('applies improvements directly to exam in DRAFT status when saveMode is EXAM', async () => {
+    mockPrisma.exam.findUnique.mockResolvedValue({
+      id: 'exam-1',
+      title: 'Exam 1',
+      creatorId: 'instructor-1',
+      course: { lecturerId: 'instructor-1' },
+      status: 'DRAFT',
+      _count: { submissions: 0 },
+      examQuestions: [{ questionId: 'q-1', question: { id: 'q-1' } }],
     });
 
     mockPrisma.question.update.mockResolvedValue({ id: 'q-1' });
@@ -104,9 +186,11 @@ describe('ExamAuditService - applyAuditImprovements Tool Security Lock', () => {
       ],
       userId: 'instructor-1',
       userRole: 'LECTURER',
+      saveMode: 'EXAM',
     });
 
     expect(result.success).toBe(true);
+    expect(result.savedToBank).toBe(false);
     expect(result.appliedCount).toBe(1);
     expect(result.questionIds).toEqual(['q-1']);
     expect(mockPrisma.$transaction).toHaveBeenCalled();

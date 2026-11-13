@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiTelemetryService } from '../telemetry.service';
 import { createExamAuditGraph } from './exam-audit.graph';
@@ -121,8 +121,9 @@ export class ExamAuditService {
     }>;
     userId?: string;
     userRole?: string;
+    saveMode?: 'EXAM' | 'QUESTION_BANK';
   }) {
-    const { examId, improvements, userId, userRole } = params;
+    const { examId, improvements, userId, userRole, saveMode = 'EXAM' } = params;
 
     if (!Array.isArray(improvements) || improvements.length === 0) {
       throw new BadRequestException('Danh sách câu hỏi cải tiến không được để trống');
@@ -135,6 +136,10 @@ export class ExamAuditService {
         title: true,
         creatorId: true,
         courseId: true,
+        status: true,
+        startTime: true,
+        endTime: true,
+        duration: true,
         course: {
           select: {
             lecturerId: true,
@@ -143,6 +148,23 @@ export class ExamAuditService {
         examQuestions: {
           select: {
             questionId: true,
+            question: {
+              select: {
+                id: true,
+                type: true,
+                difficulty: true,
+                points: true,
+                defaultPoints: true,
+                options: true,
+                correctAnswer: true,
+                explanation: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            submissions: true,
           },
         },
       },
@@ -180,7 +202,69 @@ export class ExamAuditService {
       }
     }
 
-    // 3. Atomic execution inside a Prisma transaction
+    // 3. Lifecycle state verification
+    const nowMs = Date.now();
+    const hasStarted = exam.startTime ? nowMs >= new Date(exam.startTime).getTime() : false;
+    const hasSubmissions = (exam._count?.submissions || 0) > 0;
+    const notDraft = exam.status !== 'DRAFT';
+    const isExamLocked = notDraft || hasSubmissions || hasStarted;
+
+    // 4. Branch logic based on saveMode
+    if (saveMode === 'QUESTION_BANK') {
+      const createdQuestions = await this.prisma.$transaction(async (tx) => {
+        const results: string[] = [];
+        const eqMap = new Map(exam.examQuestions.map((eq) => [eq.questionId, eq.question]));
+
+        for (const item of improvements) {
+          const original = eqMap.get(item.questionId) as any;
+          const rawContent = item.improvedContent.trim();
+          const content = rawContent.startsWith('[AI Tinh chỉnh]')
+            ? rawContent
+            : `[AI Tinh chỉnh] ${rawContent}`;
+
+          const created = await tx.question.create({
+            data: {
+              content,
+              type: original?.type || 'MULTIPLE_CHOICE',
+              options: item.improvedOptions !== undefined ? item.improvedOptions : (original?.options ?? undefined),
+              correctAnswer: original?.correctAnswer ?? undefined,
+              explanation: item.improvedExplanation?.trim() || original?.explanation || '',
+              difficulty: original?.difficulty ?? 1,
+              points: original?.points ?? 1,
+              defaultPoints: original?.defaultPoints ?? undefined,
+              courseId: exam.courseId || undefined,
+              creatorId: userId || exam.creatorId,
+              status: 'PUBLISHED',
+              isReusable: true,
+            },
+            select: { id: true },
+          });
+          results.push(created.id);
+        }
+        return results;
+      });
+
+      this.logger.log(
+        `[LangGraph] Người dùng ${userId || 'SYSTEM'} đã lưu an toàn ${createdQuestions.length} câu hỏi tinh chỉnh vào Ngân hàng câu hỏi (Khóa học: ${exam.courseId || 'Chung'})`,
+      );
+
+      return {
+        success: true,
+        savedToBank: true,
+        appliedCount: createdQuestions.length,
+        questionIds: createdQuestions,
+        message: `Đã lưu thành công ${createdQuestions.length} câu hỏi tinh chỉnh vào Ngân hàng câu hỏi`,
+      };
+    }
+
+    // saveMode === 'EXAM': Enforce strict lock if exam is ongoing, ended, or has submissions
+    if (isExamLocked) {
+      throw new ConflictException(
+        'Không thể cập nhật trực tiếp câu hỏi vì bài thi đang diễn ra, đã kết thúc hoặc đã có bài nộp. Vui lòng chọn lưu vào Ngân hàng câu hỏi hoặc dùng tính năng Điều chỉnh điểm hậu kiểm.',
+      );
+    }
+
+    // Atomic execution inside a Prisma transaction for DRAFT exam
     const updatedQuestions = await this.prisma.$transaction(async (tx) => {
       const results: string[] = [];
       for (const item of improvements) {
@@ -204,6 +288,7 @@ export class ExamAuditService {
 
     return {
       success: true,
+      savedToBank: false,
       appliedCount: updatedQuestions.length,
       questionIds: updatedQuestions,
     };

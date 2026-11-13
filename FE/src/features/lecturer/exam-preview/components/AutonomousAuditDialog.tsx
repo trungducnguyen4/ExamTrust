@@ -28,7 +28,10 @@ import {
   Download,
   Eye,
   RotateCcw,
+  BookmarkPlus,
+  Lock,
 } from "lucide-react";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import {
   Card,
@@ -94,6 +97,7 @@ interface AutonomousAuditDialogProps {
   examId: string;
   examTitle: string;
   examQuestions?: any[];
+  isExamLocked?: boolean;
   onAuditApplied?: () => void;
 }
 
@@ -103,6 +107,7 @@ export default function AutonomousAuditDialog({
   examId,
   examTitle,
   examQuestions = [],
+  isExamLocked = false,
   onAuditApplied,
 }: AutonomousAuditDialogProps) {
   const [stage, setStage] = useState<"idle" | "running" | "completed">("idle");
@@ -400,16 +405,22 @@ export default function AutonomousAuditDialog({
         }));
 
       if (selectedItems.length > 0) {
-        await api.applyAuditImprovements(examId, selectedItems);
+        const saveMode = isExamLocked ? "QUESTION_BANK" : "EXAM";
+        const result = await api.applyAuditImprovements(examId, selectedItems, saveMode);
+        if (isExamLocked || result?.savedToBank) {
+          toast.success(
+            `Đã lưu thành công ${selectedItems.length} câu hỏi tinh chỉnh vào Ngân hàng câu hỏi (Gắn nhãn [AI Tinh chỉnh])!`
+          );
+        } else {
+          toast.success(`Đã cập nhật ${selectedItems.length} câu hỏi cải tiến vào đề thi thành công!`);
+        }
       }
 
       onAuditApplied?.();
       onOpenChange(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Lỗi khi áp dụng cải tiến câu hỏi:", err);
-      // Vẫn gọi callback thành công cho trải nghiệm demo
-      onAuditApplied?.();
-      onOpenChange(false);
+      toast.error(err?.message || "Không thể lưu câu hỏi cải tiến.");
     } finally {
       setApplying(false);
     }
@@ -697,6 +708,24 @@ ${report.improvements
               {/* Tab 1: Improvements (Diff View) */}
               {activeTab === "improvements" && (
                 <div className="space-y-3">
+                  {isExamLocked && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-3.5 text-xs text-amber-900 flex items-start gap-3 shadow-xs dark:bg-amber-950/25 dark:border-amber-900/50 dark:text-amber-200">
+                      <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div className="space-y-1">
+                        <p className="font-semibold text-amber-950 dark:text-amber-100">
+                          Đề thi đã khóa chỉnh sửa trực tiếp (Đang diễn ra, đã kết thúc hoặc đã có bài làm)
+                        </p>
+                        <p className="text-amber-800 dark:text-amber-300/90 leading-relaxed">
+                          Để bảo toàn snapshot và điểm số lịch sử của sinh viên, các câu hỏi được chọn sẽ được{" "}
+                          <span className="font-semibold text-amber-950 dark:text-amber-100 underline decoration-amber-400">
+                            lưu mới vào Ngân hàng câu hỏi
+                          </span>{" "}
+                          (gắn tiền tố <code className="bg-amber-100 dark:bg-amber-900/50 px-1 py-0.5 rounded font-mono text-[11px]">[AI Tinh chỉnh]</code>) để tái sử dụng cho các kỳ thi sau. Nếu đề thi có câu hỏi lỗi, vui lòng sử dụng tính năng{" "}
+                          <strong>Điều chỉnh điểm hậu kiểm</strong> trong mục xem bài làm.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   {report.improvements.length === 0 ? (
                     <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
                       Đề thi không phát hiện câu hỏi lỗi. Tất cả câu hỏi đều đạt chuẩn khảo thí!
@@ -879,12 +908,22 @@ ${report.improvements
                 size="sm"
                 onClick={handleApplySelected}
                 disabled={applying || Object.values(selectedQuestions).filter(Boolean).length === 0}
-                className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm"
+                className={`gap-1.5 text-xs text-white font-medium shadow-sm ${
+                  isExamLocked
+                    ? "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                    : "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+                }`}
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                {isExamLocked ? (
+                  <BookmarkPlus className="w-3.5 h-3.5" />
+                ) : (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                )}
                 {applying
-                  ? "Đang áp dụng..."
-                  : `Áp dụng ${Object.values(selectedQuestions).filter(Boolean).length} câu vào đề thi`}
+                  ? "Đang xử lý..."
+                  : isExamLocked
+                    ? `Lưu ${Object.values(selectedQuestions).filter(Boolean).length} câu vào Ngân hàng câu hỏi`
+                    : `Áp dụng ${Object.values(selectedQuestions).filter(Boolean).length} câu vào đề thi`}
               </Button>
             )}
           </div>
