@@ -4,6 +4,7 @@
   "scripts": {
     "attack": "node scripts/attack/run-all.mjs",
     "test:fe": "cd FE && npm test",
-    "test:be": "cd BE && npm test"
+    "test:be": "cd BE && npm test",
+    "test:e2e": "npm run test:e2e --prefix FE"
   }
 }

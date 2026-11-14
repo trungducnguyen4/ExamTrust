@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import { spawnSync } from 'node:child_process';
 
 export async function auditChaos(options = {}) {
   const issues = [];
   const passed = [];
 
-  console.log('🐒 [Chaos Monkey & Edge Hunter] Thử nghiệm trạng thái dị trong kỳ thi...');
+  console.log('🐒 [Chaos Monkey & Edge Hunter] Thử nghiệm trạng thái dị và race condition trong kỳ thi...');
 
   if (fs.existsSync('BE/src/main.ts')) {
     const mainCode = fs.readFileSync('BE/src/main.ts', 'utf8');
@@ -19,8 +20,25 @@ export async function auditChaos(options = {}) {
     }
   }
 
-  if (fs.existsSync('FE/src')) {
-    passed.push('FE Next.js có cấu trúc phân trang và xử lý exception form bài thi');
+  if (fs.existsSync('FE/e2e/double-submit-race.spec.ts')) {
+    passed.push('Kịch bản Playwright Chaos kiểm thử Double-Submit Race Condition đã sẵn sàng');
+
+    if (process.env.RUN_E2E === '1' || options.runE2E) {
+      console.log('🐒 [Chaos Monkey] Chạy Playwright Double-Submit Race Condition Test...');
+      const res = spawnSync('npx', ['playwright', 'test', 'e2e/double-submit-race.spec.ts', '--reporter=line'], {
+        cwd: 'FE',
+        shell: true,
+        encoding: 'utf8'
+      });
+      if (res.status === 0) {
+        passed.push('Chaos Monkey Double Submit: Idempotency và Fast-Fail chặn click lặp thành công');
+      } else {
+        issues.push({
+          severity: 'HIGH',
+          message: `Chaos Test thất bại: ${res.stderr || res.stdout || 'Xem logs chi tiết'}`
+        });
+      }
+    }
   }
 
   return {
