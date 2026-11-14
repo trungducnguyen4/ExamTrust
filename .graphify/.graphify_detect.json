@@ -581,11 +581,13 @@
       ".agents/rules/verification.md",
       ".agents/skills/context-hygiene/SKILL.md",
       ".agents/skills/design-taste-frontend/SKILL.md",
+      ".agents/skills/diagnostics/SKILL.md",
       ".agents/skills/graphify/SKILL.md",
       ".agents/skills/redesign-existing-projects/SKILL.md",
       ".agents/skills/release-versioning/SKILL.md",
       ".agents/skills/sync-role-screens/SKILL.md",
       ".agents/skills/verification-visual-proof/SKILL.md",
+      ".claude/agents/diagnostics.md",
       ".github/PULL_REQUEST_TEMPLATE.md",
       ".github/workflows/clear-storage.yml",
       ".github/workflows/code-health.yml",
@@ -662,6 +664,7 @@
       "docs/runs/2026-11-10-EX-054.md",
       "docs/runs/2026-11-11-EX-055.md",
       "docs/runs/2026-11-11-EX-056.md",
+      "docs/runs/2026-11-11-EX-057.md",
       "docs/tai-lieu-on-tap-phong-van.html",
       "docs/webcam-proctoring-upgrade-plan.md",
       "render.yaml",
@@ -669,6 +672,7 @@
     ],
     "paper": [],
     "image": [
+      "1mb-jpg-example-file.jpg",
       "BE/var/proctoring-evidence/2026-08-03/055d2da4-c963-457b-b0a5-3ef5616e3b93.jpg",
       "BE/var/proctoring-evidence/2026-08-03/92880383-b77c-47b2-a078-2533f7e09696.jpg",
       "BE/var/proctoring-evidence/2026-08-03/f06297da-1338-4294-a8f9-9a840d9d545d.jpg",
@@ -734,21 +738,22 @@
       "examtrust-3a-crest-flat.svg"
     ],
     "video": [
+      "1mb.mp3",
       "docs/videos/ex-041-dashboard-perf-proof.mp4",
       "docs/videos/ex-042-api-key-flow.mp4"
     ]
   },
-  "total_files": 728,
-  "total_words": 1131463,
+  "total_files": 733,
+  "total_words": 1153672,
   "needs_graph": true,
-  "warning": "Large corpus: 728 files · ~1,131,463 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
+  "warning": "Large corpus: 733 files · ~1,153,672 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.",
   "skipped_sensitive": [
     "FE/src/features/ResetPassword.tsx"
   ],
   "graphifyignore_patterns": 67,
   "git": {
     "source_owner": "git",
-    "source_hash": "93b750e17c83e0f81587fc7e2faac14074fd1d1b",
+    "source_hash": "6464c14affc313ba4db8fbea6d0006451f86e4e1",
     "branches": [
       "bugfix/EX-033-metadata-base-env",
       "bugfix/EX-038-optimize-dashboard-queries",
@@ -777,6 +782,13 @@
       "feature/EX-055-backend-tool-guardrails-lock",
       "feature/EX-056-standardize-agent-harness-and-rules",
       "feature/EX-057-isolated-diagnostics-skill-and-subagent",
+      "feature/EX-058-ai-qa-squad-semantic-differentiation",
+      "feature/EX-059-sticky-pagination-and-scoring-fix",
+      "feature/EX-060-submission-review-wide-layout",
+      "feature/EX-061-wide-responsive-layout-systemwide",
+      "feature/EX-062-lifecycle-question-edit-lock-and-bank-save",
+      "feature/EX-063-playwright-e2e-and-agent-skill",
+      "feature/EX-064-toggle-auto-graded-questions",
       "hotfix/EX-029-filter-panel-syntax",
       "main"
     ],
@@ -789,13 +801,13 @@
     "source": "default-auto",
     "root": ".",
     "git_root": ".",
-    "head": "93b750e17c83e0f81587fc7e2faac14074fd1d1b",
-    "candidate_count": 796,
-    "included_count": 728,
-    "excluded_untracked_count": 2,
-    "excluded_ignored_count": 111406,
+    "head": "6464c14affc313ba4db8fbea6d0006451f86e4e1",
+    "candidate_count": 799,
+    "included_count": 733,
+    "excluded_untracked_count": 3,
+    "excluded_ignored_count": 112410,
     "excluded_sensitive_count": 1,
-    "missing_committed_count": 2,
+    "missing_committed_count": 0,
     "warnings": [],
     "recommendation": "Use --scope all or graphify.yaml inputs.corpus for a knowledge-base folder."
   }

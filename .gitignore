@@ -81,3 +81,12 @@ graphify-out/
 fe/.graphify
 be/.graphify
 Cloudfare Bucket.png
+
+# Playwright Test Artifacts
+playwright-report/
+*/playwright-report/
+test-results/
+*/test-results/
+.playwright/
+*/.playwright/
+FE/e2e/.auth/
