@@ -1556,7 +1556,7 @@
     "hash": "f42ddc2051b355ac153822c6a720fbc0"
   },
   "D:/KLTN2/ExamTrust/FE/src/features/lecturer/ManualGradingDetail.tsx": {
-    "mtime": 1794640724830.8076,
+    "mtime": 1794641380083.5244,
     "hash": "48c9e292ac4ac106d5a1c0fd4b07dd3b"
   },
   "D:/KLTN2/ExamTrust/FE/src/features/lecturer/QuestionBankManagement.tsx": {
@@ -2056,8 +2056,8 @@
     "hash": "00afe2edcc29efc46d99b07a77831269"
   },
   "D:/KLTN2/ExamTrust/.graphify/GRAPH_REPORT.md": {
-    "mtime": 1794640677168.139,
-    "hash": "c5bcfe8df9565b629fe85555ba64315f"
+    "mtime": 1794641419837.0251,
+    "hash": "7978b029abf7e3ad3d1fd20b7aa29e54"
   },
   "D:/KLTN2/ExamTrust/.graphify/studio/index.html": {
     "mtime": 1786182231736.4763,
@@ -2072,8 +2072,8 @@
     "hash": "e5861f13e142f0cc35929a8d53a35567"
   },
   "D:/KLTN2/ExamTrust/AGENTS.md": {
-    "mtime": 1794640677221.9575,
-    "hash": "47432fcaae7b9fc2ecf1252e8b795e2c"
+    "mtime": 1794641376968.0923,
+    "hash": "58f93a8b4b89086495aa04689bc7ef35"
   },
   "D:/KLTN2/ExamTrust/BE/var/proctoring-evidence/2026-08-09/12b6fc05-bc6d-4aa2-9e98-535b8cd7d183.jpg": {
     "mtime": 1786265280481.6494,
@@ -2520,12 +2520,12 @@
     "hash": "e2a1ba9e0edcc6f337db0c8ffc8105d0"
   },
   "D:/KLTN2/ExamTrust/scripts/attack/audit-chaos.mjs": {
-    "mtime": 1794640677228.9688,
-    "hash": "e1a5d982f63ec5a81698c12b5ee52e84"
+    "mtime": 1794641376978.8555,
+    "hash": "d91797454f437c786dcdf7cb358a9b3d"
   },
   "D:/KLTN2/ExamTrust/scripts/attack/audit-features.mjs": {
-    "mtime": 1794640677230.479,
-    "hash": "50df8ea921841143518756d40b14e271"
+    "mtime": 1794641376978.8555,
+    "hash": "faa22fddeda855ef28af347ee1fd64d5"
   },
   "D:/KLTN2/ExamTrust/scripts/attack/audit-perf.mjs": {
     "mtime": 1790500751893.8445,
@@ -2930,5 +2930,45 @@
   "D:/KLTN2/ExamTrust/1mb.mp3": {
     "mtime": 1794350634986.4504,
     "hash": "e2a764d843a733c62d3524e69fee0030"
+  },
+  "D:/KLTN2/ExamTrust/FE/e2e/auth.setup.ts": {
+    "mtime": 1794641376969.053,
+    "hash": "c7485ed441720ddcb6f32baf27fe262e"
+  },
+  "D:/KLTN2/ExamTrust/FE/e2e/double-submit-race.spec.ts": {
+    "mtime": 1794641376969.053,
+    "hash": "53f598061b0ac25b9851ca9b18b12f0d"
+  },
+  "D:/KLTN2/ExamTrust/FE/e2e/exam-taking.spec.ts": {
+    "mtime": 1794641376969.053,
+    "hash": "43176ccb4d4d58c97b103962b3a3cc44"
+  },
+  "D:/KLTN2/ExamTrust/FE/e2e/fixtures/test-users.ts": {
+    "mtime": 1794641376970.587,
+    "hash": "43ff3343662ef76b4c438f10c32ace5c"
+  },
+  "D:/KLTN2/ExamTrust/FE/e2e/login-and-layout.spec.ts": {
+    "mtime": 1794641376971.678,
+    "hash": "8ffc70900592c897edabd62d2fe4608d"
+  },
+  "D:/KLTN2/ExamTrust/FE/playwright.config.ts": {
+    "mtime": 1794641376974.814,
+    "hash": "d50af09cb95dc552ed9b1f657861aa5d"
+  },
+  "D:/KLTN2/ExamTrust/.agents/skills/playwright-runner/SKILL.md": {
+    "mtime": 1794641376927.6597,
+    "hash": "cdd7d353da3bf91b961967df2b46060c"
+  },
+  "D:/KLTN2/ExamTrust/docs/runs/2026-11-14-EX-063.md": {
+    "mtime": 1794641376975.683,
+    "hash": "1699233a4d898f267c2144dcfd38a5f8"
+  },
+  "D:/KLTN2/ExamTrust/docs/screenshots/e2e-login-shell.png": {
+    "mtime": 1794641376977.8547,
+    "hash": "058aed420ac3b5817cff5d8d4e857600"
+  },
+  "D:/KLTN2/ExamTrust/docs/screenshots/e2e-student-exam-taking.png": {
+    "mtime": 1794641376977.8547,
+    "hash": "4c6ae853c6ad3d79192928006b0546b1"
   }
 }

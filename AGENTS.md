@@ -58,6 +58,7 @@ Specialized executable capabilities available to agents:
 - **`graphify`**: Codebase knowledge graph querying and maintenance.
 - **`context-hygiene`**: Context tracking, handoff generation, and `/compact` coordination.
 - **`sync-role-screens`**: Tracing and synchronizing UI/logic changes across Student, Lecturer, and Admin roles.
+- **`playwright-runner`**: Executing, authoring, and diagnosing Playwright E2E test suites, powering Attack Squad chaos tests, and generating automated Visual Proofs.
 - **`verification-visual-proof`**: Standards for live dev server captures and animated user flow recordings.
 - **`release-versioning`**: SemVer bumping, changelog updates, and release tag creation.
 - **`design-taste-frontend`**: Anti-slop frontend craftsmanship for landing and core flows.
