@@ -1,24 +1,24 @@
 # Graph Report - .  (2026-11-14)
 
 ## Corpus Check
-- Large corpus: 733 files · ~1,153,778 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.
+- Large corpus: 743 files · ~1,162,108 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.
 
 ## Summary
-- 3409 nodes · 16503 edges · 203 communities detected
+- 3420 nodes · 16719 edges · 204 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
-- Edge kinds: ON_BRANCH: 7201 · MODIFIES: 2532 · imports: 1889 · contains: 1776 · imports_from: 1147 · method: 745 · calls: 733 · PARENT_OF: 370 · references: 87 · inherits: 11 · implements: 10 · rationale_for: 2
+- Edge kinds: ON_BRANCH: 7402 · MODIFIES: 2541 · imports: 1890 · contains: 1778 · imports_from: 1148 · method: 745 · calls: 733 · PARENT_OF: 372 · references: 87 · inherits: 11 · implements: 10 · rationale_for: 2
 
 
 ## Input Scope
 - Requested: auto
 - Resolved: committed (source: default-auto)
-- Included files: 733 · Candidates: 799
-- Excluded: 9 untracked · 112384 ignored · 1 sensitive · 0 missing committed
+- Included files: 743 · Candidates: 809
+- Excluded: 0 untracked · 112415 ignored · 1 sensitive · 0 missing committed
 - Recommendation: Use --scope all or graphify.yaml inputs.corpus for a knowledge-base folder.
 
 ## Graph Freshness
-- Built from Git commit: `6464c14`
+- Built from Git commit: `c330f80`
 - Compare this hash to `git rev-parse HEAD` before trusting freshness-sensitive graph output.
 ## God Nodes (most connected - your core abstractions)
 1. `ApiClient` - 163 edges
@@ -34,21 +34,21 @@
 
 ## Surprising Connections (you probably didn't know these)
 - `02b1de4 Pagination` --PARENT_OF--> `4e55692 Merge pull request #23 from OAB710/main`  [EXTRACTED]
-  git → git  _Bridges community 0 → community 22_
+  git → git  _Bridges community 0 → community 55_
 - `0391dc3 mang project tu repo cu qua` --ON_BRANCH--> `hotfix/EX-029-filter-panel-syntax`  [EXTRACTED]
   git → git  _Bridges community 2 → community 0_
 - `0391dc3 mang project tu repo cu qua` --PARENT_OF--> `fddcaf1 add`  [EXTRACTED]
-  git → git  _Bridges community 2 → community 37_
+  git → git  _Bridges community 2 → community 30_
 - `06d86ad Apply gitignore and remove generated files from tracking` --PARENT_OF--> `3987c12 add`  [EXTRACTED]
-  git → git  _Bridges community 0 → community 73_
-- `093b6ef Merge pull request #6 from OAB710/main` --ON_BRANCH--> `bugfix/EX-033-metadata-base-env`  [EXTRACTED]
-  git → git  _Bridges community 55 → community 0_
+  git → git  _Bridges community 0 → community 30_
+- `0957e0d docs: add run handoff for EX-053` --PARENT_OF--> `17c65ba feat(ai): [EX-054] implement pedagogical typography standard and topic guardrails`  [EXTRACTED]
+  git → git  _Bridges community 0 → community 24_
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.14
-Nodes (288): media_user_storage_usage, bugfix/EX-033-metadata-base-env, bugfix/EX-038-optimize-dashboard-queries, chore/EX-036-warm-window, duc, feature/EX-030-skill-discovery, feature/EX-031-context-hygiene, feature/EX-032-free-cloud-deploy (+280 more)
+Cohesion: 0.15
+Nodes (283): media_user_storage_usage, bugfix/EX-033-metadata-base-env, bugfix/EX-038-optimize-dashboard-queries, chore/EX-036-warm-window, feature/EX-030-skill-discovery, feature/EX-031-context-hygiene, feature/EX-032-free-cloud-deploy, feature/EX-034-redis-tls-aiven (+275 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.03
@@ -56,7 +56,7 @@ Nodes (1): ApiClient
 
 ### Community 2 - "Community 2"
 Cohesion: 0.03
-Nodes (28): courses, topics, courses, exam_snapshots, AuditModule, AuthModule, CacheModule, 0391dc3 mang project tu repo cu qua (+20 more)
+Nodes (30): courses, topics, courses, exam_snapshots, AuditModule, AuthModule, CacheModule, 0391dc3 mang project tu repo cu qua (+22 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
@@ -71,24 +71,24 @@ Cohesion: 0.06
 Nodes (36): canonicalize(), canonicalStringify(), hashObject(), isPlainObject(), chooseStrategy(), generateExam(), hashJson(), hashStringToNumber() (+28 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.05
-Nodes (27): ApiKeyConfigDialog(), ApiKeyConfigDialogProps, ExamData, ExamQuestion, getCorrectAnswerText(), getOptionEntries(), ExamData, ExamQuestion (+19 more)
-
-### Community 7 - "Community 7"
 Cohesion: 0.09
 Nodes (1): QuestionsService
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.07
 Nodes (41): DurationInput(), useQuestionTopics(), BankQuestionOption, BankTopic, buildReviewSettingsPayload(), CourseOption, createDefaultForm(), createDefaultReviewSettingsDraft() (+33 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.07
+Nodes (36): EVIDENCE_SIGNAL_LABELS, EvidenceCapture, getEvidenceEventLabel(), IntegrityCaseDetail(), IntegrityCaseDetailProps, IntegrityTimelineEvent, FlaggedSubmission, IntegrityReason (+28 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.04
 Nodes (4): 2d105be Convert FE from embedded repository to regular folder, mocks, courses, mocks
 
 ### Community 10 - "Community 10"
-Cohesion: 0.07
-Nodes (36): EVIDENCE_SIGNAL_LABELS, EvidenceCapture, getEvidenceEventLabel(), IntegrityCaseDetail(), IntegrityCaseDetailProps, IntegrityTimelineEvent, FlaggedSubmission, IntegrityReason (+28 more)
+Cohesion: 0.08
+Nodes (26): EMPTY_FILTERS, Exam, 9765fa3 Sua lenh bot Zalo, them nut lam moi + fix cuon trang khi doi trang, d0edeff Merge pull request #46 from trungducnguyen4/feature/EX-044-langgraph-autonomous-exam-qa-squad, da20a4e add, DataPagination(), DataPaginationProps, CourseOption (+18 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.05
@@ -96,143 +96,143 @@ Nodes (1): SubmissionsController
 
 ### Community 12 - "Community 12"
 Cohesion: 0.08
-Nodes (29): metadata, Providers(), AuthProvider(), Action, ActionType, actionTypes, addToRemoveQueue(), dispatch() (+21 more)
+Nodes (38): formatAttemptLimitVi(), formatDateTimeVi(), formatDateVi(), formatDurationVi(), formatNumberVi(), formatPercentVi(), formatScoreVi(), getAttemptStatusLabel() (+30 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.07
-Nodes (22): MetricCardProps, NavLink, NavLinkBaseProps, NavLinkCompatProps, cn(), ListToolbarProps, AccordionContent, AccordionItem (+14 more)
+Cohesion: 0.08
+Nodes (29): metadata, Providers(), AuthProvider(), Action, ActionType, actionTypes, addToRemoveQueue(), dispatch() (+21 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.15
 Nodes (2): AiService, OnModuleInit
 
 ### Community 15 - "Community 15"
-Cohesion: 0.09
-Nodes (27): EMPTY_FILTERS, Exam, BackendRole, BackendStatus, EMPTY_CREATE_FORM, EMPTY_EDIT_FORM, EMPTY_FILTERS, USER_FILTERS (+19 more)
-
-### Community 16 - "Community 16"
 Cohesion: 0.10
 Nodes (32): 7ff6d1c Merge pull request #28 from OAB710/main, EXAM_PLANS, ExamPlan, main(), prisma, toExamStatus(), touchDemoExamToTop(), addMinutes() (+24 more)
 
-### Community 17 - "Community 17"
-Cohesion: 0.09
-Nodes (18): 9765fa3 Sua lenh bot Zalo, them nut lam moi + fix cuon trang khi doi trang, DataPagination(), DataPaginationProps, Course, EMPTY_FILTERS, gradientClasses, GroupedCourses, ListPageHeader() (+10 more)
-
-### Community 18 - "Community 18"
-Cohesion: 0.09
-Nodes (32): formatAttemptLimitVi(), formatDateTimeVi(), formatDateVi(), formatDurationVi(), formatNumberVi(), formatPercentVi(), formatScoreVi(), getAttemptStatusLabel() (+24 more)
-
-### Community 19 - "Community 19"
+### Community 16 - "Community 16"
 Cohesion: 0.10
 Nodes (15): 0e4348a add, 23cc713 Merge remote-tracking branch 'upstream/main', b9a4c06 add, f2db362 Refactor VI + RCM Topic + AI Summarize, AuthUser, CreateCourseDto, CreateUserDto, LoginDto (+7 more)
 
-### Community 20 - "Community 20"
+### Community 17 - "Community 17"
 Cohesion: 0.08
 Nodes (27): b8349a8 refactor code căng, DonutSegment, QuestionBankDonutStats(), QuestionBankDonutStatsProps, QuestionBankCourse, useQuestionBankData(), Params, useQuestionBankRouteState() (+19 more)
 
+### Community 18 - "Community 18"
+Cohesion: 0.09
+Nodes (26): BackendRole, BackendStatus, EMPTY_CREATE_FORM, EMPTY_EDIT_FORM, EMPTY_FILTERS, USER_FILTERS, UserForm, UserRow (+18 more)
+
+### Community 19 - "Community 19"
+Cohesion: 0.09
+Nodes (15): EmptyState(), MetricCardProps, PageHeader(), PageHeaderProps, NavLink, NavLinkBaseProps, NavLinkCompatProps, cn() (+7 more)
+
+### Community 20 - "Community 20"
+Cohesion: 0.12
+Nodes (13): exam_submissions, integrity_reviews, AdminDashboardModule, COMPLETED, ZALO_BOT_COMMANDS, a4ea817 Merge pull request #4 from trungducnguyen4/duc, f4e10e9 add, f593a1b Merge remote-tracking branch 'upstream/main' (+5 more)
+
 ### Community 21 - "Community 21"
-Cohesion: 0.10
-Nodes (22): 89c42ab feat(layout): system-wide wide responsive layout refactor across 16 core pages, e4c1b1c Merge pull request #64 from trungducnguyen4/feature/EX-061-wide-responsive-layout-systemwide, BackToDashboardButton(), BackToDashboardButtonProps, ButtonSize, ButtonVariant, getSessionDevice(), groupSessionsByDevice() (+14 more)
-
-### Community 22 - "Community 22"
-Cohesion: 0.08
-Nodes (21): EMPTY_FILTERS, EMPTY_PATTERNS, EMPTY_STATS, IntegrityCasesResponse, IntegrityPatterns, IntegrityStats, 4e55692 Merge pull request #23 from OAB710/main, BulkStudentImport() (+13 more)
-
-### Community 23 - "Community 23"
 Cohesion: 0.17
 Nodes (30): buildBeInfoText(), buildFeInfoText(), buildPublicInfoText(), buildR2InfoText(), buildSystemOverviewConclusions(), buildSystemOverviewText(), cfGraphQL(), formatBuildStatus() (+22 more)
+
+### Community 22 - "Community 22"
+Cohesion: 0.09
+Nodes (15): iso(), rangeFor(), Exam, Submission, User, AdminPageShellProps, copy, DevopsStatus (+7 more)
+
+### Community 23 - "Community 23"
+Cohesion: 0.09
+Nodes (23): AdminStatCard(), AdminStatCardProps, { academicYear: defaultAcademicYear, term: defaultTerm }, academicYearOptions, buildToken(), CourseForm, CourseItem, defaultForm (+15 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.13
 Nodes (19): AiModule, GuardrailAlertBanner(), GuardrailAlertBannerProps, GuardrailResult, GuardrailValidationResult, IncompatibleDomainRule, 17c65ba feat(ai): [EX-054] implement pedagogical typography standard and topic guardrails, 5d668ba docs(rules): upgrade attack squad to diff-aware 2.0 with tailored threat vectors (+11 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.17
-Nodes (13): AuthPageShell(), ThemeToggle(), useAuth(), demoAccounts, JoinStep, Alert, AlertDescription, AlertTitle (+5 more)
-
-### Community 26 - "Community 26"
 Cohesion: 0.07
 Nodes (27): useIsMobile(), SheetContent, Sidebar, SidebarContent, SidebarContext, SidebarFooter, SidebarGroup, SidebarGroupAction (+19 more)
 
+### Community 26 - "Community 26"
+Cohesion: 0.15
+Nodes (14): PRIORITY_STYLES, HelpedTitle(), Props, QuestionTopicDialog(), CheckStatus, defaultExamInfo, ExamStep, SystemCheck (+6 more)
+
 ### Community 27 - "Community 27"
-Cohesion: 0.11
-Nodes (16): iso(), rangeFor(), Exam, Submission, User, AdminPageShell(), AdminPageShellProps, copy (+8 more)
+Cohesion: 0.16
+Nodes (13): AuthPageShell(), ThemeToggle(), useAuth(), demoAccounts, JoinStep, Alert, AlertDescription, AlertTitle (+5 more)
 
 ### Community 28 - "Community 28"
+Cohesion: 0.11
+Nodes (19): 89c42ab feat(layout): system-wide wide responsive layout refactor across 16 core pages, e4c1b1c Merge pull request #64 from trungducnguyen4/feature/EX-061-wide-responsive-layout-systemwide, BackToDashboardButton(), BackToDashboardButtonProps, ButtonSize, ButtonVariant, getSessionDevice(), groupSessionsByDevice() (+11 more)
+
+### Community 29 - "Community 29"
 Cohesion: 0.07
 Nodes (3): OnModuleDestroy, OnModuleInit, SubmissionsService
 
-### Community 29 - "Community 29"
+### Community 30 - "Community 30"
+Cohesion: 0.13
+Nodes (21): duc, 093b6ef Merge pull request #6 from OAB710/main, 13dcbd7 add, 36549ac AI GEN QUES, 3987c12 add, 72d5704 add, 7b4322c add, 9d34aad Merge branch 'main' into duc (+13 more)
+
+### Community 31 - "Community 31"
 Cohesion: 0.08
 Nodes (9): buildEvidenceStorageKey(), DEFAULT_EVENT_CAPTURE_LIMITS, DEFAULT_POLICY, EventCaptureLimits, KNOWN_SIGNAL_SLUGS, OnModuleInit, ProctoringEvidenceService, SCHEDULED_CAPTURE_PERCENTAGES (+1 more)
 
-### Community 30 - "Community 30"
+### Community 32 - "Community 32"
 Cohesion: 0.11
 Nodes (1): ExamsService
 
-### Community 31 - "Community 31"
-Cohesion: 0.10
-Nodes (21): AdminStatCard(), AdminStatCardProps, { academicYear: defaultAcademicYear, term: defaultTerm }, academicYearOptions, buildToken(), CourseForm, CourseItem, defaultForm (+13 more)
-
-### Community 32 - "Community 32"
-Cohesion: 0.09
-Nodes (20): main(), prisma, Q, SEMANTIC, SINGLETON, TEXT_TEXT, main(), prisma (+12 more)
-
 ### Community 33 - "Community 33"
-Cohesion: 0.15
-Nodes (9): AdminDashboardModule, a4ea817 Merge pull request #4 from trungducnguyen4/duc, f4e10e9 add, f593a1b Merge remote-tracking branch 'upstream/main', ReviewAnomalyFlagDto, ReviewIntegrityCaseDto, RiskFlagDecision, nextConfig (+1 more)
+Cohesion: 0.11
+Nodes (16): AdminPageShell(), Course, EMPTY_FILTERS, gradientClasses, GroupedCourses, ActiveFilterChips(), ActiveFilterChipsProps, compareValues() (+8 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.18
-Nodes (13): PRIORITY_STYLES, HelpedTitle(), Props, QuestionTopicDialog(), CheckStatus, defaultExamInfo, ExamStep, SystemCheck (+5 more)
+Cohesion: 0.09
+Nodes (20): main(), prisma, Q, SEMANTIC, SINGLETON, TEXT_TEXT, main(), prisma (+12 more)
 
 ### Community 35 - "Community 35"
 Cohesion: 0.09
 Nodes (22): bloomOptions, ClarificationConfig, distractorOptions, Props, QuestionClarificationDialog(), styleOptions, timeOptions, GeneratedQuestion (+14 more)
 
 ### Community 36 - "Community 36"
+Cohesion: 0.11
+Nodes (21): { academicYear: defaultAcademicYear, term: defaultTerm }, academicYearOptions, APICourse, buildToken(), Course, CourseExamPreview, courseGradientClasses, CreateCourse() (+13 more)
+
+### Community 37 - "Community 37"
 Cohesion: 0.08
 Nodes (1): QuestionDraftsController
 
-### Community 37 - "Community 37"
-Cohesion: 0.13
-Nodes (20): detectAiProvider(), DetectedProvider, PROVIDER_INFO, ProviderDetectionResult, verifyApiKeyWithProvider(), buildContextLines(), buildExamTrustPromptHeader(), ExamTrustAiAnalyticsSummary (+12 more)
-
 ### Community 38 - "Community 38"
+Cohesion: 0.18
+Nodes (18): AI_SECTIONS, AISectionValue, AiTaskType, CreateAiJobParams, 2a844fd feat(exam-lifecycle): Thiet lap Invariant Lock cau hoi khi de thi dang dien ra/ket thuc va Luu cau hoi AI tinh chinh vao Ngan hang cau hoi, 318de46 feat(security): [EX-055] Khóa cứng tầng Tool & Service Logic Guardrails chống IDOR và spam queue, 6464c14 Merge pull request #65 from trungducnguyen4/feature/EX-062-lifecycle-question-edit-lock-and-bank-save, 73a58bd Merge pull request #58 from trungducnguyen4/feature/EX-055-backend-tool-guardrails-lock (+10 more)
+
+### Community 39 - "Community 39"
 Cohesion: 0.15
 Nodes (16): themes, THEME_OPTIONS, THEME_PROVIDER_OPTIONS, SortButtonProps, SortOption, Avatar, AvatarFallback, AvatarImage (+8 more)
 
-### Community 39 - "Community 39"
+### Community 40 - "Community 40"
 Cohesion: 0.12
 Nodes (20): completedStatuses, useStudentDashboardData(), COMPLETED_STATUSES, CourseExamAction, CourseExamForAction, CourseExamSubmission, ExamDisplayState, getCourseExamAction() (+12 more)
 
-### Community 40 - "Community 40"
+### Community 41 - "Community 41"
 Cohesion: 0.12
 Nodes (21): QUESTION_TYPES, QuestionType, backendEnvPath, buildSampleMediaFields(), buildTypePlan(), COURSE_QUESTION_PLAN, COURSE_TOPIC_LABELS, DupQuestion (+13 more)
 
-### Community 41 - "Community 41"
-Cohesion: 0.13
-Nodes (15): AuditLog, Unit, UNIT_LABELS, UNIT_SECONDS, ExamItem, ExamLinkItem, LINK_STATE_LABELS, LinkUsage (+7 more)
-
 ### Community 42 - "Community 42"
+Cohesion: 0.09
+Nodes (11): AttentionSection(), 0aae96f add, CourseSummary, difficultyClassName(), Exam, formatDifficulty(), QuestionBankSummary, QuestionItem (+3 more)
+
+### Community 43 - "Community 43"
 Cohesion: 0.14
 Nodes (17): AttentionItemData, AttentionPriority, LecturerAttentionResponse, LecturerAttentionSummary, LECTURER_ATTENTION_QUERY_KEY, PRIORITY_ORDER, useAttentionItems(), AuthContext (+9 more)
 
-### Community 43 - "Community 43"
+### Community 44 - "Community 44"
 Cohesion: 0.15
 Nodes (14): SessionMeta, TokenUser, NestInterceptor, PerfInterceptor, OnModuleDestroy, OnModuleInit, { PrismaClient }, PrismaService (+6 more)
-
-### Community 44 - "Community 44"
-Cohesion: 0.12
-Nodes (14): d0edeff Merge pull request #46 from trungducnguyen4/feature/EX-044-langgraph-autonomous-exam-qa-squad, da20a4e add, CourseOption, Exam, GRADING_STRATEGY_LABELS, getActiveFilterCount(), SearchBar(), SearchBarProps (+6 more)
 
 ### Community 45 - "Community 45"
 Cohesion: 0.09
 Nodes (15): AGGREGATE_ALERT_TYPES, EMPTY_STUDENT_FILTERS, EVIDENCE_SIGNAL_LABELS, EvidenceCapture, ExamMonitor(), ExamOverview, FastCompletion, getEvidenceEventLabel() (+7 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.17
-Nodes (12): GeneratedQuestion, Step, getMinError(), getNumericInputError(), hasValidNumberFormat(), NumericInputOptions, parseNumericInput(), parseNumericInputOr() (+4 more)
+Cohesion: 0.16
+Nodes (13): ExamItem, ExamLinkItem, LINK_STATE_LABELS, LinkUsage, getMinError(), getNumericInputError(), hasValidNumberFormat(), NumericInputOptions (+5 more)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.10
@@ -247,44 +247,44 @@ Cohesion: 0.10
 Nodes (20): getIntegrityEventCategory(), getIntegrityEventLabel(), getIntegrityEventSeverity(), INTEGRITY_EVENT_LABELS, IntegrityEventCategory, ALWAYS_RECORDED_EVENT_TYPES, AUTO_GRADED_TYPES, AutosaveAnswerMeta (+12 more)
 
 ### Community 50 - "Community 50"
+Cohesion: 0.15
+Nodes (13): AuditLog, Unit, UNIT_LABELS, UNIT_SECONDS, GeneratedQuestion, Step, SelectContent, SelectItem (+5 more)
+
+### Community 51 - "Community 51"
 Cohesion: 0.11
 Nodes (10): hash64(), LogSpec, main(), now, prisma, Profile, PROFILES, randomHash64() (+2 more)
 
-### Community 51 - "Community 51"
-Cohesion: 0.24
-Nodes (14): 2a844fd feat(exam-lifecycle): Thiet lap Invariant Lock cau hoi khi de thi dang dien ra/ket thuc va Luu cau hoi AI tinh chinh vao Ngan hang cau hoi, 318de46 feat(security): [EX-055] Khóa cứng tầng Tool & Service Logic Guardrails chống IDOR và spam queue, 6464c14 Merge pull request #65 from trungducnguyen4/feature/EX-062-lifecycle-question-edit-lock-and-bank-save, 73a58bd Merge pull request #58 from trungducnguyen4/feature/EX-055-backend-tool-guardrails-lock, b7d1821 chore(merge): resolve merge conflicts with main and rebuild unified knowledge graph, assertExplanationLength(), assertLineContent(), assertOptionsLength() (+6 more)
-
 ### Community 52 - "Community 52"
-Cohesion: 0.14
-Nodes (14): typeLabels, Direction, evaluateMatrixCase(), MATRIX_27_CASES, MatrixCase, EMPTY_HISTORY_FILTERS, historyFilterDefinitions, QuestionHistoryRow (+6 more)
+Cohesion: 0.17
+Nodes (16): detectAiProvider(), DetectedProvider, PROVIDER_INFO, ProviderDetectionResult, verifyApiKeyWithProvider(), buildContextLines(), buildExamTrustPromptHeader(), ExamTrustAiAnalyticsSummary (+8 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.11
-Nodes (9): AttentionSection(), 0aae96f add, CourseSummary, difficultyClassName(), Exam, formatDifficulty(), QuestionBankSummary, QuestionItem (+1 more)
+Cohesion: 0.15
+Nodes (7): auditChaos(), auditFeatures(), auditPerformance(), auditSecurity(), c330f80 [EX-063] feat(e2e): integrate Playwright test suite, upgrade attack squad chaos, and add playwright-runner skill, authDir, TEST_USERS
 
 ### Community 54 - "Community 54"
 Cohesion: 0.19
 Nodes (1): AuthService
 
 ### Community 55 - "Community 55"
-Cohesion: 0.17
-Nodes (13): 093b6ef Merge pull request #6 from OAB710/main, 36549ac AI GEN QUES, 9d34aad Merge branch 'main' into duc, f5fcba9 Merge pull request #5 from OAB710/main, f609787 feat(student): add exam schedule endpoint and student schedule page, CopyQuestionBankDto, CreateQuestionCrudDto, PreviewCopyQuestionBankDto (+5 more)
+Cohesion: 0.11
+Nodes (12): 4e55692 Merge pull request #23 from OAB710/main, BulkStudentImport(), completedSubmissionStatuses, Course, CourseExam, CourseExamSummary, Enrollment, ExamSubmission (+4 more)
 
 ### Community 56 - "Community 56"
 Cohesion: 0.15
-Nodes (14): formatSignedScoreAdjustment(), getScoreAdjustmentCategoryLabel(), formatAnswerCell(), formatChoiceAnswer(), formatPoints(), formatStructuredAnswer(), GradingBreakdown(), OptionDisplay (+6 more)
-
-### Community 57 - "Community 57"
-Cohesion: 0.15
 Nodes (13): EditorQuestionType, useQuestionAnswerState(), useQuestionPersistence(), CorrectAnswerPayload, EditableQuestion, QuestionDraft, QuestionOption, TopicOption (+5 more)
 
-### Community 58 - "Community 58"
+### Community 57 - "Community 57"
 Cohesion: 0.17
 Nodes (1): AuthController
 
-### Community 59 - "Community 59"
+### Community 58 - "Community 58"
 Cohesion: 0.12
 Nodes (16): AddLogsDto, AutosaveAnswerDto, AutosaveExamDto, CreateScoreAdjustmentDto, ExtendSubmissionDeadlineDto, FinalizeEvidenceCaptureDto, GradeAnswerDto, ReopenSubmissionDto (+8 more)
+
+### Community 59 - "Community 59"
+Cohesion: 0.17
+Nodes (12): formatAnswerCell(), formatChoiceAnswer(), formatPoints(), formatStructuredAnswer(), GradingBreakdown(), OptionDisplay, optionDisplays(), parseOptionTexts() (+4 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.13
@@ -299,128 +299,128 @@ Cohesion: 0.23
 Nodes (1): CoursesService
 
 ### Community 63 - "Community 63"
+Cohesion: 0.14
+Nodes (5): ExamData, ExamQuestion, getCorrectAnswerText(), getOptionEntries(), Progress
+
+### Community 64 - "Community 64"
+Cohesion: 0.17
+Nodes (9): CalendarView, ExamDetailsDialog(), FlexibleExamCard(), getEventTone(), getStatusLabel(), HOURS, LaidOutEvent, ScheduleExamItem (+1 more)
+
+### Community 65 - "Community 65"
+Cohesion: 0.18
+Nodes (11): 1e57c6d Merge pull request #10 from trungducnguyen4/duc, 42fc287 add, 5e60238 add, GenerateExamQuestionsDto, GenerateQuestionDto, SuggestSimilarTopicsDto, ApproveQuestionAiImprovementDto, CreateQuestionAiImprovementDto (+3 more)
+
+### Community 66 - "Community 66"
 Cohesion: 0.19
 Nodes (8): answerTitles, FillBlankGuide(), OptionRowProps, Props, QuestionAnswerEditor(), lineContentCounterText(), LineValidationResult, validateLineContent()
 
-### Community 64 - "Community 64"
+### Community 67 - "Community 67"
 Cohesion: 0.19
 Nodes (8): AiEvaluationJudge, EvalMetricResult, GOLDEN_ESSAY_GRADING_CASES, GOLDEN_QUESTION_CASES, GOLDEN_RISK_CASES, GoldenEssayGradingCase, GoldenQuestionCase, GoldenRiskAssessmentCase
 
-### Community 65 - "Community 65"
-Cohesion: 0.15
-Nodes (13): { academicYear: defaultAcademicYear, term: defaultTerm }, academicYearOptions, APICourse, buildToken(), Course, CourseExamPreview, courseGradientClasses, CreateCourse() (+5 more)
-
-### Community 66 - "Community 66"
+### Community 68 - "Community 68"
 Cohesion: 0.29
 Nodes (14): ai_generation_records, course_topics, courses, exam_questions, question_course_scopes, question_drafts, question_tags, question_topics (+6 more)
 
-### Community 68 - "Community 68"
+### Community 70 - "Community 70"
+Cohesion: 0.14
+Nodes (5): 8fe34c1 [EX-064] feat(lecturer): toggle collapse/expand auto-graded questions in manual grading review, formatSignedScoreAdjustment(), getScoreAdjustmentCategoryLabel(), AiSuggestion, DraftGrade
+
+### Community 71 - "Community 71"
 Cohesion: 0.15
 Nodes (1): EnrollmentsController
 
-### Community 69 - "Community 69"
+### Community 72 - "Community 72"
 Cohesion: 0.27
 Nodes (1): EnrollmentsService
 
-### Community 70 - "Community 70"
+### Community 73 - "Community 73"
 Cohesion: 0.24
 Nodes (1): ExamLinksService
 
-### Community 71 - "Community 71"
-Cohesion: 0.14
-Nodes (6): ButtonProps, buttonVariants, CalendarProps, PaginationContent, PaginationItem, PaginationLinkProps
+### Community 74 - "Community 74"
+Cohesion: 0.15
+Nodes (4): ExamData, ExamQuestion, getCorrectAnswerText(), getOptionEntries()
 
-### Community 72 - "Community 72"
+### Community 75 - "Community 75"
 Cohesion: 0.14
 Nodes (12): Carousel, CarouselApi, CarouselContent, CarouselContext, CarouselContextProps, CarouselItem, CarouselNext, CarouselOptions (+4 more)
 
-### Community 73 - "Community 73"
-Cohesion: 0.17
-Nodes (4): 3987c12 add, 72d5704 add, AiSuggestion, DraftGrade
-
-### Community 74 - "Community 74"
-Cohesion: 0.22
-Nodes (9): EmptyState(), PageHeader(), PageHeaderProps, EmptyStateProps, PageAction, ResponsiveColumn, StatusTone, ThemeMode (+1 more)
-
-### Community 75 - "Community 75"
+### Community 76 - "Community 76"
 Cohesion: 0.15
 Nodes (12): AIGenerateSectionDto, AIGenerationConstraintsDto, AISection, ApplyAICandidateDto, CreateQuestionDraftDto, DraftPublishMode, DraftValidationLevel, PublishQuestionDraftDto (+4 more)
 
-### Community 76 - "Community 76"
+### Community 77 - "Community 77"
+Cohesion: 0.19
+Nodes (9): typeLabels, Direction, evaluateMatrixCase(), MATRIX_27_CASES, MatrixCase, EMPTY_HISTORY_FILTERS, historyFilterDefinitions, QuestionHistoryRow (+1 more)
+
+### Community 78 - "Community 78"
 Cohesion: 0.23
 Nodes (10): FilterPanel(), FilterPanelProps, Drawer(), DrawerContent, DrawerDescription, DrawerFooter(), DrawerHeader(), DrawerOverlay (+2 more)
 
-### Community 77 - "Community 77"
+### Community 79 - "Community 79"
 Cohesion: 0.24
 Nodes (3): AuthUser, extractUploaderIdFromKey(), MediaService
 
-### Community 78 - "Community 78"
+### Community 80 - "Community 80"
 Cohesion: 0.18
 Nodes (7): BATCH_SIZE, fetchBatch(), LegacyQuestion, main(), prisma, { PrismaClient }, processQuestion()
 
-### Community 80 - "Community 80"
-Cohesion: 0.24
-Nodes (7): auth_sessions, users, exam_submissions, score_adjustments, users, 13dcbd7 add, b27133b add
-
-### Community 81 - "Community 81"
+### Community 82 - "Community 82"
 Cohesion: 0.17
 Nodes (4): roleToPath, capabilityGroups, operatingPrinciples, Header()
 
-### Community 82 - "Community 82"
+### Community 83 - "Community 83"
 Cohesion: 0.17
 Nodes (1): CoursesController
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 0.42
 Nodes (10): asObject(), findErrorText(), formatManualAnswer(), matchingSides(), parseValue(), SCORE_ADJUSTMENT_CATEGORY_LABELS, stringList(), StructuredValue (+2 more)
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 0.17
 Nodes (9): FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem, FormItemContext, FormItemContextValue, FormLabel (+1 more)
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 0.17
 Nodes (10): Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarLabel, MenubarRadioItem, MenubarSeparator, MenubarSubContent (+2 more)
 
-### Community 86 - "Community 86"
+### Community 87 - "Community 87"
 Cohesion: 0.45
 Nodes (10): courses, enrollments, exam_questions, exam_submissions, exams, integrity_logs, proctoring_sessions, questions (+2 more)
 
-### Community 87 - "Community 87"
+### Community 88 - "Community 88"
 Cohesion: 0.24
 Nodes (1): AiController
 
-### Community 88 - "Community 88"
+### Community 89 - "Community 89"
+Cohesion: 0.29
+Nodes (8): ApiKeyConfigDialog(), ApiKeyConfigDialogProps, api, DialogContent, DialogDescription, DialogHeader(), DialogOverlay, DialogTitle
+
+### Community 90 - "Community 90"
 Cohesion: 0.20
 Nodes (1): CacheService
 
-### Community 89 - "Community 89"
+### Community 91 - "Community 91"
 Cohesion: 0.24
 Nodes (8): ExamSecurityModalProps, violationLabels, emptyCounts, FirstViolationNotice, UseExamSecurityOptions, UseExamSecurityResult, ViolationLog, ViolationType
 
-### Community 90 - "Community 90"
+### Community 92 - "Community 92"
 Cohesion: 0.22
 Nodes (9): COURSE_PLANS, CoursePlan, main(), prisma, daysAgo(), LECTURER_DEPARTMENTS, LECTURER_FULL_NAMES, main() (+1 more)
 
-### Community 91 - "Community 91"
+### Community 93 - "Community 93"
 Cohesion: 0.24
 Nodes (1): QueueService
 
-### Community 92 - "Community 92"
+### Community 94 - "Community 94"
 Cohesion: 0.18
 Nodes (7): ChartConfig, ChartContainer, ChartContext, ChartContextProps, ChartLegendContent, ChartTooltipContent, THEMES
 
-### Community 93 - "Community 93"
+### Community 95 - "Community 95"
 Cohesion: 0.36
 Nodes (9): anomaly_flags, exam_instances, exam_questions, exam_submissions, exams, focus_events, interaction_logs, question_versions (+1 more)
-
-### Community 94 - "Community 94"
-Cohesion: 0.24
-Nodes (3): AdminDashboardService, COMPLETED, ZALO_BOT_COMMANDS
-
-### Community 95 - "Community 95"
-Cohesion: 0.24
-Nodes (5): AI_SECTIONS, AiJobsService, AISectionValue, AiTaskType, CreateAiJobParams
 
 ### Community 96 - "Community 96"
 Cohesion: 0.27
@@ -428,23 +428,23 @@ Nodes (3): AITelemetry, AiTelemetryService, ProviderPricing
 
 ### Community 97 - "Community 97"
 Cohesion: 0.29
-Nodes (4): auditChaos(), auditFeatures(), auditPerformance(), auditSecurity()
-
-### Community 98 - "Community 98"
-Cohesion: 0.29
 Nodes (8): AutosaveAnswer, AutosaveSyncStatus, getQueueStorageKey(), loadQueue(), persistQueue(), safeParseQueue(), useExamAutosave(), UseExamAutosaveOptions
 
-### Community 99 - "Community 99"
+### Community 98 - "Community 98"
 Cohesion: 0.36
 Nodes (9): course_topics, courses, exist, question_tags, question_topics, questions, tags, topics (+1 more)
 
-### Community 100 - "Community 100"
+### Community 99 - "Community 99"
 Cohesion: 0.24
 Nodes (8): COLLUDE_INDICES, COLLUSION_QUESTION_INDICES, isColluder(), main(), prisma, QUESTION_SPECS, QuestionSpec, STUDENT_ID_PATTERN()
 
-### Community 101 - "Community 101"
+### Community 100 - "Community 100"
 Cohesion: 0.33
 Nodes (1): ExamRiskAssessmentService
+
+### Community 102 - "Community 102"
+Cohesion: 0.20
+Nodes (4): ButtonProps, PaginationContent, PaginationItem, PaginationLinkProps
 
 ### Community 103 - "Community 103"
 Cohesion: 0.20
@@ -531,272 +531,272 @@ Cohesion: 0.48
 Nodes (6): exam_question_snapshots, exam_snapshots, exams, question_snapshots, question_versions, questions
 
 ### Community 125 - "Community 125"
+Cohesion: 0.43
+Nodes (5): ai_generation_records, exam_quality_review_items, questions, users, 3b6ff4a add
+
+### Community 126 - "Community 126"
+Cohesion: 0.38
+Nodes (1): AdminDashboardService
+
+### Community 127 - "Community 127"
 Cohesion: 0.33
 Nodes (2): AiStatusController, safeEqual()
 
-### Community 126 - "Community 126"
+### Community 128 - "Community 128"
 Cohesion: 0.33
 Nodes (4): _extract_json(), generate(), local_ai_server.py — Minimal local model server for ExamTrust AI feature Uses l, Try to pull the first valid JSON object out of model output.
 
-### Community 127 - "Community 127"
+### Community 129 - "Community 129"
 Cohesion: 0.29
 Nodes (6): BulkEnrollByEmailsDto, BulkEnrollmentDto, BulkImportStudentRow, BulkImportStudentsDto, CreateEnrollmentDto, UpdateEnrollmentStatusDto
 
-### Community 128 - "Community 128"
+### Community 130 - "Community 130"
 Cohesion: 0.29
 Nodes (6): AddQuestionsToExamDto, CreateExamDto, RescheduleExamDto, ShareExamDto, UpdateExamDto, UpdateExamQuestionDto
 
-### Community 129 - "Community 129"
+### Community 131 - "Community 131"
 Cohesion: 0.29
 Nodes (5): Params, relationLabel, TopicRelation, topicRelationLabel, TopicSuggestion
 
-### Community 130 - "Community 130"
+### Community 132 - "Community 132"
 Cohesion: 0.43
 Nodes (3): QueueModule, SharedRedisModule, buildRedisOptions()
 
-### Community 131 - "Community 131"
+### Community 133 - "Community 133"
 Cohesion: 0.38
 Nodes (5): deleteAllUnderPrefix(), main(), parseArgs(), PREFIXES_BY_TARGET, PROTECTED_PREFIXES
 
-### Community 132 - "Community 132"
+### Community 134 - "Community 134"
 Cohesion: 0.38
 Nodes (1): AccessPolicyService
 
-### Community 133 - "Community 133"
+### Community 135 - "Community 135"
 Cohesion: 0.29
 Nodes (4): AuthState, DisplayRole, User, UserRole
 
-### Community 134 - "Community 134"
+### Community 136 - "Community 136"
 Cohesion: 0.29
 Nodes (4): CommandDialogProps, CommandInput, CommandSeparator, DialogProps
 
-### Community 135 - "Community 135"
+### Community 137 - "Community 137"
+Cohesion: 0.33
+Nodes (5): ToggleGroup, ToggleGroupContext, ToggleGroupItem, Toggle, toggleVariants
+
+### Community 138 - "Community 138"
 Cohesion: 0.33
 Nodes (5): anomaly_flags, exam_instances, focus_events, interaction_logs, tab_switch_events
 
-### Community 136 - "Community 136"
+### Community 139 - "Community 139"
 Cohesion: 0.60
 Nodes (1): TopicGuardrailsService
 
-### Community 137 - "Community 137"
+### Community 140 - "Community 140"
 Cohesion: 0.33
 Nodes (1): ExamQualityReviewService
 
-### Community 140 - "Community 140"
+### Community 143 - "Community 143"
 Cohesion: 0.40
 Nodes (1): ApiRequestError
 
-### Community 141 - "Community 141"
+### Community 144 - "Community 144"
 Cohesion: 0.33
 Nodes (1): MediaController
 
-### Community 142 - "Community 142"
+### Community 145 - "Community 145"
 Cohesion: 0.33
 Nodes (1): QuestionMetadataController
 
-### Community 143 - "Community 143"
+### Community 146 - "Community 146"
 Cohesion: 0.73
 Nodes (5): pickId(), pollAiJob(), request(), requireOk(), run()
 
-### Community 145 - "Community 145"
+### Community 148 - "Community 148"
 Cohesion: 0.33
 Nodes (5): Exam, ExamHistoryItem, ExamResult, ExamStatus, UpcomingExam
 
-### Community 146 - "Community 146"
+### Community 149 - "Community 149"
 Cohesion: 0.60
 Nodes (5): ipToLong(), isIpInAnyCidr(), isIpInCidr(), isValidIpOrCidr(), normalizeIp()
 
-### Community 147 - "Community 147"
+### Community 150 - "Community 150"
 Cohesion: 0.70
 Nodes (4): ai_generation_records, question_drafts, question_versions, questions
 
-### Community 148 - "Community 148"
-Cohesion: 0.70
-Nodes (4): ai_generation_records, exam_quality_review_items, questions, users
-
-### Community 149 - "Community 149"
+### Community 151 - "Community 151"
 Cohesion: 0.70
 Nodes (4): exam_instances, exam_submissions, proctoring_evidence_captures, users
 
-### Community 150 - "Community 150"
+### Community 152 - "Community 152"
+Cohesion: 0.60
+Nodes (1): AiJobsService
+
+### Community 153 - "Community 153"
 Cohesion: 0.40
 Nodes (1): AuditService
 
-### Community 151 - "Community 151"
+### Community 154 - "Community 154"
 Cohesion: 0.40
 Nodes (1): RateLimiterService
 
-### Community 152 - "Community 152"
-Cohesion: 0.40
-Nodes (4): ApproveQuestionAiImprovementDto, CreateQuestionAiImprovementDto, RejectQuestionAiImprovementDto, UpdateQuestionAiImprovementDraftDto
-
-### Community 153 - "Community 153"
+### Community 155 - "Community 155"
 Cohesion: 0.50
 Nodes (2): CanActivate, RateLimitGuard
 
-### Community 154 - "Community 154"
+### Community 156 - "Community 156"
 Cohesion: 0.40
 Nodes (2): CanActivate, RolesGuard
 
-### Community 155 - "Community 155"
+### Community 157 - "Community 157"
 Cohesion: 0.40
 Nodes (4): MEDIA_ALLOWED_MIME_TYPES, MEDIA_EXTENSION_BY_MIME, MEDIA_MAX_BYTES, MediaAttachmentType
 
-### Community 156 - "Community 156"
+### Community 158 - "Community 158"
 Cohesion: 0.40
 Nodes (3): IdempotencyMiddleware, IdempotencyStore, NestMiddleware
 
-### Community 157 - "Community 157"
+### Community 159 - "Community 159"
 Cohesion: 0.60
 Nodes (4): hasColumn(), hasIndex(), main(), prisma
 
-### Community 158 - "Community 158"
+### Community 160 - "Community 160"
+Cohesion: 0.40
+Nodes (4): InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
+
+### Community 161 - "Community 161"
 Cohesion: 0.83
 Nodes (3): exam_link_usages, exam_links, exams
 
-### Community 159 - "Community 159"
+### Community 162 - "Community 162"
 Cohesion: 1.00
 Nodes (3): integrity_review_audits, integrity_reviews, users
 
-### Community 160 - "Community 160"
-Cohesion: 0.50
-Nodes (1): AdminDashboardController
-
-### Community 161 - "Community 161"
-Cohesion: 0.50
-Nodes (1): SystemOverviewController
-
-### Community 162 - "Community 162"
-Cohesion: 0.50
-Nodes (1): AuditController
-
 ### Community 163 - "Community 163"
-Cohesion: 0.50
-Nodes (3): GenerateExamLinkDto, JoinExamLinkDto, UpdateExamLinkDto
+Cohesion: 0.83
+Nodes (3): exam_submissions, score_adjustments, users
 
 ### Community 164 - "Community 164"
 Cohesion: 0.50
-Nodes (3): GenerateExamQuestionsDto, GenerateQuestionDto, SuggestSimilarTopicsDto
+Nodes (1): AdminDashboardController
 
 ### Community 165 - "Community 165"
 Cohesion: 0.50
-Nodes (3): ConfirmMediaUploadDto, CreatePresignedUploadDto, ReleaseMediaUploadDto
+Nodes (1): SystemOverviewController
 
 ### Community 166 - "Community 166"
 Cohesion: 0.50
-Nodes (2): PaginatedResult, PaginationDto
+Nodes (1): AuditController
 
 ### Community 167 - "Community 167"
 Cohesion: 0.50
-Nodes (3): CreateDuplicateAnalysisJobDto, DuplicateQuestionCheckDto, UpdateDuplicatePreferenceDto
+Nodes (3): GenerateExamLinkDto, JoinExamLinkDto, UpdateExamLinkDto
 
 ### Community 168 - "Community 168"
 Cohesion: 0.50
-Nodes (3): CreateTopicDto, ListTopicsQueryDto, SetCourseTopicsDto
+Nodes (3): ConfirmMediaUploadDto, CreatePresignedUploadDto, ReleaseMediaUploadDto
 
 ### Community 169 - "Community 169"
 Cohesion: 0.50
-Nodes (3): ChangePasswordDto, DeleteProfileDto, UpdateProfileDto
+Nodes (2): PaginatedResult, PaginationDto
 
 ### Community 170 - "Community 170"
 Cohesion: 0.50
-Nodes (1): ExamAuditService
+Nodes (3): CreateDuplicateAnalysisJobDto, DuplicateQuestionCheckDto, UpdateDuplicatePreferenceDto
 
 ### Community 171 - "Community 171"
 Cohesion: 0.50
-Nodes (1): LecturerDashboardController
+Nodes (3): CreateTopicDto, ListTopicsQueryDto, SetCourseTopicsDto
 
 ### Community 172 - "Community 172"
 Cohesion: 0.50
-Nodes (1): LecturerDashboardService
+Nodes (3): ChangePasswordDto, DeleteProfileDto, UpdateProfileDto
+
+### Community 173 - "Community 173"
+Cohesion: 0.50
+Nodes (1): ExamAuditService
+
+### Community 174 - "Community 174"
+Cohesion: 0.50
+Nodes (1): LecturerDashboardController
 
 ### Community 175 - "Community 175"
 Cohesion: 0.50
-Nodes (2): prisma, TABLES
-
-### Community 176 - "Community 176"
-Cohesion: 0.50
-Nodes (2): prisma, REQUIRED_COLUMNS
-
-### Community 177 - "Community 177"
-Cohesion: 0.50
-Nodes (2): backendEnvPath, prisma
+Nodes (1): LecturerDashboardService
 
 ### Community 178 - "Community 178"
 Cohesion: 0.50
-Nodes (2): backendEnvPath, prisma
+Nodes (2): prisma, TABLES
 
 ### Community 179 - "Community 179"
 Cohesion: 0.50
-Nodes (1): EventsProcessor
+Nodes (2): prisma, REQUIRED_COLUMNS
 
 ### Community 180 - "Community 180"
 Cohesion: 0.50
-Nodes (1): IntegrityLogsProcessor
+Nodes (2): backendEnvPath, prisma
 
 ### Community 181 - "Community 181"
 Cohesion: 0.50
-Nodes (1): AIGenerationJobsController
+Nodes (2): backendEnvPath, prisma
+
+### Community 182 - "Community 182"
+Cohesion: 0.50
+Nodes (1): EventsProcessor
 
 ### Community 183 - "Community 183"
 Cohesion: 0.50
+Nodes (1): IntegrityLogsProcessor
+
+### Community 184 - "Community 184"
+Cohesion: 0.50
+Nodes (1): AIGenerationJobsController
+
+### Community 186 - "Community 186"
+Cohesion: 0.50
 Nodes (1): SubmissionsEventsService
 
-### Community 185 - "Community 185"
+### Community 188 - "Community 188"
+Cohesion: 0.50
+Nodes (3): AccordionContent, AccordionItem, AccordionTrigger
+
+### Community 189 - "Community 189"
 Cohesion: 1.00
 Nodes (2): notifications, users
 
-### Community 186 - "Community 186"
-Cohesion: 1.00
-Nodes (2): exam_submissions, integrity_reviews
+### Community 190 - "Community 190"
+Cohesion: 1.33
+Nodes (2): auth_sessions, users
 
-### Community 187 - "Community 187"
+### Community 191 - "Community 191"
 Cohesion: 1.00
 Nodes (2): question_bank_preferences, users
 
-### Community 188 - "Community 188"
+### Community 192 - "Community 192"
 Cohesion: 1.00
 Nodes (2): ai_generation_records, anomaly_flags
 
-### Community 189 - "Community 189"
+### Community 193 - "Community 193"
 Cohesion: 0.67
 Nodes (1): c7c474f Merge remote-tracking branch 'upstream/main'
 
-### Community 190 - "Community 190"
+### Community 194 - "Community 194"
 Cohesion: 0.67
 Nodes (2): VerifyApiKeyDto, VerifyApiKeyResult
 
-### Community 191 - "Community 191"
+### Community 195 - "Community 195"
 Cohesion: 0.67
 Nodes (2): prisma, { PrismaClient }
 
-### Community 192 - "Community 192"
+### Community 196 - "Community 196"
 Cohesion: 0.67
 Nodes (2): LimitConfig, POLICIES
 
-### Community 193 - "Community 193"
+### Community 197 - "Community 197"
 Cohesion: 0.67
 Nodes (1): ExamAuditGraphRunnable
 
-### Community 194 - "Community 194"
-Cohesion: 0.67
-Nodes (1): mocks
-
-### Community 196 - "Community 196"
-Cohesion: 0.67
-Nodes (1): prisma
-
-### Community 197 - "Community 197"
-Cohesion: 0.67
-Nodes (1): prisma
-
 ### Community 198 - "Community 198"
 Cohesion: 0.67
-Nodes (1): prisma
-
-### Community 199 - "Community 199"
-Cohesion: 0.67
-Nodes (1): prisma
+Nodes (1): mocks
 
 ### Community 200 - "Community 200"
 Cohesion: 0.67
@@ -828,74 +828,78 @@ Nodes (1): prisma
 
 ### Community 207 - "Community 207"
 Cohesion: 0.67
-Nodes (1): HealthController
+Nodes (1): prisma
 
 ### Community 208 - "Community 208"
-Cohesion: 1.00
-Nodes (2): bootstrap(), parseCsvList()
+Cohesion: 0.67
+Nodes (1): prisma
 
 ### Community 209 - "Community 209"
 Cohesion: 0.67
-Nodes (1): JwtStrategy
+Nodes (1): prisma
+
+### Community 210 - "Community 210"
+Cohesion: 0.67
+Nodes (1): HealthController
 
 ### Community 211 - "Community 211"
 Cohesion: 1.00
-Nodes (1): media_storage_usage
+Nodes (2): bootstrap(), parseCsvList()
 
 ### Community 212 - "Community 212"
-Cohesion: 1.00
-Nodes (1): mocks
+Cohesion: 0.67
+Nodes (1): JwtStrategy
 
-### Community 213 - "Community 213"
+### Community 214 - "Community 214"
+Cohesion: 1.00
+Nodes (1): media_storage_usage
+
+### Community 215 - "Community 215"
 Cohesion: 1.00
 Nodes (1): QUESTION_LIMITS
 
-### Community 216 - "Community 216"
+### Community 218 - "Community 218"
 Cohesion: 1.00
 Nodes (1): MediaModule
 
-### Community 218 - "Community 218"
-Cohesion: 1.00
-Nodes (1): Skeleton()
-
 ## Knowledge Gaps
-- **734 isolated node(s):** `local_ai_server.py — Minimal local model server for ExamTrust AI feature Uses l`, `Try to pull the first valid JSON object out of model output.`, `prisma`, `prisma`, `prisma` (+729 more)
+- **735 isolated node(s):** `local_ai_server.py — Minimal local model server for ExamTrust AI feature Uses l`, `Try to pull the first valid JSON object out of model output.`, `prisma`, `prisma`, `prisma` (+730 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **Thin community `Community 1`** (1 nodes): `ApiClient`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 7`** (1 nodes): `QuestionsService`
+- **Thin community `Community 6`** (1 nodes): `QuestionsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 11`** (1 nodes): `SubmissionsController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 14`** (2 nodes): `AiService`, `OnModuleInit`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (1 nodes): `ExamsService`
+- **Thin community `Community 32`** (1 nodes): `ExamsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (1 nodes): `QuestionDraftsController`
+- **Thin community `Community 37`** (1 nodes): `QuestionDraftsController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 47`** (1 nodes): `ExamsController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 54`** (1 nodes): `AuthService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (1 nodes): `AuthController`
+- **Thin community `Community 57`** (1 nodes): `AuthController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 62`** (1 nodes): `CoursesService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 68`** (1 nodes): `EnrollmentsController`
+- **Thin community `Community 71`** (1 nodes): `EnrollmentsController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (1 nodes): `EnrollmentsService`
+- **Thin community `Community 72`** (1 nodes): `EnrollmentsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 70`** (1 nodes): `ExamLinksService`
+- **Thin community `Community 73`** (1 nodes): `ExamLinksService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (1 nodes): `CoursesController`
+- **Thin community `Community 83`** (1 nodes): `CoursesController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (1 nodes): `AiController`
+- **Thin community `Community 88`** (1 nodes): `AiController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `CacheService`
+- **Thin community `Community 90`** (1 nodes): `CacheService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 91`** (1 nodes): `QueueService`
+- **Thin community `Community 93`** (1 nodes): `QueueService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 101`** (1 nodes): `ExamRiskAssessmentService`
+- **Thin community `Community 100`** (1 nodes): `ExamRiskAssessmentService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 104`** (1 nodes): `UsersController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -909,85 +913,81 @@ Nodes (1): Skeleton()
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 117`** (1 nodes): `AIGenerationProcessor`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 125`** (2 nodes): `AiStatusController`, `safeEqual()`
+- **Thin community `Community 126`** (1 nodes): `AdminDashboardService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 132`** (1 nodes): `AccessPolicyService`
+- **Thin community `Community 127`** (2 nodes): `AiStatusController`, `safeEqual()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 136`** (1 nodes): `TopicGuardrailsService`
+- **Thin community `Community 134`** (1 nodes): `AccessPolicyService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 137`** (1 nodes): `ExamQualityReviewService`
+- **Thin community `Community 139`** (1 nodes): `TopicGuardrailsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 140`** (1 nodes): `ApiRequestError`
+- **Thin community `Community 140`** (1 nodes): `ExamQualityReviewService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 141`** (1 nodes): `MediaController`
+- **Thin community `Community 143`** (1 nodes): `ApiRequestError`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 142`** (1 nodes): `QuestionMetadataController`
+- **Thin community `Community 144`** (1 nodes): `MediaController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 150`** (1 nodes): `AuditService`
+- **Thin community `Community 145`** (1 nodes): `QuestionMetadataController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 151`** (1 nodes): `RateLimiterService`
+- **Thin community `Community 152`** (1 nodes): `AiJobsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 153`** (2 nodes): `CanActivate`, `RateLimitGuard`
+- **Thin community `Community 153`** (1 nodes): `AuditService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 154`** (2 nodes): `CanActivate`, `RolesGuard`
+- **Thin community `Community 154`** (1 nodes): `RateLimiterService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 160`** (1 nodes): `AdminDashboardController`
+- **Thin community `Community 155`** (2 nodes): `CanActivate`, `RateLimitGuard`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 161`** (1 nodes): `SystemOverviewController`
+- **Thin community `Community 156`** (2 nodes): `CanActivate`, `RolesGuard`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 162`** (1 nodes): `AuditController`
+- **Thin community `Community 164`** (1 nodes): `AdminDashboardController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 166`** (2 nodes): `PaginatedResult`, `PaginationDto`
+- **Thin community `Community 165`** (1 nodes): `SystemOverviewController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 170`** (1 nodes): `ExamAuditService`
+- **Thin community `Community 166`** (1 nodes): `AuditController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 171`** (1 nodes): `LecturerDashboardController`
+- **Thin community `Community 169`** (2 nodes): `PaginatedResult`, `PaginationDto`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 172`** (1 nodes): `LecturerDashboardService`
+- **Thin community `Community 173`** (1 nodes): `ExamAuditService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 175`** (2 nodes): `prisma`, `TABLES`
+- **Thin community `Community 174`** (1 nodes): `LecturerDashboardController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 176`** (2 nodes): `prisma`, `REQUIRED_COLUMNS`
+- **Thin community `Community 175`** (1 nodes): `LecturerDashboardService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 177`** (2 nodes): `backendEnvPath`, `prisma`
+- **Thin community `Community 178`** (2 nodes): `prisma`, `TABLES`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 178`** (2 nodes): `backendEnvPath`, `prisma`
+- **Thin community `Community 179`** (2 nodes): `prisma`, `REQUIRED_COLUMNS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 179`** (1 nodes): `EventsProcessor`
+- **Thin community `Community 180`** (2 nodes): `backendEnvPath`, `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 180`** (1 nodes): `IntegrityLogsProcessor`
+- **Thin community `Community 181`** (2 nodes): `backendEnvPath`, `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 181`** (1 nodes): `AIGenerationJobsController`
+- **Thin community `Community 182`** (1 nodes): `EventsProcessor`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 183`** (1 nodes): `SubmissionsEventsService`
+- **Thin community `Community 183`** (1 nodes): `IntegrityLogsProcessor`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 185`** (2 nodes): `notifications`, `users`
+- **Thin community `Community 184`** (1 nodes): `AIGenerationJobsController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 186`** (2 nodes): `exam_submissions`, `integrity_reviews`
+- **Thin community `Community 186`** (1 nodes): `SubmissionsEventsService`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 187`** (2 nodes): `question_bank_preferences`, `users`
+- **Thin community `Community 189`** (2 nodes): `notifications`, `users`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 188`** (2 nodes): `ai_generation_records`, `anomaly_flags`
+- **Thin community `Community 190`** (2 nodes): `auth_sessions`, `users`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 189`** (1 nodes): `c7c474f Merge remote-tracking branch 'upstream/main'`
+- **Thin community `Community 191`** (2 nodes): `question_bank_preferences`, `users`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 190`** (2 nodes): `VerifyApiKeyDto`, `VerifyApiKeyResult`
+- **Thin community `Community 192`** (2 nodes): `ai_generation_records`, `anomaly_flags`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 191`** (2 nodes): `prisma`, `{ PrismaClient }`
+- **Thin community `Community 193`** (1 nodes): `c7c474f Merge remote-tracking branch 'upstream/main'`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 192`** (2 nodes): `LimitConfig`, `POLICIES`
+- **Thin community `Community 194`** (2 nodes): `VerifyApiKeyDto`, `VerifyApiKeyResult`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 193`** (1 nodes): `ExamAuditGraphRunnable`
+- **Thin community `Community 195`** (2 nodes): `prisma`, `{ PrismaClient }`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 194`** (1 nodes): `mocks`
+- **Thin community `Community 196`** (2 nodes): `LimitConfig`, `POLICIES`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 196`** (1 nodes): `prisma`
+- **Thin community `Community 197`** (1 nodes): `ExamAuditGraphRunnable`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 197`** (1 nodes): `prisma`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 198`** (1 nodes): `prisma`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 199`** (1 nodes): `prisma`
+- **Thin community `Community 198`** (1 nodes): `mocks`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 200`** (1 nodes): `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -1003,37 +1003,39 @@ Nodes (1): Skeleton()
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 206`** (1 nodes): `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 207`** (1 nodes): `HealthController`
+- **Thin community `Community 207`** (1 nodes): `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 208`** (2 nodes): `bootstrap()`, `parseCsvList()`
+- **Thin community `Community 208`** (1 nodes): `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 209`** (1 nodes): `JwtStrategy`
+- **Thin community `Community 209`** (1 nodes): `prisma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 211`** (1 nodes): `media_storage_usage`
+- **Thin community `Community 210`** (1 nodes): `HealthController`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 212`** (1 nodes): `mocks`
+- **Thin community `Community 211`** (2 nodes): `bootstrap()`, `parseCsvList()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 213`** (1 nodes): `QUESTION_LIMITS`
+- **Thin community `Community 212`** (1 nodes): `JwtStrategy`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 216`** (1 nodes): `MediaModule`
+- **Thin community `Community 214`** (1 nodes): `media_storage_usage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 218`** (1 nodes): `Skeleton()`
+- **Thin community `Community 215`** (1 nodes): `QUESTION_LIMITS`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 218`** (1 nodes): `MediaModule`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ApiClient` connect `Community 1` to `Community 42`, `Community 138`, `Community 139`, `Community 140`, `Community 173`, `Community 174`, `Community 214`, `Community 215`?**
+- **Why does `ApiClient` connect `Community 1` to `Community 43`, `Community 141`, `Community 142`, `Community 143`, `Community 176`, `Community 177`, `Community 216`, `Community 217`?**
   _High betweenness centrality (0.089) - this node is a cross-community bridge._
-- **Why does `SubmissionsService` connect `Community 28` to `Community 49`, `Community 210`, `Community 67`, `Community 119`, `Community 79`, `Community 184`, `Community 102`, `Community 144`?**
+- **Why does `SubmissionsService` connect `Community 29` to `Community 49`, `Community 213`, `Community 69`, `Community 119`, `Community 81`, `Community 187`, `Community 101`, `Community 147`?**
   _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `QuestionsService` connect `Community 7` to `Community 51`?**
+- **Why does `QuestionsService` connect `Community 6` to `Community 38`?**
   _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **What connects `local_ai_server.py — Minimal local model server for ExamTrust AI feature Uses l`, `Try to pull the first valid JSON object out of model output.`, `prisma` to the rest of the system?**
-  _734 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _735 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.1401044806108097 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14568389809547366 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.028855721393034824 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.026307026307026308 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.025308641975308643 - nodes in this community are weakly interconnected._

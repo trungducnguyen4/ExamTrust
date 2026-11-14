@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
-import { ArrowLeft, Loader2, Save, UserCheck, Plus, RefreshCw, Undo2, Sparkles, CheckCircle2, XCircle, ListChecks, Image as ImageIcon, Music } from "lucide-react";
+import { ArrowLeft, Loader2, Save, UserCheck, Plus, RefreshCw, Undo2, Sparkles, CheckCircle2, XCircle, ListChecks, Image as ImageIcon, Music, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -91,6 +91,7 @@ export default function ManualGradingDetail() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [submission, setSubmission] = useState<any | null>(null);
+  const [showAutoAnswers, setShowAutoAnswers] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, DraftGrade>>({});
   const [suggestingId, setSuggestingId] = useState<string | null>(null);
   const [aiSuggestions, setAiSuggestions] = useState<Record<string, AiSuggestion>>({});
@@ -503,62 +504,91 @@ export default function ManualGradingDetail() {
 
             {(submission?.autoAnswers || []).length > 0 ? (
               <Card className="border-slate-200 bg-white shadow-xs">
-                <CardHeader className="p-5 sm:p-6 pb-3 sm:pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-                    <ListChecks className="h-5 w-5 text-primary" />
-                    Câu tự động chấm
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Các câu trắc nghiệm/tự động đã được hệ thống chấm ngay khi nộp bài — hiển thị để đối chiếu, không cần chấm lại.
-                    Đúng <strong className="text-slate-800">{submission.autoCorrect ?? 0}</strong>/<strong className="text-slate-800">{submission.autoTotal ?? submission.autoAnswers.length}</strong> câu.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 p-5 sm:p-6 pt-0">
-                  {submission.autoAnswers.map((answer: any, index: number) => {
-                    const answerLines = formatManualAnswer(answer.questionType, answer.answer, answer.questionOptions);
-                    const correctLines = answer.correctAnswer == null
-                      ? ["Không xác định"]
-                      : formatManualAnswer(answer.questionType, answer.correctAnswer, answer.questionOptions);
-                    return (
-                      <div key={answer.id} className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-shadow hover:shadow-sm">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0 flex-1 pr-0 sm:pr-4">
-                            <p className="text-sm font-semibold leading-relaxed text-slate-900">
-                              <MediaBadge mediaType={answer.questionMediaType} /> Câu {index + 1}. {answer.questionText}
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">{answer.questionType} · tối đa {answer.maxPoints} điểm</p>
-                            <QuestionMedia mediaType={answer.questionMediaType} mediaUrl={answer.questionMediaUrl} />
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`shrink-0 self-start sm:self-auto gap-1.5 px-3 py-1 font-semibold text-xs rounded-full ${
-                              answer.isCorrect
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-rose-200 bg-rose-50 text-rose-700"
-                            }`}
-                          >
-                            {answer.isCorrect ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <XCircle className="h-3.5 w-3.5 text-rose-600" />}
-                            {answer.pointsAwarded ?? 0}/{answer.maxPoints} điểm
-                          </Badge>
-                        </div>
-                        <div className="mt-4 grid grid-cols-1 gap-3.5 md:grid-cols-2">
-                          <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-3.5">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sinh viên trả lời</p>
-                            <div className="mt-2 whitespace-pre-wrap text-sm text-slate-900 font-medium">
-                              {answerLines.map((line, lineIndex) => <span key={lineIndex} className="block">{line}</span>)}
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 p-3.5">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Đáp án đúng</p>
-                            <div className="mt-2 whitespace-pre-wrap text-sm text-emerald-950 font-medium">
-                              {correctLines.map((line, lineIndex) => <span key={lineIndex} className="block">{line}</span>)}
-                            </div>
-                          </div>
-                        </div>
+                <CardHeader className={`p-5 sm:p-6 ${showAutoAnswers ? "pb-3 sm:pb-4 border-b border-slate-100" : ""}`}>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0 flex-1 pr-0 sm:pr-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+                          <ListChecks className="h-5 w-5 text-primary" />
+                          Câu tự động chấm
+                        </CardTitle>
+                        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+                          Đúng {submission.autoCorrect ?? 0}/{submission.autoTotal ?? submission.autoAnswers.length}
+                        </Badge>
                       </div>
-                    );
-                  })}
-                </CardContent>
+                      <CardDescription className="mt-1 text-sm">
+                        Các câu trắc nghiệm/tự động đã được hệ thống chấm ngay khi nộp bài — hiển thị để đối chiếu, không cần chấm lại.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAutoAnswers((prev) => !prev)}
+                      className="shrink-0 self-start sm:self-center gap-1.5 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs"
+                    >
+                      {showAutoAnswers ? (
+                        <>
+                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          Ẩn danh sách
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          Hiện danh sách ({submission.autoAnswers.length} câu)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {showAutoAnswers ? (
+                  <CardContent className="space-y-4 p-5 sm:p-6 pt-4">
+                    {submission.autoAnswers.map((answer: any, index: number) => {
+                      const answerLines = formatManualAnswer(answer.questionType, answer.answer, answer.questionOptions);
+                      const correctLines = answer.correctAnswer == null
+                        ? ["Không xác định"]
+                        : formatManualAnswer(answer.questionType, answer.correctAnswer, answer.questionOptions);
+                      return (
+                        <div key={answer.id} className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-shadow hover:shadow-sm">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0 flex-1 pr-0 sm:pr-4">
+                              <p className="text-sm font-semibold leading-relaxed text-slate-900">
+                                <MediaBadge mediaType={answer.questionMediaType} /> Câu {index + 1}. {answer.questionText}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">{answer.questionType} · tối đa {answer.maxPoints} điểm</p>
+                              <QuestionMedia mediaType={answer.questionMediaType} mediaUrl={answer.questionMediaUrl} />
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className={`shrink-0 self-start sm:self-auto gap-1.5 px-3 py-1 font-semibold text-xs rounded-full ${
+                                answer.isCorrect
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                  : "border-rose-200 bg-rose-50 text-rose-700"
+                              }`}
+                            >
+                              {answer.isCorrect ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <XCircle className="h-3.5 w-3.5 text-rose-600" />}
+                              {answer.pointsAwarded ?? 0}/{answer.maxPoints} điểm
+                            </Badge>
+                          </div>
+                          <div className="mt-4 grid grid-cols-1 gap-3.5 md:grid-cols-2">
+                            <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-3.5">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sinh viên trả lời</p>
+                              <div className="mt-2 whitespace-pre-wrap text-sm text-slate-900 font-medium">
+                                {answerLines.map((line, lineIndex) => <span key={lineIndex} className="block">{line}</span>)}
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-emerald-100 bg-emerald-50/40 p-3.5">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">Đáp án đúng</p>
+                              <div className="mt-2 whitespace-pre-wrap text-sm text-emerald-950 font-medium">
+                                {correctLines.map((line, lineIndex) => <span key={lineIndex} className="block">{line}</span>)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </CardContent>
+                ) : null}
               </Card>
             ) : null}
 
